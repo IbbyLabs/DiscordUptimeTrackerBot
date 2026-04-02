@@ -9,7 +9,12 @@ if TYPE_CHECKING:
 
 
 class StatusPaginationView(ui.View):
-    def __init__(self, bot: "DiscordUptimeTrackerBot", cog: "UptimeCog", data: dict[str, Any]) -> None:
+    def __init__(
+        self,
+        bot: "DiscordUptimeTrackerBot",
+        cog: "UptimeCog",
+        data: dict[str, Any],
+    ) -> None:
         super().__init__(timeout=180)
         self.bot = bot
         self.cog = cog
@@ -26,16 +31,28 @@ class StatusPaginationView(ui.View):
         self.page_indicator.label = f"Page {self.current_page + 1}/{max(self.total_pages, 1)}"
 
     @ui.button(label="Previous", style=discord.ButtonStyle.secondary)
-    async def prev_button(self, interaction: discord.Interaction, button: ui.Button) -> None:
+    async def prev_button(
+        self,
+        interaction: discord.Interaction,
+        _button: ui.Button,
+    ) -> None:
         self.current_page -= 1
         await self._update_message(interaction)
 
     @ui.button(label="Page 1/1", style=discord.ButtonStyle.secondary, disabled=True)
-    async def page_indicator(self, interaction: discord.Interaction, button: ui.Button) -> None:
+    async def page_indicator(
+        self,
+        _interaction: discord.Interaction,
+        _button: ui.Button,
+    ) -> None:
         return
 
     @ui.button(label="Next", style=discord.ButtonStyle.secondary)
-    async def next_button(self, interaction: discord.Interaction, button: ui.Button) -> None:
+    async def next_button(
+        self,
+        interaction: discord.Interaction,
+        _button: ui.Button,
+    ) -> None:
         self.current_page += 1
         await self._update_message(interaction)
 
@@ -53,12 +70,23 @@ class StatusPaginationView(ui.View):
 
 
 class StatusDashboardView(ui.View):
-    def __init__(self, bot: "DiscordUptimeTrackerBot", cog: "UptimeCog", data: dict[str, Any]) -> None:
+    def __init__(
+        self,
+        bot: "DiscordUptimeTrackerBot",
+        cog: "UptimeCog",
+        data: dict[str, Any],
+    ) -> None:
         super().__init__(timeout=None)
         self.bot = bot
         self.cog = cog
         groups = cog.group_services(data)
-        self.add_item(ui.Button(label="Full Status Page", url=bot.config.STATUS_PAGE_URL, row=4))
+        self.add_item(
+            ui.Button(
+                label="Full Status Page",
+                url=bot.config.STATUS_PAGE_URL,
+                row=4,
+            )
+        )
         for index, group_name in enumerate(list(groups.keys())[:24]):
             row = index // 5
             button = ui.Button(

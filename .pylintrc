@@ -1,0 +1,15 @@
+[MESSAGES CONTROL]
+disable=
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    too-few-public-methods,
+    too-many-instance-attributes,
+    too-many-public-methods,
+    trailing-newlines
+
+[FORMAT]
+max-line-length=100
+
+[BASIC]
+attr-rgx=([a-z_][a-z0-9_]*|[A-Z][A-Z0-9_]*)$

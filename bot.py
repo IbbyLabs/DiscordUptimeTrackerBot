@@ -44,7 +44,10 @@ async def sync_app_commands(tree: AppCommandTreeLike, guild_id: int | None) -> b
         except discord.DiscordServerError as exc:
             if attempt >= len(COMMAND_SYNC_RETRY_DELAYS):
                 log.warning(
-                    "Command sync failed for %s after %d attempts. Starting without fresh command sync: %s",
+                    (
+                        "Command sync failed for %s after %d attempts. "
+                        "Starting without fresh command sync: %s"
+                    ),
                     scope,
                     attempt + 1,
                     exc,
@@ -52,7 +55,10 @@ async def sync_app_commands(tree: AppCommandTreeLike, guild_id: int | None) -> b
                 return False
             delay = COMMAND_SYNC_RETRY_DELAYS[attempt]
             log.warning(
-                "Command sync failed for %s on attempt %d/%d with Discord server error: %s. Retrying in %.1f seconds.",
+                (
+                    "Command sync failed for %s on attempt %d/%d with "
+                    "Discord server error: %s. Retrying in %.1f seconds."
+                ),
                 scope,
                 attempt + 1,
                 len(COMMAND_SYNC_RETRY_DELAYS) + 1,
@@ -76,7 +82,11 @@ class DiscordUptimeTrackerBot(commands.Bot):
         intents = discord.Intents.default()
         intents.guilds = True
         intents.message_content = True
-        super().__init__(command_prefix=config.COMMAND_PREFIX, intents=intents, help_command=None)
+        super().__init__(
+            command_prefix=config.COMMAND_PREFIX,
+            intents=intents,
+            help_command=None,
+        )
         self.config = config
         self.db: TrackerDatabase | None = None
         self.start_time = discord.utils.utcnow()
@@ -102,25 +112,31 @@ class DiscordUptimeTrackerBot(commands.Bot):
             parts.append(f"{seconds} sec{'s' if seconds != 1 else ''}")
         return ", ".join(parts)
 
+    def _get_presence_emoji(self) -> str | discord.PartialEmoji | None:
+        emoji = self.config.STATUS_EMOJI
+        if emoji.isdigit():
+            return discord.PartialEmoji(name="emoji", id=int(emoji))
+        if emoji.startswith("<:") and emoji.endswith(">"):
+            parsed_emoji = discord.PartialEmoji.from_str(emoji)
+            if parsed_emoji.id is None:
+                log.warning("Invalid custom emoji format: %s", emoji)
+                return None
+            return parsed_emoji
+        return emoji or None
+
     async def presence_updater(self) -> None:
         await self.wait_until_ready()
         while not self.is_closed():
             uptime_str = self.get_uptime_str()
             status = f"Uptime | Up for {uptime_str}"
             try:
-                emoji = self.config.STATUS_EMOJI
-                partial_emoji = None
-                if emoji.isdigit():
-                    partial_emoji = discord.PartialEmoji(name="emoji", id=int(emoji))
-                elif emoji.startswith("<:") and emoji.endswith(">"):
-                    try:
-                        partial_emoji = discord.PartialEmoji.from_str(emoji)
-                    except Exception:
-                        log.warning("Invalid custom emoji format: %s", emoji)
                 await self.change_presence(
-                    activity=discord.CustomActivity(name=status, emoji=partial_emoji)
+                    activity=discord.CustomActivity(
+                        name=status,
+                        emoji=self._get_presence_emoji(),
+                    )
                 )
-            except Exception as exc:
+            except discord.DiscordException as exc:
                 log.error("Failed to update presence: %s", exc)
             await asyncio.sleep(15)
 
@@ -133,7 +149,11 @@ class DiscordUptimeTrackerBot(commands.Bot):
 
     async def on_ready(self) -> None:
         if self.user is not None:
-            log.info("DiscordUptimeTrackerBot ready. Logged in as %s (%d)", self.user, self.user.id)
+            log.info(
+                "DiscordUptimeTrackerBot ready. Logged in as %s (%d)",
+                self.user,
+                self.user.id,
+            )
 
 
 async def main() -> None:
