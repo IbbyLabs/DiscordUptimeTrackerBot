@@ -1,0 +1,5 @@
+aiohttp>=3.9.0
+aiosqlite>=0.20.0
+discord.py>=2.4.0
+python-dotenv>=1.0.1
+pytest>=8.0.0
