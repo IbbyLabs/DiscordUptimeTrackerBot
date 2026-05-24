@@ -19,6 +19,7 @@ StatusData = dict[str, Any]
 StatusSender = Callable[[discord.Embed], Awaitable[object]]
 ErrorSender = Callable[[str], Awaitable[object]]
 StatusViewSender = Callable[[discord.Embed, discord.ui.View], Awaitable[object]]
+AlertChange = dict[str, str | int | float]
 TRACKER_CHANNEL_TYPES = (
     discord.TextChannel,
     discord.Thread,
@@ -56,7 +57,15 @@ class UptimeCog(commands.Cog):
     @tasks.loop(minutes=10.0)
     async def refresh_status_task(self) -> None:
         await self.bot.wait_until_ready()
-        await self.update_tracked_messages()
+        await self.run_status_cycle()
+
+    async def run_status_cycle(self) -> tuple[int, int]:
+        data = await self.fetch_status()
+        if not data:
+            return 0, 0
+        alerts_sent = await self.process_status_alerts(data)
+        updated = await self.update_tracked_messages(data)
+        return updated, alerts_sent
 
     async def fetch_status(self) -> StatusData | None:
         try:
@@ -132,6 +141,105 @@ class UptimeCog(commands.Cog):
         filled = max(0, min(10, round(percent / 10)))
         return "█" * filled + "░" * (10 - filled)
 
+    def service_key(self, service: StatusData) -> str:
+        group_name = str(service.get("group") or "Other").strip()
+        service_name = str(service.get("name") or "Unknown Service").strip()
+        service_url = str(service.get("url") or "").strip()
+        return "|".join((group_name, service_name, service_url))
+
+    def service_state_map(self, data: StatusData) -> dict[str, str]:
+        return {
+            self.service_key(service): str(service.get("last", {}).get("state") or "UNKNOWN")
+            for service in self.visible_services(data)
+        }
+
+    def collect_status_changes(
+        self,
+        previous_states: dict[str, str],
+        data: StatusData,
+    ) -> list[AlertChange]:
+        changes: list[AlertChange] = []
+        for service in self.visible_services(data):
+            key = self.service_key(service)
+            current_state = str(service.get("last", {}).get("state") or "UNKNOWN")
+            previous_state = previous_states.get(key)
+            if previous_state is None or previous_state == current_state:
+                continue
+            changes.append(
+                {
+                    "group": str(service.get("group") or "Other"),
+                    "name": str(service.get("name") or "Unknown Service"),
+                    "state": current_state,
+                    "previous_state": previous_state,
+                    "latency": int(service.get("last", {}).get("latency") or 0),
+                    "uptime_percent": float(service.get("uptimePercent") or 0),
+                }
+            )
+        return changes
+
+    def alert_color(self, changes: list[AlertChange]) -> int:
+        priority = {
+            "DOWN": 4,
+            "DEGRADED": 3,
+            "MAINTENANCE": 2,
+            "UNKNOWN": 1,
+            "UP": 0,
+        }
+        highest = max(priority.get(str(change["state"]), 0) for change in changes)
+        if highest >= 4:
+            return 0xD90429
+        if highest >= 3:
+            return 0xF77F00
+        if highest >= 2:
+            return 0xF4A261
+        return 0x2A9D8F
+
+    def create_alert_embed(
+        self,
+        data: StatusData,
+        changes: list[AlertChange],
+    ) -> discord.Embed:
+        tracker_name = self.tracker_name(data)
+        change_count = len(changes)
+        noun = "service" if change_count == 1 else "services"
+        embed = discord.Embed(
+            title=f"{tracker_name} Alerts",
+            description=(
+                f"Detected {change_count} status change for {noun}.\n\n"
+                f"View the full status page: {self.bot.config.STATUS_PAGE_URL}"
+            ),
+            color=self.alert_color(changes),
+            url=self.bot.config.STATUS_PAGE_URL,
+        )
+        for change in changes[:25]:
+            name = str(change["name"])
+            group = str(change["group"])
+            current_state = str(change["state"])
+            previous_state = str(change["previous_state"])
+            latency = int(change["latency"])
+            uptime_percent = float(change["uptime_percent"])
+            embed.add_field(
+                name=f"{self.get_state_emoji(current_state)} {name}",
+                value=(
+                    f"Group: {group}\n"
+                    f"State: {previous_state} -> {current_state}\n"
+                    f"Latency: {latency}ms\n"
+                    f"Uptime: {uptime_percent:.1f}%"
+                ),
+                inline=False,
+            )
+        if change_count > 25:
+            embed.set_footer(text=f"Showing 25 of {change_count} status changes")
+        else:
+            embed.set_footer(text="Owned, created, and maintained by Ibby")
+        if self.bot.user and self.bot.user.display_avatar:
+            embed.set_author(
+                name=tracker_name,
+                icon_url=self.bot.user.display_avatar.url,
+                url=self.bot.config.STATUS_PAGE_URL,
+            )
+        return embed
+
     def last_updated_unix(self, data: StatusData) -> int:
         generated_at = str(data.get("generatedAt") or "").strip()
         if generated_at:
@@ -175,6 +283,20 @@ class UptimeCog(commands.Cog):
             f"**Up:** {up_count} | **Down:** {down_count} | "
             f"**Degraded:** {degraded_count}"
         )
+
+    async def resolve_tracker_channel(
+        self,
+        channel_id: int,
+    ) -> discord.abc.Messageable | None:
+        channel = self.bot.get_channel(channel_id)
+        if channel is None:
+            try:
+                channel = await self.bot.fetch_channel(channel_id)
+            except discord.HTTPException:
+                return None
+        if not isinstance(channel, TRACKER_CHANNEL_TYPES):
+            return None
+        return channel
 
     def _summary_field_value(self, services: list[StatusData]) -> str:
         group_up = sum(1 for item in services if item.get("last", {}).get("state") == "UP")
@@ -278,13 +400,45 @@ class UptimeCog(commands.Cog):
             )
         return embed
 
-    async def update_tracked_messages(self) -> int:
+    async def process_status_alerts(self, data: StatusData) -> int:
+        if self.bot.db is None:
+            return 0
+        current_states = self.service_state_map(data)
+        previous_states = await self.bot.db.get_service_states()
+        await self.bot.db.replace_service_states(current_states)
+        if not previous_states:
+            return 0
+        changes = self.collect_status_changes(previous_states, data)
+        if not changes:
+            return 0
+        alert_channels = await self.bot.db.list_alert_channels()
+        if not alert_channels:
+            return 0
+        embed = self.create_alert_embed(data, changes)
+        sent = 0
+        for item in alert_channels:
+            channel = await self.resolve_tracker_channel(int(item["channel_id"]))
+            if channel is None:
+                continue
+            try:
+                await channel.send(embed=embed)
+                sent += 1
+            except discord.HTTPException as exc:
+                log.error(
+                    "Failed to send alert in channel %s: %s",
+                    item["channel_id"],
+                    exc,
+                )
+        return sent
+
+    async def update_tracked_messages(self, data: StatusData | None = None) -> int:
         if self.bot.db is None:
             return 0
         tracked_messages = await self.bot.db.list_tracked_messages()
         if not tracked_messages:
             return 0
-        data = await self.fetch_status()
+        if data is None:
+            data = await self.fetch_status()
         if not data:
             return 0
         view = StatusDashboardView(self.bot, self, data)
@@ -294,13 +448,8 @@ class UptimeCog(commands.Cog):
             guild_id = str(item["guild_id"])
             channel_id = int(item["channel_id"])
             message_id = int(item["message_id"])
-            channel = self.bot.get_channel(channel_id)
+            channel = await self.resolve_tracker_channel(channel_id)
             if channel is None:
-                try:
-                    channel = await self.bot.fetch_channel(channel_id)
-                except discord.HTTPException:
-                    continue
-            if not isinstance(channel, TRACKER_CHANNEL_TYPES):
                 continue
             try:
                 message = await channel.fetch_message(message_id)
@@ -321,6 +470,12 @@ class UptimeCog(commands.Cog):
                     exc,
                 )
         return updated
+
+    def refresh_result_text(self, updated: int, alerts_sent: int) -> str:
+        tracker_text = f"Refreshed {updated} uptime tracker message(s)."
+        if alerts_sent == 0:
+            return tracker_text
+        return f"{tracker_text} Sent {alerts_sent} alert(s)."
 
     async def send_uptime_response(
         self,
@@ -386,9 +541,56 @@ class UptimeCog(commands.Cog):
     @is_bot_owner()
     async def refresh_tracker(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
-        count = await self.update_tracked_messages()
+        count, alerts_sent = await self.run_status_cycle()
         await interaction.followup.send(
-            f"Refreshed {count} uptime tracker message(s).",
+            self.refresh_result_text(count, alerts_sent),
+            ephemeral=True,
+        )
+
+    @tracker.command(name="alerts", description="Send status alerts to this channel")
+    @is_bot_owner()
+    async def setup_alerts(self, interaction: discord.Interaction) -> None:
+        if not interaction.guild or not interaction.channel or self.bot.db is None:
+            await interaction.response.send_message(
+                "Cannot use this command here.",
+                ephemeral=True,
+            )
+            return
+        channel_id = interaction.channel_id
+        if channel_id is None:
+            await interaction.response.send_message(
+                "Cannot use this command here.",
+                ephemeral=True,
+            )
+            return
+        channel = await self.resolve_tracker_channel(channel_id)
+        if channel is None:
+            await interaction.response.send_message(
+                "Cannot use this command here.",
+                ephemeral=True,
+            )
+            return
+        await self.bot.db.upsert_alert_channel(
+            str(interaction.guild_id),
+            str(channel_id),
+        )
+        await interaction.response.send_message(
+            "Status alerts will be sent to this channel.",
+            ephemeral=True,
+        )
+
+    @tracker.command(name="stopalerts", description="Stop sending status alerts in this guild")
+    @is_bot_owner()
+    async def remove_alerts(self, interaction: discord.Interaction) -> None:
+        if not interaction.guild or self.bot.db is None:
+            await interaction.response.send_message(
+                "Cannot use this command here.",
+                ephemeral=True,
+            )
+            return
+        await self.bot.db.delete_alert_channel(str(interaction.guild_id))
+        await interaction.response.send_message(
+            "Status alerts are now disabled for this guild.",
             ephemeral=True,
         )
 
@@ -451,8 +653,34 @@ class UptimeCog(commands.Cog):
             await ctx.message.delete()
         except discord.Forbidden:
             pass
-        count = await self.update_tracked_messages()
-        await ctx.send(f"Refreshed {count} uptime tracker message(s).", delete_after=10)
+        count, alerts_sent = await self.run_status_cycle()
+        await ctx.send(self.refresh_result_text(count, alerts_sent), delete_after=10)
+
+    @commands.command(name="setupalerts")
+    async def setup_alerts_prefix(self, ctx: commands.Context) -> None:
+        if self.bot.config.BOT_OWNER_ID and ctx.author.id != self.bot.config.BOT_OWNER_ID:
+            return
+        if self.bot.db is None or ctx.guild is None:
+            return
+        try:
+            await ctx.message.delete()
+        except discord.Forbidden:
+            pass
+        await self.bot.db.upsert_alert_channel(str(ctx.guild.id), str(ctx.channel.id))
+        await ctx.send("Status alerts will be sent to this channel.", delete_after=10)
+
+    @commands.command(name="removealerts")
+    async def remove_alerts_prefix(self, ctx: commands.Context) -> None:
+        if self.bot.config.BOT_OWNER_ID and ctx.author.id != self.bot.config.BOT_OWNER_ID:
+            return
+        if self.bot.db is None or ctx.guild is None:
+            return
+        try:
+            await ctx.message.delete()
+        except discord.Forbidden:
+            pass
+        await self.bot.db.delete_alert_channel(str(ctx.guild.id))
+        await ctx.send("Status alerts are now disabled for this guild.", delete_after=10)
 
     @commands.command(name="removeuptime")
     async def remove_uptime_prefix(self, ctx: commands.Context) -> None:

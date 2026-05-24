@@ -94,7 +94,7 @@ class DiscordUptimeTrackerBot(commands.Bot):
             with open("VERSION", "r", encoding="utf-8") as handle:
                 self.version = handle.read().strip()
         except FileNotFoundError:
-            self.version = "0.1.0"
+            self.version = "0.0.0"
 
     def get_uptime_str(self) -> str:
         diff = discord.utils.utcnow() - self.start_time

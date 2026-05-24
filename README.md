@@ -8,18 +8,24 @@ DiscordUptimeTrackerBot is a standalone Discord bot for one job: showing a live 
 - Slash and prefix uptime commands
 - Live tracker message setup for a guild
 - Automatic refresh for tracked messages
+- Automatic alert delivery when service states change
 - Group buttons for detailed service views
 - Lightweight SQLite storage
+- Docker image publishing on tagged GitHub releases
 
 ## Commands
 
 - `/uptime`
 - `/tracker setup`
+- `/tracker alerts`
 - `/tracker refresh`
+- `/tracker stopalerts`
 - `/tracker remove`
 - `.uptime`
 - `.setupuptime`
+- `.setupalerts`
 - `.refreshuptime`
+- `.removealerts`
 - `.removeuptime`
 
 `tracker` commands are owner only.
@@ -31,6 +37,20 @@ DiscordUptimeTrackerBot is a standalone Discord bot for one job: showing a live 
 3. Copy `.env.example` to `.env`.
 4. Set `BOT_TOKEN`.
 5. Run `python bot.py`.
+
+## Docker
+
+Build locally:
+
+```bash
+docker build -t discord-uptime-tracker-bot .
+```
+
+Run locally with your env file:
+
+```bash
+docker run --env-file .env discord-uptime-tracker-bot
+```
 
 ## Environment
 
@@ -45,3 +65,30 @@ DiscordUptimeTrackerBot is a standalone Discord bot for one job: showing a live 
 - `BRAND_NAME`: Optional embed title override
 - `BRAND_DESCRIPTION`: Optional embed intro text override
 - `REFRESH_MINUTES`: Automatic refresh interval in minutes
+
+## Releases
+
+Use the release script to bump the version, validate the repo, create the release commit and tag, push both, and publish a GitHub release:
+
+```bash
+bash scripts/release.sh patch
+bash scripts/release.sh minor
+bash scripts/release.sh major
+```
+
+Requirements:
+
+- `gh` must be installed and authenticated
+- Your working tree must be clean
+- Run the script from the `main` branch
+
+For a safe preview, run:
+
+```bash
+bash scripts/release.sh patch --dry-run
+```
+
+Publishing a GitHub release triggers the Docker workflow, which builds and pushes a multi-platform image for `linux/amd64` and `linux/arm64` to `ghcr.io/ibbylabs/discorduptimetrackerbot`.
+
+Each release also updates `CHANGELOG.md` automatically and uses commit subjects since the previous tag for both the changelog entry and the GitHub release notes.
+
