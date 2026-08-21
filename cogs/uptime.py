@@ -16,17 +16,16 @@ if TYPE_CHECKING:
 import status_api
 from panels import build_panel_specs
 from incidents import (
+    alertable_rows,
     build_page_incident_messages,
     format_page_incidents,
     plan_page_incident_alerts,
     is_alert_suppressed,
-    is_alertable_transition,
 )
 from tracker_db import GUILD_SETTING_FIELDS
 
 from ui.status_layout import (
     AboutLayout,
-    AlertLayout,
     HostLayout,
     IncidentHistoryLayout,
     PanelLayout,
@@ -446,41 +445,6 @@ class UptimeCog(commands.Cog):
         service_url = str(service.get("url") or "").strip()
         return "|".join((group_name, service_name, service_url))
 
-    def service_state_map(self, data: StatusData) -> dict[str, str]:
-        return {
-            self.service_key(service): str(service.get("last", {}).get("state") or "UNKNOWN")
-            for service in self.visible_services(data)
-        }
-
-    def collect_status_changes(
-        self,
-        previous_states: dict[str, str],
-        data: StatusData,
-    ) -> list[AlertChange]:
-        changes: list[AlertChange] = []
-        for service in self.visible_services(data):
-            key = self.service_key(service)
-            current_state = str(service.get("last", {}).get("state") or "UNKNOWN")
-            previous_state = previous_states.get(key)
-            if previous_state is None or previous_state == current_state:
-                continue
-            if not is_alertable_transition(previous_state, current_state):
-                continue
-            if is_alert_suppressed(service):
-                continue
-            changes.append(
-                {
-                    "key": key,
-                    "group": str(service.get("group") or "Other"),
-                    "name": str(service.get("name") or "Unknown Service"),
-                    "state": current_state,
-                    "previous_state": previous_state,
-                    "latency": int(service.get("last", {}).get("latency") or 0),
-                    "uptime_percent": float(service.get("uptimePercent") or 0),
-                }
-            )
-        return changes
-
     def alert_color(self, changes: list[AlertChange]) -> int:
         priority = {
             "DOWN": 4,
@@ -586,7 +550,7 @@ class UptimeCog(commands.Cog):
         del data
         if self.bot.db is None:
             return 0
-        rows = await self.fetch_incidents()
+        rows = alertable_rows(await self.fetch_incidents())
         if not rows:
             return 0
         announced = await self.bot.db.get_announced_incidents()

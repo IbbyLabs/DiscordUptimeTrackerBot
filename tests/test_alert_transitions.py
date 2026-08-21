@@ -1,4 +1,4 @@
-from incidents import is_alertable_transition, is_alert_suppressed
+from incidents import alertable_rows, is_alert_suppressed, is_alertable_transition
 
 
 def test_crossing_into_down_alerts_from_any_answering_state() -> None:
@@ -45,38 +45,21 @@ def test_suppression_matches_on_name_or_id() -> None:
     assert is_alert_suppressed({"name": "Torbox", "id": "torbox"}) is False
 
 
-def _cog():
-    from cogs.uptime import UptimeCog
-    return UptimeCog.__new__(UptimeCog)
+def _row(name, sid):
+    return {"id": f"{sid}-x", "service_id": sid, "name": name, "group": "G",
+            "state": "DOWN", "opened_at": "2026-08-21T10:00:00Z", "closed_at": None}
 
 
-def _svc(sid, name, state):
-    return {
-        "id": sid, "name": name, "group": "Debrid Services",
-        "url": f"https://{sid}.test/", "last": {"state": state, "latency": 100},
-        "uptimePercent": 99.0,
-    }
+# The suppression list has to reach the page-driven alerts, not just exist.
+def test_a_suppressed_service_is_dropped_from_the_alertable_incidents() -> None:
+    rows = [_row("WebStreamr MBG", "webstreamr-mbg"), _row("Torbox", "torbox")]
+    assert [r["name"] for r in alertable_rows(rows)] == ["Torbox"]
 
 
-def _run(previous_by_key, services):
-    cog = _cog()
-    data = {"services": services}
-    previous = {}
-    for service, state in zip(services, previous_by_key):
-        previous[cog.service_key(service)] = state
-    return [str(change["name"]) for change in cog.collect_status_changes(previous, data)]
+def test_suppression_matches_on_the_service_id_too() -> None:
+    assert alertable_rows([_row("Something Else", "webstreamr")]) == []
 
 
-# The filters have to be reached by the collector, not merely defined beside it.
-def test_only_boundary_crossings_reach_the_alert_list() -> None:
-    services = [
-        _svc("a", "Went Down", "DOWN"),
-        _svc("b", "Came Back", "UP"),
-        _svc("c", "Slowed Only", "DEGRADED"),
-    ]
-    assert _run(["UP", "DOWN", "UP"], services) == ["Went Down", "Came Back"]
-
-
-def test_a_suppressed_service_is_dropped_even_when_it_crosses() -> None:
-    services = [_svc("webstreamr", "WebStreamr", "DOWN"), _svc("d", "Other", "DOWN")]
-    assert _run(["UP", "UP"], services) == ["Other"]
+def test_nothing_suppressed_leaves_the_list_alone() -> None:
+    rows = [_row("Torbox", "torbox"), _row("Comet", "comet")]
+    assert len(alertable_rows(rows)) == 2

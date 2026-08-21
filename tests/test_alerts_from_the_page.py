@@ -130,3 +130,31 @@ def test_a_failed_fetch_announces_nothing_rather_than_an_all_clear() -> None:
         finally:
             os.unlink(path)
     asyncio.run(run())
+
+
+def _suppressed_row(rid, closed=None):
+    return {"id": rid, "service_id": "webstreamr-mbg", "name": "WebStreamr MBG",
+            "group": "Content Scrapers", "state": "DOWN",
+            "opened_at": "2026-08-21T22:15:05Z", "closed_at": closed}
+
+
+# The suppression list has to be reached by the alert path, not merely defined
+# beside it — nine of the last fifty incidents on the page are this one service.
+def test_a_suppressed_service_never_reaches_the_channel() -> None:
+    async def run():
+        db, path = await _fresh()
+        try:
+            rec = Recorder()
+            rows = [_row("a")]
+            cog = _cog(db, rows, rec)
+            await cog.process_status_alerts(cast(Any, {}))       # silent intake
+            rows.append(_suppressed_row("noisy-1"))
+            await cog.process_status_alerts(cast(Any, {}))
+            assert rec.sent == [], "announced a service on the suppression list"
+
+            rows.append(_row("b", name="Real"))
+            await cog.process_status_alerts(cast(Any, {}))
+            assert _headings(rec) == ["## 🔴 Outage started"], "the real one should still fire"
+        finally:
+            os.unlink(path)
+    asyncio.run(run())

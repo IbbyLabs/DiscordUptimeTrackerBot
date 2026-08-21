@@ -215,6 +215,7 @@ def normalise_page_incidents(payload: Any) -> list[dict[str, Any]]:
             continue
         rows.append({
             "id": str(item.get("id") or ""),
+            "service_id": str(service.get("id") or ""),
             "name": str(service.get("name") or service.get("id") or "Unknown service"),
             "group": str(service.get("group") or ""),
             "state": str(item.get("state") or "").upper(),
@@ -255,6 +256,20 @@ def _iso_stamp(value: str) -> str:
     except (ValueError, AttributeError):
         return str(value)
     return f"<t:{int(moment.timestamp())}:f>"
+
+
+def alertable_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The incidents worth announcing.
+
+    A suppressed service still appears in the history panel — it did go down —
+    but it does not ring a channel. The noisiest service on the page accounts
+    for nine of the last fifty incidents.
+    """
+
+    return [
+        row for row in rows
+        if not is_alert_suppressed({"name": row.get("name"), "id": row.get("service_id")})
+    ]
 
 
 def plan_page_incident_alerts(

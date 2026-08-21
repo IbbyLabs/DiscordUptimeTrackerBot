@@ -295,47 +295,6 @@ class IncidentHistoryLayout(ui.LayoutView):
         self.add_item(ui.ActionRow(ui.Button(label="Full Status Page", url=page_url)))
 
 
-class AlertLayout(ui.LayoutView):
-    """A status change notification as Components V2."""
-
-    def __init__(
-        self,
-        cog: "UptimeCog",
-        data: dict[str, Any],
-        changes: list[dict[str, Any]],
-        *,
-        healthy: str | None = None,
-        page_url: str | None = None,
-        heading: str | None = None,
-    ) -> None:
-        super().__init__(timeout=None)
-        page_url = page_url or cog.bot.config.STATUS_PAGE_URL
-        count = len(changes)
-        noun = "service" if count == 1 else "services"
-        lines = [
-            f"{cog.get_state_emoji(str(c['state']), healthy)} **{c['name']}** "
-            f"({c['group']}): {c['previous_state']} → {c['state']}, "
-            f"{int(c['latency'])}ms, {float(c['uptime_percent']):.1f}% uptime"
-            for c in changes
-        ]
-        chunks, dropped = _body_chunks(lines)
-        footer = f"-# {dropped} more not shown here" if dropped else None
-        children: list[ui.Item[Any]] = [
-            ui.TextDisplay(
-                heading
-                or f"## Status Alerts\nDetected {count} status change for {noun}."
-            ),
-            ui.Separator(),
-            *(ui.TextDisplay(chunk) for chunk in chunks),
-        ]
-        if footer:
-            children.append(ui.TextDisplay(footer))
-        self.add_item(ui.Container(*children, accent_colour=cog.alert_color(changes)))
-        self.add_item(ui.ActionRow(ui.Button(label="Full Status Page", url=page_url)))
-
-
-# The API returns 84 two-hour buckets for d7 and 90 eight-hour buckets for d30.
-# Both are too wide to read on a phone, so they collapse to these widths.
 TIMELINE_WIDTH = {"d7": 28, "d30": 30}
 STATE_BLOCK = {"UP": "🟩", "DEGRADED": "🟨", "DOWN": "🟥"}
 UNKNOWN_BLOCK = "⬛"
