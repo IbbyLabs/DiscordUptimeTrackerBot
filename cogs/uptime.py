@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from bot import DiscordUptimeTrackerBot
 
 import status_api
+from panels import build_panel_specs
 from incidents import (
     build_incident_messages,
     format_page_incidents,
@@ -27,6 +28,7 @@ from ui.status_layout import (
     AlertLayout,
     HostLayout,
     IncidentHistoryLayout,
+    PanelLayout,
     StatusLayout,
 )
 
@@ -195,7 +197,38 @@ class UptimeCog(commands.Cog):
         await self.bot.set_status_presence(*self._summary_counts(data))
         alerts_sent = await self.process_status_alerts(data)
         updated = await self.update_tracked_messages(data)
+        await self.sync_alert_panels(data)
         return updated, alerts_sent
+
+    async def sync_alert_panels(self, data: StatusData) -> None:
+        """Keep the three panels current in every guild's alert channel.
+
+        Rendered from the page rather than from anything this bot accumulated,
+        so they are right on the first cycle including outages that started
+        before it did.
+        """
+
+        if self.bot.db is None:
+            return
+        channels = await self.bot.db.list_alert_channels()
+        if not channels:
+            return
+
+        incidents = await self.fetch_incidents()
+
+        for item in channels:
+            guild_id = str(item.get("guild_id"))
+            channel = await self.resolve_tracker_channel(int(item["channel_id"]))
+            if channel is None:
+                continue
+            settings = await self.guild_render_settings(guild_id)
+            for panel, heading, lines, accent in build_panel_specs(self, data, incidents):
+                await self.sync_panel(
+                    guild_id,
+                    panel,
+                    channel,
+                    PanelLayout(self, heading, lines, accent, **settings),
+                )
 
     async def fetch_status(self) -> StatusData | None:
         return await status_api.fetch_status(self.status_api_url)
@@ -264,6 +297,32 @@ class UptimeCog(commands.Cog):
             return str(override)
         source_name = str(data.get("source", {}).get("name") or "").strip()
         return source_name or self.bot.config.BRAND_NAME
+
+    def known_issues(self, data: StatusData) -> list[StatusData]:
+        """Services deliberately taken offline, with the reason given.
+
+        Maintenance is how an operator says *why* something is down. Every other
+        surface shows a red dot; this is the only place the reason reaches
+        anyone.
+        """
+
+        return [
+            service for service in self.visible_services(data)
+            if isinstance(service.get("maintenance"), dict)
+        ]
+
+    def known_issue_line(self, service: StatusData) -> str:
+        name = str(service.get("name") or "Unknown Service")
+        maintenance = service.get("maintenance") or {}
+        reason = str(
+            maintenance.get("reason")
+            or maintenance.get("title")
+            or maintenance.get("message")
+            or "No reason given"
+        ).strip()
+        started = str(maintenance.get("startedAt") or maintenance.get("changedAt") or "")
+        when = f" since {_discord_relative(started)}" if started else ""
+        return f"🛠️ **{name}**{when}\n-# {reason}"
 
     def unstable_count(self, data: StatusData) -> int:
         """Services the monitor has flagged as bouncing rather than broken.
@@ -521,7 +580,14 @@ class UptimeCog(commands.Cog):
         current_states = self.service_state_map(data)
         previous_states = await self.bot.db.get_service_states()
         await self.bot.db.replace_service_states(current_states)
+        # The first cycle takes the page as truth and says nothing. Nobody was
+        # waiting to hear about an outage that predates the bot, and a fresh
+        # install would otherwise announce the whole estate at once. The panels
+        # carry that state; the channel carries what happens from here.
         if not previous_states:
+            log.info(
+                "First cycle: recorded %d services without announcing.", len(current_states)
+            )
             return 0
         changes = self.collect_status_changes(previous_states, data)
         # Services down from before this incident opened are not part of it, so
@@ -558,6 +624,43 @@ class UptimeCog(commands.Cog):
                         exc,
                     )
         return sent
+
+    async def sync_panel(
+        self,
+        guild_id: str,
+        panel: str,
+        channel: discord.abc.Messageable,
+        layout: discord.ui.LayoutView,
+    ) -> None:
+        """Keep one panel as a single message, edited rather than reposted.
+
+        A panel that posts afresh each cycle turns an alert channel into a
+        scrolling log of the same thing. A message someone deleted is posted
+        again, since the alternative is a panel that silently stops existing.
+        """
+
+        if self.bot.db is None:
+            return
+        stored = await self.bot.db.get_panel_message(guild_id, panel)
+        channel_id = getattr(channel, "id", None)
+        if stored and str(stored["channel_id"]) == str(channel_id):
+            try:
+                message = await channel.fetch_message(int(stored["message_id"]))
+                await message.edit(view=layout)
+                return
+            except discord.NotFound:
+                pass
+            except discord.HTTPException as exc:
+                log.error("Failed to edit the %s panel in %s: %s", panel, channel_id, exc)
+                return
+        try:
+            message = await channel.send(view=layout)
+        except discord.HTTPException as exc:
+            log.error("Failed to post the %s panel in %s: %s", panel, channel_id, exc)
+            return
+        await self.bot.db.upsert_panel_message(
+            guild_id, panel, str(channel_id), str(message.id)
+        )
 
     async def _replace_tracker_message(
         self,

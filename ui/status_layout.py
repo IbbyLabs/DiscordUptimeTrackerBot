@@ -186,6 +186,39 @@ class StatusLayout(ui.LayoutView):
         )
 
 
+class PanelLayout(ui.LayoutView):
+    """One persistent panel, kept current in the alert channel.
+
+    Chunked like the board, because a panel grows with the estate and a message
+    that outgrows the limit fails rather than shortening.
+    """
+
+    def __init__(
+        self,
+        cog: "UptimeCog",
+        heading: str,
+        lines: list[str],
+        accent: int,
+        *,
+        healthy: str | None = None,
+        page_url: str | None = None,
+    ) -> None:
+        super().__init__(timeout=None)
+        del healthy
+        page_url = page_url or cog.bot.config.STATUS_PAGE_URL
+        chunks, dropped = _body_chunks(lines)
+        children: list[ui.Item[Any]] = [
+            ui.TextDisplay(heading),
+            ui.Separator(),
+            *(ui.TextDisplay(chunk) for chunk in chunks),
+        ]
+        if dropped:
+            children.append(ui.TextDisplay(f"-# {dropped} more not shown here"))
+        children.append(ui.TextDisplay(f"-# Developed by IbbyLabs • v{cog.bot.version}"))
+        self.add_item(ui.Container(*children, accent_colour=accent))
+        self.add_item(ui.ActionRow(ui.Button(label="Full Status Page", url=page_url)))
+
+
 class AboutLayout(ui.LayoutView):
     """Who made it, how to reach them, and how to run your own.
 

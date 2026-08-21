@@ -46,6 +46,18 @@ class TrackerDatabase:
             )
             await db.execute(
                 """
+                CREATE TABLE IF NOT EXISTS panel_messages (
+                    guild_id TEXT NOT NULL,
+                    panel TEXT NOT NULL,
+                    channel_id TEXT NOT NULL,
+                    message_id TEXT NOT NULL,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (guild_id, panel)
+                )
+                """
+            )
+            await db.execute(
+                """
                 CREATE TABLE IF NOT EXISTS incidents (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     opened_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -178,6 +190,40 @@ class TrackerDatabase:
                     """,
                     [(service_key, state) for service_key, state in states.items()],
                 )
+            await db.commit()
+
+    async def get_panel_message(self, guild_id: str, panel: str) -> dict[str, str] | None:
+        async with aiosqlite.connect(self.path) as db:
+            async with db.execute(
+                "SELECT channel_id, message_id FROM panel_messages"
+                " WHERE guild_id = ? AND panel = ?",
+                (guild_id, panel),
+            ) as cursor:
+                row = await cursor.fetchone()
+        if row is None:
+            return None
+        return {"channel_id": str(row[0]), "message_id": str(row[1])}
+
+    async def upsert_panel_message(
+        self, guild_id: str, panel: str, channel_id: str, message_id: str
+    ) -> None:
+        async with aiosqlite.connect(self.path) as db:
+            await db.execute(
+                """
+                INSERT INTO panel_messages (guild_id, panel, channel_id, message_id, updated_at)
+                VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+                ON CONFLICT(guild_id, panel) DO UPDATE SET
+                    channel_id = excluded.channel_id,
+                    message_id = excluded.message_id,
+                    updated_at = CURRENT_TIMESTAMP
+                """,
+                (guild_id, panel, channel_id, message_id),
+            )
+            await db.commit()
+
+    async def delete_panel_messages(self, guild_id: str) -> None:
+        async with aiosqlite.connect(self.path) as db:
+            await db.execute("DELETE FROM panel_messages WHERE guild_id = ?", (guild_id,))
             await db.commit()
 
     async def get_open_incident(self) -> dict[str, object] | None:
