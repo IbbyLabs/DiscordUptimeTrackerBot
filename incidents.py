@@ -104,8 +104,14 @@ def normalise_page_incidents(payload: Any) -> list[dict[str, Any]]:
     return rows
 
 
-# Matching src/incidents.mjs, so the bot's history and the status page agree
-# about which outages count as one and which are too brief to list.
+# TEMPORARY. These duplicate DEFAULT_MAJOR_INCIDENT_MINUTES and
+# DEFAULT_MAJOR_INCIDENT_MERGE_WINDOW_MINUTES in the status page's
+# src/incidents.mjs, and nothing tells this copy when those change.
+#
+# The page already applies the rule behind /v1/incidents/history, which answers
+# 401 without credentials this bot does not hold. Once the public handler reads
+# majorOnly from the query string, fetch /v1/incidents?majorOnly=true and delete
+# major_incidents along with these constants.
 MAJOR_INCIDENT_MINUTES = 30
 MAJOR_INCIDENT_MERGE_WINDOW_MINUTES = 30
 _ACTIVE_STATES = {"DOWN", "DEGRADED", "UNKNOWN"}
