@@ -18,6 +18,7 @@ def plan_incident_alerts(
     down_keys: set[str],
     newly_down: list[tuple[str, str]],
     newly_up: list[tuple[str, str]],
+    present_keys: set[str] | None = None,
 ) -> dict[str, Any]:
     """What one refresh cycle should announce.
 
@@ -34,6 +35,16 @@ def plan_incident_alerts(
     still_down.update(key for key, _ in newly_down)
     still_down.difference_update(key for key, _ in newly_up)
 
+    # A service can leave the payload mid-incident: hidden, renamed, or moved to
+    # another group, since the key carries the group and name. It has not
+    # recovered, but it can no longer be observed, so it cannot hold the incident
+    # open. An empty payload is a failed fetch rather than every service leaving,
+    # and prunes nothing.
+    vanished: set[str] = set()
+    if present_keys:
+        vanished = still_down - present_keys
+        still_down -= vanished
+
     closing = (incident_open or opening) and not still_down
 
     return {
@@ -43,6 +54,7 @@ def plan_incident_alerts(
         "joined": [] if opening else joined,
         "rejoined": rejoined,
         "recovered": recovered,
+        "vanished": vanished,
         "still_down": still_down,
     }
 
@@ -54,6 +66,7 @@ def _plural(count: int, singular: str, plural: str) -> str:
 async def build_incident_messages(
     db: Any,
     changes: list[AlertChange],
+    present_keys: set[str] | None = None,
 ) -> list[tuple[str, list[AlertChange]]]:
     """Turn a cycle's changes into announcements, recording the incident.
 
@@ -80,6 +93,7 @@ async def build_incident_messages(
         down_keys={str(row["service_key"]) for row in rows if row["recovered_at"] is None},
         newly_down=newly_down,
         newly_up=newly_up,
+        present_keys=present_keys,
     )
 
     incident_id = await db.open_incident() if plan["opening"] else (
@@ -110,7 +124,8 @@ async def build_incident_messages(
         messages.append((f"## Back up\n{len(back)} {verb} responding again.", back))
 
     if plan["closing"]:
-        messages.append(("## All clear\nEvery affected service is responding again.", back))
+        if back:
+            messages.append(("## All clear\nEvery affected service is responding again.", back))
         if incident_id:
             await db.close_incident(incident_id)
 

@@ -120,3 +120,35 @@ def test_nothing_changing_announces_nothing() -> None:
             os.unlink(path)
 
     asyncio.run(run())
+
+
+def test_an_incident_closed_only_by_a_vanished_service_says_nothing() -> None:
+    async def run() -> None:
+        db, path = await _fresh()
+        try:
+            cog = _cog(db)
+            await cog.incident_messages([_change("a", "A", "DOWN", "UP")])
+            # The row is hidden or renamed, so it is gone from the payload.
+            quiet = await build_incident_messages(db, [], present_keys={"z"})
+            assert quiet == [], "claimed an all-clear for a service that never recovered"
+            assert await db.get_open_incident() is None
+        finally:
+            os.unlink(path)
+
+    asyncio.run(run())
+
+
+def test_a_real_recovery_still_announces_the_all_clear() -> None:
+    async def run() -> None:
+        db, path = await _fresh()
+        try:
+            cog = _cog(db)
+            await cog.incident_messages([_change("a", "A", "DOWN", "UP")])
+            msgs = await build_incident_messages(
+                db, [_change("a", "A", "UP", "DOWN")], present_keys={"a"}
+            )
+            assert _headings(msgs) == ["## All clear"]
+        finally:
+            os.unlink(path)
+
+    asyncio.run(run())

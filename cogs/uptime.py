@@ -484,7 +484,9 @@ class UptimeCog(commands.Cog):
         if not previous_states:
             return 0
         changes = self.collect_status_changes(previous_states, data)
-        messages = await build_incident_messages(self.bot.db, changes)
+        messages = await build_incident_messages(
+            self.bot.db, changes, present_keys=set(current_states)
+        )
         if not messages:
             return 0
         alert_channels = await self.bot.db.list_alert_channels()

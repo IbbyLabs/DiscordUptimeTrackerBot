@@ -69,3 +69,33 @@ def test_nothing_happening_announces_nothing() -> None:
     p = plan(incident_open=True, seen_keys={"a"}, down_keys={"a"})
     assert p["opening"] is False and p["closing"] is False
     assert p["joined"] == [] and p["recovered"] == []
+
+
+# The key carries group and name, so hiding a row, renaming it or moving it to
+# another group all remove it from the payload mid-incident.
+def test_a_service_that_leaves_the_payload_stops_holding_the_incident_open() -> None:
+    p = plan(incident_open=True, seen_keys={"a", "b"}, down_keys={"a", "b"},
+             newly_up=[("b", "B")], present_keys={"b"})
+    assert p["vanished"] == {"a"}
+    assert p["still_down"] == set()
+    assert p["closing"] is True
+
+
+def test_a_vanished_service_alone_closes_the_incident() -> None:
+    p = plan(incident_open=True, seen_keys={"a"}, down_keys={"a"}, present_keys={"b"})
+    assert p["closing"] is True
+    assert p["recovered"] == []
+
+
+# An empty payload is a failed fetch, not every service leaving at once.
+def test_an_empty_payload_prunes_nothing() -> None:
+    p = plan(incident_open=True, seen_keys={"a"}, down_keys={"a"}, present_keys=set())
+    assert p["vanished"] == set()
+    assert p["still_down"] == {"a"}
+    assert p["closing"] is False
+
+
+def test_a_present_service_is_untouched_by_the_prune() -> None:
+    p = plan(incident_open=True, seen_keys={"a"}, down_keys={"a"}, present_keys={"a"})
+    assert p["vanished"] == set()
+    assert p["closing"] is False
