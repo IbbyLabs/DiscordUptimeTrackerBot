@@ -34,8 +34,14 @@ def _cog(db, rows, recorder):
         recorder.sent.extend(messages)
         return len(messages)
 
+    def active_outages(_data):
+        # The status payload agrees with the incident list in these tests: a
+        # service with an open incident is a service the payload shows down.
+        return [r for r in rows if r["closed_at"] is None]
+
     cast(Any, cog).fetch_incidents = fetch_incidents
     cast(Any, cog).send_alerts = send_alerts
+    cast(Any, cog).active_outages = active_outages
     return cog
 
 

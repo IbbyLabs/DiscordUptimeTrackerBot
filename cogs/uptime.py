@@ -585,7 +585,6 @@ class UptimeCog(commands.Cog):
         does not open with a burst about outages that predate it.
         """
 
-        del data
         if self.bot.db is None:
             return 0
         rows = alertable_rows(await self.fetch_incidents())
@@ -602,7 +601,11 @@ class UptimeCog(commands.Cog):
             log.info("First cycle: recorded %d incidents without announcing.", len(rows))
             return 0
 
-        plan = plan_page_incident_alerts(announced=announced, rows=rows)
+        plan = plan_page_incident_alerts(
+            announced=announced,
+            rows=rows,
+            anything_still_down=bool(self.active_outages(data)),
+        )
         if plan["silent"]:
             await self.bot.db.mark_incidents_seen(plan["silent"], closed=True)
         messages = build_page_incident_messages(plan)

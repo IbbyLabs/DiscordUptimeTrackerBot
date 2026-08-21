@@ -311,6 +311,7 @@ def plan_page_incident_alerts(
     *,
     announced: dict[str, dict[str, bool]],
     rows: list[dict[str, Any]],
+    anything_still_down: bool,
 ) -> dict[str, Any]:
     """What to announce, given the page's incidents and what we have said.
 
@@ -344,12 +345,14 @@ def plan_page_incident_alerts(
         elif not ongoing and not state["closed"]:
             to_close.append(row)
 
-    still_open = [r for r in rows if r["closed_at"] is None]
+    # Taken from the status payload rather than from these rows. The incident
+    # list is paged, so an outage running longer than the page's window falls
+    # off it — and an all-clear derived from a truncated list is a false one.
     return {
         "open": to_open,
         "close": to_close,
         "silent": silent,
-        "all_clear": bool(to_close) and not still_open,
+        "all_clear": bool(to_close) and not anything_still_down,
     }
 
 

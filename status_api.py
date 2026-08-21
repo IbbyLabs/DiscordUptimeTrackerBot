@@ -49,4 +49,7 @@ async def fetch_incidents(url: str) -> list[dict[str, Any]]:
     command failing in front of someone.
     """
 
-    return normalise_page_incidents(await _get_json(url, "incidents"))
+    # The largest page the API serves. A wider window matters because an
+    # outage older than the page falls out of the history entirely.
+    separator = "&" if "?" in url else "?"
+    return normalise_page_incidents(await _get_json(f"{url}{separator}limit=100", "incidents"))
