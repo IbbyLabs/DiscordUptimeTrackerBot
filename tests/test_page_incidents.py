@@ -71,3 +71,51 @@ def test_it_reads_the_live_endpoints_payload() -> None:
     assert all(r["opened_at"] for r in rows)
     assert any(r["closed_at"] is None for r in rows), "expected at least one ongoing incident"
     assert "<t:" in format_page_incidents(rows)[0]
+
+
+def _with_events(events, error="timeout"):
+    return {"incidents": [{
+        "id": "x", "service": {"id": "s", "name": "Api", "group": "G"},
+        "state": "DOWN", "openedAt": "2026-08-21T10:00:00Z",
+        "closedAt": "2026-08-21T11:00:00Z", "error": error, "events": events,
+    }]}
+
+
+# The chain is where a degrade-then-fail becomes visible; openedAt alone hides it.
+def test_the_chain_shows_a_degrade_before_the_failure() -> None:
+    rows = normalise_page_incidents(_with_events([
+        {"state": "DEGRADED", "startedAt": "2026-08-21T10:00:00Z",
+         "duration": "7m 59s", "error": "High latency detected"},
+        {"state": "DOWN", "startedAt": "2026-08-21T10:08:00Z",
+         "duration": "52m 0s", "error": "timeout"},
+        {"state": "UP", "startedAt": "2026-08-21T11:00:00Z", "duration": "0s", "error": None},
+    ]))
+    line = format_page_incidents(rows)[0]
+    assert "DEGRADED 7m 59s (High latency detected)" in line
+    assert "→ DOWN 52m 0s (timeout)" in line
+    assert "→ UP" in line
+
+
+# A zero duration is the end of the chain, not a fact worth printing.
+def test_a_zero_duration_event_shows_only_its_state() -> None:
+    rows = normalise_page_incidents(_with_events([
+        {"state": "UP", "startedAt": "2026-08-21T11:00:00Z", "duration": "0s", "error": None},
+    ]))
+    assert "UP 0s" not in format_page_incidents(rows)[0]
+
+
+def test_an_incident_with_no_events_falls_back_to_its_error() -> None:
+    rows = normalise_page_incidents(_with_events([], error="connection refused"))
+    assert "connection refused" in format_page_incidents(rows)[0]
+
+
+def test_an_incident_with_neither_renders_without_a_chain_line() -> None:
+    rows = normalise_page_incidents(_with_events([], error=""))
+    assert format_page_incidents(rows)[0].count("\n") == 1
+
+
+# The real payload, so the chain is checked against shapes the page emits.
+def test_the_live_payload_produces_chains() -> None:
+    rows = normalise_page_incidents(json.load(open(LIVE)))
+    lines = format_page_incidents(rows, limit=10)
+    assert any("→" in line for line in lines), "no chain rendered from live data"

@@ -221,6 +221,16 @@ def normalise_page_incidents(payload: Any) -> list[dict[str, Any]]:
             "state": str(item.get("state") or "").upper(),
             "opened_at": opened,
             "closed_at": str(item.get("closedAt")) if item.get("closedAt") else None,
+            "error": str(item.get("error") or "").strip(),
+            "events": [
+                {
+                    "state": str(event.get("state") or "").upper(),
+                    "duration": str(event.get("duration") or "").strip(),
+                    "error": str(event.get("error") or "").strip(),
+                }
+                for event in (item.get("events") or [])
+                if isinstance(event, dict)
+            ],
         })
     # Newest first, since a reader asking what happened means recently.
     rows.sort(key=lambda row: row["opened_at"], reverse=True)
@@ -244,8 +254,33 @@ def format_page_incidents(rows: list[dict[str, Any]], limit: int = 10) -> list[s
             when = f"{when} to {_iso_stamp(row['closed_at'])}"
         else:
             when = f"{when}, ongoing"
-        lines.append(f"{marker} **{row['name']}**{where}\n-# {when}")
+        line = f"{marker} **{row['name']}**{where}\n-# {when}"
+        chain = _event_chain(row)
+        if chain:
+            line += f"\n-# {chain}"
+        lines.append(line)
     return lines
+
+
+def _event_chain(row: dict[str, Any]) -> str:
+    """How the incident went, not just when it started.
+
+    An outage that degrades before it fails opens earlier than it goes down,
+    and the chain is the only place that difference is visible.
+    """
+
+    events = row.get("events") or []
+    parts: list[str] = []
+    for event in events:
+        state = event.get("state") or "?"
+        duration = event.get("duration")
+        piece = f"{state} {duration}" if duration and duration != "0s" else state
+        if event.get("error"):
+            piece += f" ({event['error']})"
+        parts.append(piece)
+    if not parts:
+        return row.get("error") or ""
+    return " → ".join(parts)
 
 
 def _iso_stamp(value: str) -> str:
