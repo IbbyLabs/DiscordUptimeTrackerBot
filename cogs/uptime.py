@@ -16,7 +16,13 @@ if TYPE_CHECKING:
 from incidents import build_incident_messages, format_incident_history
 from tracker_db import GUILD_SETTING_FIELDS
 
-from ui.status_layout import AlertLayout, HostLayout, IncidentHistoryLayout, StatusLayout
+from ui.status_layout import (
+    AboutLayout,
+    AlertLayout,
+    HostLayout,
+    IncidentHistoryLayout,
+    StatusLayout,
+)
 
 log = logging.getLogger("uptimebot.cogs.uptime")
 
@@ -967,6 +973,18 @@ class UptimeCog(commands.Cog):
 
     # Read-only and ephemeral, so it sits beside /uptime rather than inside the
     # manager-gated group: an outage is what an ordinary member wants to look up.
+    # Top-level and open to anyone, like /incidents: a member wanting to know
+    # who made this, or how to run their own, is not a server manager.
+    @app_commands.command(name="about", description="Who made this bot, and how to run your own")
+    @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.guild_id)
+    async def about_slash(self, interaction: discord.Interaction) -> None:
+        settings = await self.guild_render_settings(
+            str(interaction.guild_id) if interaction.guild_id else None
+        )
+        await interaction.response.send_message(
+            view=AboutLayout(self, **settings), ephemeral=True
+        )
+
     @app_commands.command(name="incidents", description="Recent outages and who they affected")
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.guild_id)
     async def incidents_slash(self, interaction: discord.Interaction) -> None:

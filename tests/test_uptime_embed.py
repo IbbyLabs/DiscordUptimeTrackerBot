@@ -10,6 +10,7 @@ from cogs.uptime import UptimeCog
 
 def build_cog() -> UptimeCog:
     bot = SimpleNamespace(
+        version="9.9.9",
         config=SimpleNamespace(
             STATUS_API_URL="https://status.example.com/api",
             STATUS_PAGE_URL="https://status.example.com",
@@ -149,6 +150,7 @@ def build_alert_cog(
         return channel
 
     bot = SimpleNamespace(
+        version="9.9.9",
         config=SimpleNamespace(
             STATUS_API_URL="https://status.example.com/api",
             STATUS_PAGE_URL="https://status.example.com",

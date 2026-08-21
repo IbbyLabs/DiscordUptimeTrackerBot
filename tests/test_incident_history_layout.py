@@ -13,6 +13,7 @@ from ui.status_layout import IncidentHistoryLayout
 def _cog():
     cog = UptimeCog.__new__(UptimeCog)
     cast(Any, cog).bot = SimpleNamespace(
+        version="9.9.9",
         config=SimpleNamespace(STATUS_PAGE_URL="https://status.test/")
     )
     return cog

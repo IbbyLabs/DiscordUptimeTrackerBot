@@ -15,6 +15,14 @@ MAX_CHARS = 4000
 SELECT_OPTION_LIMIT = 25
 
 
+# Redirects rather than the destinations, so reissuing a link is one change
+# here rather than an edit everywhere it has been pasted.
+BRAND_SITE_URL = "https://ibbylabs.dev"
+KOFI_URL = "https://kofi.ibbylabs.dev"
+COMMUNITY_URL = "https://discord.ibbylabs.dev"
+DM_URL = "https://dm.ibbylabs.dev"
+SOURCE_URL = "https://github.com/IbbyLabs/DiscordUptimeTrackerBot"
+
 CHUNK_CHARS = 1000
 MAX_BODY_CHUNKS = 3
 
@@ -158,6 +166,9 @@ class StatusLayout(ui.LayoutView):
         updated = f"-# Last updated <t:{cog.last_updated_unix(data)}:R>"
         if dropped:
             updated = f"-# {dropped} more not shown here\n{updated}"
+        # Credit only. A board sits in a channel permanently, so anything that
+        # does not change does not belong on it; the links live in /about.
+        updated = f"{updated}\n-# Developed by IbbyLabs • v{cog.bot.version}"
 
         container = ui.Container(
             ui.TextDisplay(header),
@@ -173,6 +184,51 @@ class StatusLayout(ui.LayoutView):
             self.add_item(ui.ActionRow(GroupSelect(cog, data, group_name)))
         self.add_item(
             ui.ActionRow(ui.Button(label="Full Status Page", url=page_url))
+        )
+
+
+class AboutLayout(ui.LayoutView):
+    """Who made it, how to reach them, and how to run your own.
+
+    Everything the board deliberately leaves off lives here: a member runs the
+    command, so the links reach someone who asked for them rather than everyone
+    who can see a pinned message.
+    """
+
+    def __init__(
+        self,
+        cog: "UptimeCog",
+        *,
+        healthy: str | None = None,
+        page_url: str | None = None,
+    ) -> None:
+        super().__init__(timeout=None)
+        version = cog.bot.version
+        marker = cog.get_state_emoji("UP", healthy)
+        page_url = page_url or cog.bot.config.STATUS_PAGE_URL
+        self.add_item(
+            ui.Container(
+                ui.TextDisplay(
+                    f"## {marker} Uptime Tracker\n"
+                    "A live status board for Stremio addons, developed by IbbyLabs."
+                ),
+                ui.Separator(),
+                ui.TextDisplay(
+                    f"**Version**\n`v{version}`\n\n"
+                    "**Source**\nOpen source under the MIT licence — run your own instance "
+                    f"from [GitHub]({SOURCE_URL})."
+                ),
+                accent_colour=0x5865F2,
+            )
+        )
+        self.add_item(
+            ui.ActionRow(
+                ui.Button(label="Status Page", url=page_url),
+                ui.Button(label="IbbyLabs", url=BRAND_SITE_URL),
+                ui.Button(label="Support", url=KOFI_URL),
+                ui.Button(label="Community", url=COMMUNITY_URL),
+                ui.Button(label="Message Ibby", url=DM_URL),
+            )
         )
 
 
