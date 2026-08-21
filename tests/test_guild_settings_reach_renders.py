@@ -56,25 +56,27 @@ def test_config_defaults_are_only_read_as_a_fallback():
     assert not offenders, "unrouted config read on the render path:\n" + "\n".join(offenders)
 
 
-def test_every_embed_build_passes_the_guilds_settings():
+def test_every_view_build_passes_the_guilds_settings():
     """Routing the builders is half the job; the callers have to hand them over."""
     joined = "\n".join(p.read_text() for p in RENDER_SOURCES)
     calls = re.findall(
-        r"(?:self\.|self\.cog\.)(?:create_status_embed|create_alert_embed)\((.*?)\n\s*\)",
-        joined,
-        re.S,
+        r"(?<!class )\b(?:Status|Alert)Layout\(((?:[^()]|\([^()]*\))*)\)", joined, re.S
     )
-    assert calls, "found no embed builds to check, the pattern has drifted"
+    calls = [c for c in calls if c.strip()]
+    assert calls, "found no view builds to check, the pattern has drifted"
     missing = [c for c in calls if "guild_render_settings" not in c and "**settings" not in c]
-    assert not missing, "embed built without the guild's settings:\n" + "\n\n".join(missing)
+    assert not missing, "view built without the guild's settings:\n" + "\n\n".join(missing)
 
 
-def test_page_url_override_reaches_every_link_in_the_embed():
-    embed = build_cog().create_status_embed(
-        _data(), summary_mode=False, page_url="https://guild.example"
+def test_page_url_override_reaches_every_link_in_the_view():
+    from ui.status_layout import StatusLayout
+
+    view = StatusLayout(
+        build_cog(), _data(), group_name="Core", page_url="https://guild.example"
     )
-    surfaces = [embed.url or "", embed.description or ""]
-    surfaces += [str(f.value or "") for f in embed.fields]
-    body = "\n".join(surfaces)
+    body = "\n".join(getattr(c, "content", "") or "" for c in view.walk_children())
+    body += "\n" + "\n".join(
+        str(getattr(c, "url", "") or "") for c in view.walk_children()
+    )
     assert "https://guild.example" in body
     assert "status.example.com" not in body

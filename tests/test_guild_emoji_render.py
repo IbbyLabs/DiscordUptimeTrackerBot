@@ -4,6 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from tests.test_uptime_embed import build_cog
+from ui.status_layout import StatusLayout
 
 
 def _data(state="UP"):
@@ -24,12 +25,15 @@ def _data(state="UP"):
     }
 
 
-def _render(healthy=None, state="UP"):
-    embed = build_cog().create_status_embed(_data(state), summary_mode=False, healthy=healthy)
-    parts = [embed.description or ""]
-    parts += [f.name or "" for f in embed.fields]
-    parts += [str(f.value or "") for f in embed.fields]
-    return "\n".join(parts)
+def layout_text(view) -> str:
+    return "\n".join(getattr(child, "content", "") for child in view.walk_children())
+
+
+def _render(healthy=None, state="UP", group_name="Core"):
+    cog = build_cog()
+    return layout_text(
+        StatusLayout(cog, _data(state), healthy=healthy, group_name=group_name)
+    )
 
 
 def test_default_uses_the_instance_emoji():
@@ -45,5 +49,12 @@ def test_override_reaches_the_rendered_output():
 
 def test_override_does_not_repaint_a_failure():
     """DOWN is fixed red. A regression guard, not evidence for the change."""
-    out = _render(healthy="🟢", state="DOWN")
-    assert "🔴" in out
+    assert "🔴" in _render(healthy="🟢", state="DOWN")
+
+
+def test_the_summary_board_honours_it_too():
+    """The detail page and the board are built by different branches."""
+    cog = build_cog()
+    out = layout_text(StatusLayout(cog, _data(), healthy="🟢"))
+    assert "🟢" in out
+    assert "🟣" not in out

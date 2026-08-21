@@ -52,20 +52,20 @@ def test_create_status_embed_builds_summary_fields() -> None:
         ],
     }
 
-    embed = cog.create_status_embed(data, summary_mode=True)
+    from ui.status_layout import StatusLayout
 
-    # Identity belongs on the author line and nowhere else. Asserting the count
-    # rather than the absence, so the repetition cannot creep back in one field
-    # at a time.
-    body = "\n".join(
-        [embed.title or "", embed.description or ""]
-        + [f.name or "" for f in embed.fields]
-        + [str(f.value or "") for f in embed.fields]
-    )
-    assert body.count("Status Tracker") == 0
+    view = StatusLayout(cog, data)
+    body = "\n".join(getattr(child, "content", "") or "" for child in view.walk_children())
+
+    # Identity appears once, in the header. Asserting the count rather than the
+    # absence, so the repetition cannot creep back one line at a time.
+    assert body.count("Status Tracker") == 1
     assert "Welcome to" not in body
-    assert embed.fields[0].name == "Stremio 🔒"
-    assert "1/2" in (embed.fields[0].value or "")
+    assert "Stremio" in body
+    assert "1/2" in body
+    # Both Components V2 ceilings, on the message a server sees every refresh.
+    assert view.content_length() <= 4000
+    assert len(tuple(view.walk_children())) <= 40
 
 
 class FakeDB:
@@ -92,10 +92,10 @@ class FakeDB:
 
 class FakeChannel:
     def __init__(self) -> None:
-        self.sent_embeds: list[Any] = []
+        self.sent_views: list[Any] = []
 
-    async def send(self, *, embed: Any) -> None:
-        self.sent_embeds.append(embed)
+    async def send(self, *, view: Any) -> None:
+        self.sent_views.append(view)
 
 
 def build_alert_cog(
@@ -158,7 +158,7 @@ def test_process_status_alerts_primes_baseline_without_sending() -> None:
         sent = await cog.process_status_alerts(data)
 
         assert sent == 0
-        assert channel.sent_embeds == []
+        assert channel.sent_views == []
         assert db.states == {"Core|API|https://example.com/api": "UP"}
 
     import asyncio
@@ -193,12 +193,16 @@ def test_process_status_alerts_sends_when_service_changes() -> None:
 
         assert sent == 1
         assert db.states == {"Core|API|https://example.com/api": "DOWN"}
-        assert len(channel.sent_embeds) == 1
-        embed = channel.sent_embeds[0]
-        assert embed.title == "Status Alerts"
-        assert "Status Tracker" not in (embed.title or "")
-        assert embed.fields[0].name == "🔴 API"
-        assert "UP -> DOWN" in (embed.fields[0].value or "")
+        assert len(channel.sent_views) == 1
+        layout = channel.sent_views[0]
+        body = "\n".join(
+            getattr(child, "content", "") for child in layout.walk_children()
+        )
+        assert "Status Alerts" in body
+        assert "Status Tracker" not in body
+        assert "🔴 **API**" in body
+        assert "UP → DOWN" in body
+        assert layout.content_length() <= 4000
 
     import asyncio
 

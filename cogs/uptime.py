@@ -9,12 +9,13 @@ import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
-from ui.status_views import StatusDashboardView, StatusPaginationView
 
 if TYPE_CHECKING:
     from bot import DiscordUptimeTrackerBot
 
 from tracker_db import GUILD_SETTING_FIELDS
+
+from ui.status_layout import AlertLayout, StatusLayout
 
 log = logging.getLogger("uptimebot.cogs.uptime")
 
@@ -47,7 +48,7 @@ def validate_guild_setting(field: str, value: str) -> tuple[str | None, str | No
     return None, f"Unknown setting: {field}"
 
 StatusData = dict[str, Any]
-StatusSender = Callable[[discord.Embed], Awaitable[object]]
+StatusSender = Callable[[discord.ui.LayoutView], Awaitable[object]]
 ErrorSender = Callable[[str], Awaitable[object]]
 StatusViewSender = Callable[[discord.Embed, discord.ui.View], Awaitable[object]]
 AlertChange = dict[str, str | int | float]
@@ -135,7 +136,9 @@ class UptimeCog(commands.Cog):
         data = await self.fetch_status()
         if data:
             self.last_status = data
-            self.bot.add_view(StatusDashboardView(self.bot, self, data))
+            self.bot.add_view(
+                StatusLayout(self, data, **await self.guild_render_settings(None))
+            )
 
     async def cog_unload(self) -> None:
         self.refresh_status_task.cancel()
@@ -281,54 +284,6 @@ class UptimeCog(commands.Cog):
             return 0xF4A261
         return 0x2A9D8F
 
-    def create_alert_embed(
-        self,
-        data: StatusData,
-        changes: list[AlertChange],
-        healthy: str | None = None,
-        page_url: str | None = None,
-    ) -> discord.Embed:
-        page_url = page_url or self.bot.config.STATUS_PAGE_URL
-        tracker_name = self.tracker_name(data)
-        change_count = len(changes)
-        noun = "service" if change_count == 1 else "services"
-        embed = discord.Embed(
-            title="Status Alerts",
-            description=(
-                f"Detected {change_count} status change for {noun}.\n\n"
-                f"View the full status page: {page_url}"
-            ),
-            color=self.alert_color(changes),
-            url=page_url,
-        )
-        for change in changes[:25]:
-            name = str(change["name"])
-            group = str(change["group"])
-            current_state = str(change["state"])
-            previous_state = str(change["previous_state"])
-            latency = int(change["latency"])
-            uptime_percent = float(change["uptime_percent"])
-            embed.add_field(
-                name=f"{self.get_state_emoji(current_state, healthy)} {name}",
-                value=(
-                    f"Group: {group}\n"
-                    f"State: {previous_state} -> {current_state}\n"
-                    f"Latency: {latency}ms\n"
-                    f"Uptime: {uptime_percent:.1f}%"
-                ),
-                inline=False,
-            )
-        if change_count > 25:
-            embed.set_footer(text=f"Showing 25 of {change_count} status changes")
-        else:
-            embed.set_footer(text="Owned, created, and maintained by Ibby")
-        if self.bot.user and self.bot.user.display_avatar:
-            embed.set_author(
-                name=tracker_name,
-                icon_url=self.bot.user.display_avatar.url,
-                url=page_url,
-            )
-        return embed
 
     def last_updated_unix(self, data: StatusData) -> int:
         generated_at = str(data.get("generatedAt") or "").strip()
@@ -347,36 +302,6 @@ class UptimeCog(commands.Cog):
         degraded_count = int(summary.get("degraded", 0))
         return up_count, down_count, degraded_count
 
-    def _embed_title(
-        self,
-        data: StatusData,
-        page_info: tuple[int, int] | None,
-    ) -> str:
-        if page_info:
-            return f"Page {page_info[0]}/{page_info[1]}"
-        return ""
-
-    def _embed_description(
-        self,
-        data: StatusData,
-        services: list[StatusData],
-        healthy: str | None = None,
-        summary_mode: bool = False,
-        page_url: str | None = None,
-    ) -> str:
-        up_count, down_count, degraded_count = self._summary_counts(data)
-        # The author line already names the tracker. The tagline is for a
-        # one-off /uptime; the tracker message re-renders every couple of
-        # minutes and carries it forever.
-        intro = "" if summary_mode else f"{self.bot.config.BRAND_DESCRIPTION}\n\n"
-        return (
-            f"{intro}"
-            f"You can view the full status page at: "
-            f"**{page_url or self.bot.config.STATUS_PAGE_URL}**\n\n"
-            f"### {self.get_status_text(services, healthy)}\n"
-            f"**Up:** {up_count} | **Down:** {down_count} | "
-            f"**Degraded:** {degraded_count}"
-        )
 
     async def resolve_tracker_channel(
         self,
@@ -392,14 +317,21 @@ class UptimeCog(commands.Cog):
             return None
         return channel
 
-    def _summary_field_value(self, services: list[StatusData], healthy: str | None = None) -> str:
+    def group_summary_line(
+        self,
+        name: str,
+        services: list[StatusData],
+        healthy: str | None = None,
+    ) -> str:
         group_up = sum(1 for item in services if item.get("last", {}).get("state") == "UP")
         group_total = len(services)
         affected = group_total - group_up
         group_emoji = self.get_state_emoji("UP", healthy) if affected == 0 else "🔴"
-        noun = "Service" if affected == 1 else "Services"
-        status_text = "Operational" if affected == 0 else f"{affected} {noun} Affected"
-        return f"{group_emoji} {group_up}/{group_total} {status_text}"
+        noun = "service" if affected == 1 else "services"
+        status_text = "operational" if affected == 0 else f"{affected} {noun} affected"
+        if any(item.get("requiresAuth") for item in services):
+            name = f"{name} 🔒"
+        return f"{group_emoji} **{name}** · {group_up}/{group_total}, {status_text}"
 
     def _detail_lines(
         self,
@@ -428,84 +360,6 @@ class UptimeCog(commands.Cog):
             )
         return lines
 
-    def _field_chunks(self, display_name: str, lines: list[str]) -> list[tuple[str, str]]:
-        field_chunks: list[tuple[str, str]] = []
-        current_value = ""
-        field_index = 1
-        for line in lines:
-            next_value = f"{current_value}\n{line}".strip() if current_value else line
-            if len(next_value) > 1024:
-                field_name = display_name if field_index == 1 else f"{display_name} {field_index}"
-                field_chunks.append((field_name, current_value))
-                current_value = line
-                field_index += 1
-                continue
-            current_value = next_value
-        if current_value:
-            field_name = display_name if field_index == 1 else f"{display_name} {field_index}"
-            field_chunks.append((field_name, current_value))
-        return field_chunks
-
-    def _add_group_fields(
-        self,
-        embed: discord.Embed,
-        data: StatusData,
-        *,
-        summary_mode: bool,
-        healthy: str | None = None,
-        page_url: str | None = None,
-    ) -> None:
-        for group_name, group_items in self.group_services(data).items():
-            has_auth = any(item.get("requiresAuth") for item in group_items)
-            display_name = f"{group_name} 🔒" if has_auth else group_name
-            if summary_mode:
-                embed.add_field(
-                    name=display_name,
-                    value=self._summary_field_value(group_items, healthy),
-                    inline=True,
-                )
-                continue
-            for field_name, field_value in self._field_chunks(
-                display_name,
-                self._detail_lines(group_items, has_auth, healthy, page_url),
-            ):
-                embed.add_field(name=field_name, value=field_value, inline=False)
-
-    def create_status_embed(
-        self,
-        data: StatusData,
-        page_info: tuple[int, int] | None = None,
-        summary_mode: bool = False,
-        healthy: str | None = None,
-        page_url: str | None = None,
-    ) -> discord.Embed:
-        page_url = page_url or self.bot.config.STATUS_PAGE_URL
-        services = self.visible_services(data)
-        description = (
-            self._embed_description(data, services, healthy, summary_mode, page_url)
-        )
-        embed = discord.Embed(
-            title=self._embed_title(data, page_info),
-            description=description,
-            color=0x5A189A,
-            url=page_url,
-        )
-        self._add_group_fields(
-            embed, data, summary_mode=summary_mode, healthy=healthy, page_url=page_url
-        )
-        embed.add_field(
-            name="Last Updated",
-            value=f"<t:{self.last_updated_unix(data)}:R>",
-            inline=True,
-        )
-        embed.set_footer(text="Owned, created, and maintained by Ibby")
-        if self.bot.user and self.bot.user.display_avatar:
-            embed.set_author(
-                name=self.tracker_name(data),
-                icon_url=self.bot.user.display_avatar.url,
-                url=page_url,
-            )
-        return embed
 
     async def process_status_alerts(self, data: StatusData) -> int:
         if self.bot.db is None:
@@ -523,7 +377,8 @@ class UptimeCog(commands.Cog):
             return 0
         sent = 0
         for item in alert_channels:
-            embed = self.create_alert_embed(
+            layout = AlertLayout(
+                self,
                 data,
                 changes,
                 **await self.guild_render_settings(item.get("guild_id")),
@@ -532,7 +387,7 @@ class UptimeCog(commands.Cog):
             if channel is None:
                 continue
             try:
-                await channel.send(embed=embed)
+                await channel.send(view=layout)
                 sent += 1
             except discord.HTTPException as exc:
                 log.error(
@@ -541,6 +396,33 @@ class UptimeCog(commands.Cog):
                     exc,
                 )
         return sent
+
+    async def _replace_tracker_message(
+        self,
+        channel: discord.abc.Messageable,
+        message: discord.Message,
+        layout: "StatusLayout",
+        guild_id: str,
+        channel_id: int,
+    ) -> None:
+        new_message = await channel.send(view=layout)
+        await self.bot.db.upsert_tracked_message(
+            guild_id,
+            str(channel_id),
+            str(new_message.id),
+        )
+        log.info(
+            "Replaced the embed tracker message in channel %s with a components message",
+            channel_id,
+        )
+        try:
+            await message.delete()
+        except discord.HTTPException as exc:
+            log.warning(
+                "Could not delete the old tracker message in channel %s: %s",
+                channel_id,
+                exc,
+            )
 
     async def update_tracked_messages(self, data: StatusData | None = None) -> int:
         if self.bot.db is None:
@@ -556,8 +438,7 @@ class UptimeCog(commands.Cog):
         for item in tracked_messages:
             guild_id = str(item["guild_id"])
             settings = await self.guild_render_settings(guild_id)
-            view = StatusDashboardView(self.bot, self, data, page_url=settings["page_url"])
-            embed = self.create_status_embed(data, summary_mode=True, **settings)
+            layout = StatusLayout(self, data, **settings)
             channel_id = int(item["channel_id"])
             message_id = int(item["message_id"])
             channel = await self.resolve_tracker_channel(channel_id)
@@ -565,10 +446,18 @@ class UptimeCog(commands.Cog):
                 continue
             try:
                 message = await channel.fetch_message(message_id)
-                await message.edit(embed=embed, view=view)
+                if message.flags.components_v2:
+                    await message.edit(view=layout)
+                else:
+                    # Discord will not let the Components V2 flag be added to a
+                    # message that was sent without it, so an embed-era tracker
+                    # is replaced rather than edited.
+                    await self._replace_tracker_message(
+                        channel, message, layout, guild_id, channel_id
+                    )
                 updated += 1
             except discord.NotFound:
-                new_message = await channel.send(embed=embed, view=view)
+                new_message = await channel.send(view=layout)
                 await self.bot.db.upsert_tracked_message(
                     guild_id,
                     str(channel_id),
@@ -591,9 +480,8 @@ class UptimeCog(commands.Cog):
 
     async def send_uptime_response(
         self,
-        send_embed: StatusSender,
+        send_view: StatusSender,
         send_error: ErrorSender,
-        send_embed_with_view: StatusViewSender,
         guild_id: int | str | None = None,
     ) -> None:
         # Serve the last cycle rather than fetching. This path is per-user, so
@@ -607,23 +495,13 @@ class UptimeCog(commands.Cog):
         if not data:
             await send_error("I could not fetch status data right now.")
             return
-        view = StatusPaginationView(self.bot, self, data)
-        if not view.group_names:
+        if not self.group_services(data):
             await send_error("No services were found.")
             return
-        group_name = view.group_names[0]
-        page_data = data.copy()
-        page_data["services"] = view.groups[group_name]
-        embed = self.create_status_embed(
-            page_data,
-            page_info=(1, len(view.group_names)),
-            summary_mode=False,
-            **await self.guild_render_settings(guild_id),
+        layout = StatusLayout(
+            self, data, **await self.guild_render_settings(guild_id)
         )
-        if len(view.group_names) > 1:
-            await send_embed_with_view(embed, view)
-            return
-        await send_embed(embed)
+        await send_view(layout)
 
     @tracker.command(name="setup", description="Create a live uptime tracker message")
     @can_manage_guild()
@@ -646,9 +524,8 @@ class UptimeCog(commands.Cog):
             )
             return
         settings = await self.guild_render_settings(interaction.guild_id)
-        embed = self.create_status_embed(data, summary_mode=True, **settings)
-        view = StatusDashboardView(self.bot, self, data, page_url=settings["page_url"])
-        message = await interaction.channel.send(embed=embed, view=view)
+        layout = StatusLayout(self, data, **settings)
+        message = await interaction.channel.send(view=layout)
         await self.bot.db.upsert_tracked_message(
             str(interaction.guild_id),
             str(interaction.channel_id),
@@ -808,9 +685,8 @@ class UptimeCog(commands.Cog):
     async def uptime_slash(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
         await self.send_uptime_response(
-            lambda embed: interaction.followup.send(embed=embed, ephemeral=True),
+            lambda view: interaction.followup.send(view=view, ephemeral=True),
             lambda text: interaction.followup.send(text, ephemeral=True),
-            lambda embed, view: interaction.followup.send(embed=embed, view=view, ephemeral=True),
             guild_id=interaction.guild_id,
         )
 
@@ -829,9 +705,8 @@ class UptimeCog(commands.Cog):
             await ctx.send("I could not fetch status data right now.", delete_after=10)
             return
         settings = await self.guild_render_settings(ctx.guild.id if ctx.guild else None)
-        embed = self.create_status_embed(data, summary_mode=True, **settings)
-        view = StatusDashboardView(self.bot, self, data, page_url=settings["page_url"])
-        message = await ctx.send(embed=embed, view=view)
+        layout = StatusLayout(self, data, **settings)
+        message = await ctx.send(view=layout)
         if ctx.guild:
             await self.bot.db.upsert_tracked_message(
                 str(ctx.guild.id),
@@ -900,9 +775,8 @@ class UptimeCog(commands.Cog):
         except discord.Forbidden:
             pass
         await self.send_uptime_response(
-            lambda embed: ctx.send(embed=embed, delete_after=60),
+            lambda view: ctx.send(view=view, delete_after=60),
             lambda text: ctx.send(text, delete_after=60),
-            lambda embed, view: ctx.send(embed=embed, view=view, delete_after=60),
             guild_id=ctx.guild.id if ctx.guild else None,
         )
 
