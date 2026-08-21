@@ -3,7 +3,8 @@
   "include-component-in-tag": false,
   "packages": {
     ".": {
-      "release-type": "simple"
+      "release-type": "simple",
+      "bump-minor-pre-major": true
     }
   }
 }
