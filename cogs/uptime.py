@@ -13,7 +13,7 @@ from discord.ext import commands, tasks
 if TYPE_CHECKING:
     from bot import DiscordUptimeTrackerBot
 
-from incidents import build_incident_messages
+from incidents import build_incident_messages, format_incident_history
 from tracker_db import GUILD_SETTING_FIELDS
 
 from ui.status_layout import AlertLayout, HostLayout, StatusLayout
@@ -52,6 +52,20 @@ StatusData = dict[str, Any]
 StatusSender = Callable[[discord.ui.LayoutView], Awaitable[object]]
 ErrorSender = Callable[[str], Awaitable[object]]
 StatusViewSender = Callable[[discord.Embed, discord.ui.View], Awaitable[object]]
+def _discord_relative(iso: str) -> str:
+    """An ISO timestamp as Discord's relative stamp, or the raw text.
+
+    Discord renders the reader's own timezone, which a preformatted string
+    cannot do.
+    """
+
+    try:
+        moment = datetime.fromisoformat(iso.replace("Z", "+00:00"))
+    except (ValueError, AttributeError):
+        return iso
+    return f"<t:{int(moment.timestamp())}:R>"
+
+
 AlertChange = dict[str, str | int | float]
 
 # Services whose transitions are not announced. Both forms are listed because a
@@ -291,6 +305,30 @@ class UptimeCog(commands.Cog):
     def tracker_name(self, data: StatusData) -> str:
         source_name = str(data.get("source", {}).get("name") or "").strip()
         return source_name or self.bot.config.BRAND_NAME
+
+    def active_outages(self, data: StatusData) -> list[StatusData]:
+        """Services the payload currently reports as not responding.
+
+        Read from the payload rather than the incident tables, so the panel is
+        right on the first refresh after a restart and cannot drift from what
+        the status page says.
+        """
+
+        down = [
+            service
+            for service in self.visible_services(data)
+            if str((service.get("last") or {}).get("state") or "").upper() == "DOWN"
+        ]
+        # Longest outage first: the one that has been broken longest is the one
+        # someone is most likely asking about.
+        return sorted(down, key=lambda s: str(s.get("downSince") or "9999"))
+
+    def outage_line(self, service: StatusData) -> str:
+        name = str(service.get("name") or "Unknown Service")
+        group = str(service.get("group") or "Other")
+        since = str(service.get("downSince") or "")
+        when = f" since {_discord_relative(since)}" if since else ""
+        return f"🔴 **{name}** ({group}){when}"
 
     def visible_services(self, data: StatusData) -> list[StatusData]:
         services = data.get("services", [])
@@ -893,6 +931,22 @@ class UptimeCog(commands.Cog):
         await self.bot.db.delete_tracked_message(str(interaction.guild_id))
         await interaction.response.send_message(
             "Removed the tracked uptime message for this guild.",
+            ephemeral=True,
+        )
+
+    # Read-only and ephemeral, so it sits beside /uptime rather than inside the
+    # manager-gated group: an outage is what an ordinary member wants to look up.
+    @app_commands.command(name="incidents", description="Recent outages and who they affected")
+    @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.guild_id)
+    async def incidents_slash(self, interaction: discord.Interaction) -> None:
+        await interaction.response.defer(ephemeral=True)
+        if self.bot.db is None:
+            await interaction.followup.send("No incident history is available.", ephemeral=True)
+            return
+        incidents = await self.bot.db.list_recent_incidents_with_services(10)
+        lines = format_incident_history(incidents)
+        await interaction.followup.send(
+            "## Recent incidents\n" + "\n".join(lines),
             ephemeral=True,
         )
 

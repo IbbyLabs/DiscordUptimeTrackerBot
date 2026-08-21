@@ -77,6 +77,25 @@ class GroupSelect(ui.Select["StatusLayout"]):
         await interaction.response.send_message(view=layout, ephemeral=True)
 
 
+def _with_outages(cog: "UptimeCog", data: dict[str, Any], lines: list[str]) -> list[str]:
+    """Put what is broken above the group summary.
+
+    A reader opening the board during an outage is looking for the broken
+    service, not for the group it sits in.
+    """
+
+    outages = cog.active_outages(data)
+    if not outages:
+        return lines
+    noun = "service" if len(outages) == 1 else "services"
+    return [
+        f"**Active outages** — {len(outages)} {noun} not responding",
+        *(cog.outage_line(service) for service in outages),
+        "",
+        *lines,
+    ]
+
+
 class StatusLayout(ui.LayoutView):
     """The status board as Components V2.
 
@@ -125,6 +144,7 @@ class StatusLayout(ui.LayoutView):
                 cog.group_summary_line(name, items, healthy)
                 for name, items in groups.items()
             ]
+            lines = _with_outages(cog, data, lines)
         else:
             items = groups.get(group_name, [])
             has_auth = any(item.get("requiresAuth") for item in items)
