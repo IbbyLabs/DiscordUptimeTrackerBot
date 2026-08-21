@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 from tracker_db import GUILD_SETTING_FIELDS
 
-from ui.status_layout import AlertLayout, StatusLayout
+from ui.status_layout import AlertLayout, HostLayout, StatusLayout
 
 log = logging.getLogger("uptimebot.cogs.uptime")
 
@@ -178,6 +178,56 @@ class UptimeCog(commands.Cog):
         except (aiohttp.ClientError, asyncio.TimeoutError, ValueError) as exc:
             log.error("Error fetching status: %s", exc)
             return None
+
+    async def fetch_service_detail(
+        self,
+        service_id: str,
+        *,
+        history: bool = True,
+        timeline: bool = True,
+        history_limit: int = 12,
+    ) -> StatusData | None:
+        """One service, with its check history and long-range buckets.
+
+        The timeline is only computed for a single-service request, and both
+        extras are off unless asked for, so `serviceId` is not optional here.
+        """
+        params = {"serviceId": service_id}
+        if history:
+            params["includeHistory"] = "1"
+            params["historyLimit"] = str(history_limit)
+        if timeline:
+            params["includeTimeline"] = "1"
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    self.status_api_url,
+                    params=params,
+                    timeout=aiohttp.ClientTimeout(total=20),
+                ) as response:
+                    if response.status != 200:
+                        log.error(
+                            "Failed to fetch detail for service %s: HTTP %s",
+                            service_id,
+                            response.status,
+                        )
+                        return None
+                    payload = await response.json()
+        except (aiohttp.ClientError, asyncio.TimeoutError, ValueError) as exc:
+            log.error("Error fetching detail for service %s: %s", service_id, exc)
+            return None
+        services = payload.get("services") if isinstance(payload, dict) else None
+        if not services:
+            log.warning("No service returned for id %s", service_id)
+            return None
+        return services[0]
+
+    def find_service(self, data: StatusData, needle: str) -> StatusData | None:
+        needle = needle.strip().casefold()
+        for service in self.visible_services(data):
+            if needle in (str(service.get("id") or "").casefold(), str(service.get("name") or "").casefold()):
+                return service
+        return None
 
     def tracker_name(self, data: StatusData) -> str:
         source_name = str(data.get("source", {}).get("name") or "").strip()
@@ -575,6 +625,106 @@ class UptimeCog(commands.Cog):
         )
         await interaction.response.send_message(
             "Status alerts will be sent to this channel.",
+            ephemeral=True,
+        )
+
+    async def _status_data(self) -> StatusData | None:
+        data = self.last_status
+        if data is None:
+            data = await self.fetch_status()
+            if data:
+                self.last_status = data
+        return data
+
+    async def group_autocomplete(
+        self,
+        interaction: discord.Interaction,
+        current: str,
+    ) -> list[app_commands.Choice[str]]:
+        data = await self._status_data()
+        if not data:
+            return []
+        needle = current.casefold()
+        return [
+            app_commands.Choice(name=name[:100], value=name[:100])
+            for name in self.group_services(data)
+            if needle in name.casefold()
+        ][:25]
+
+    async def host_autocomplete(
+        self,
+        interaction: discord.Interaction,
+        current: str,
+    ) -> list[app_commands.Choice[str]]:
+        data = await self._status_data()
+        if not data:
+            return []
+        needle = current.casefold()
+        return [
+            app_commands.Choice(
+                name=str(service.get("name") or "?")[:100],
+                value=str(service.get("id") or service.get("name") or "")[:100],
+            )
+            for service in self.visible_services(data)
+            if needle in str(service.get("name") or "").casefold()
+        ][:25]
+
+    @app_commands.command(name="status", description="Service status, by group or by host")
+    @app_commands.describe(
+        group="Show one group's services",
+        host="Show one service in detail, with its uptime history",
+        state="List every service currently in this state",
+    )
+    @app_commands.choices(
+        state=[
+            app_commands.Choice(name="Down", value="DOWN"),
+            app_commands.Choice(name="Degraded", value="DEGRADED"),
+            app_commands.Choice(name="Down or degraded", value="DOWN,DEGRADED"),
+        ]
+    )
+    @app_commands.autocomplete(group=group_autocomplete, host=host_autocomplete)
+    async def status_slash(
+        self,
+        interaction: discord.Interaction,
+        group: str | None = None,
+        host: str | None = None,
+        state: app_commands.Choice[str] | None = None,
+    ) -> None:
+        await interaction.response.defer(ephemeral=True)
+        data = await self._status_data()
+        if not data:
+            await interaction.followup.send(
+                "I could not fetch status data right now.",
+                ephemeral=True,
+            )
+            return
+        settings = await self.guild_render_settings(interaction.guild_id)
+        if host:
+            service = self.find_service(data, host)
+            if service is None:
+                await interaction.followup.send(
+                    f"I could not find a service called {host}.",
+                    ephemeral=True,
+                )
+                return
+            detail = await self.fetch_service_detail(str(service["id"]))
+            layout = HostLayout(self, detail or service, **settings)
+            await interaction.followup.send(view=layout, ephemeral=True)
+            return
+        if group and group not in self.group_services(data):
+            await interaction.followup.send(
+                f"I could not find a group called {group}.",
+                ephemeral=True,
+            )
+            return
+        await interaction.followup.send(
+            view=StatusLayout(
+                self,
+                data,
+                group_name=group,
+                states=tuple(state.value.split(",")) if state else (),
+                **settings,
+            ),
             ephemeral=True,
         )
 

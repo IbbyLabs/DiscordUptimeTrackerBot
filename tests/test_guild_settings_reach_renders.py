@@ -60,7 +60,7 @@ def test_every_view_build_passes_the_guilds_settings():
     """Routing the builders is half the job; the callers have to hand them over."""
     joined = "\n".join(p.read_text() for p in RENDER_SOURCES)
     calls = re.findall(
-        r"(?<!class )\b(?:Status|Alert)Layout\(((?:[^()]|\([^()]*\))*)\)", joined, re.S
+        r"(?<!class )\b\w*Layout\(((?:[^()]|\([^()]*\))*)\)", joined, re.S
     )
     calls = [c for c in calls if c.strip()]
     assert calls, "found no view builds to check, the pattern has drifted"
