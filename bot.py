@@ -81,9 +81,8 @@ class DiscordUptimeTrackerBot(commands.Bot):
         config = Config()
         intents = discord.Intents.default()
         intents.guilds = True
-        intents.message_content = True
         super().__init__(
-            command_prefix=config.COMMAND_PREFIX,
+            command_prefix=commands.when_mentioned,
             intents=intents,
             help_command=None,
         )

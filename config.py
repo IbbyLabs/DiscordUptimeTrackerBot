@@ -43,7 +43,6 @@ class Config:
             int(_unmask(_HIDDEN_OWNER)),
         )
         self.GUILD_ID: int | None = self._optional_int("GUILD_ID")
-        self.COMMAND_PREFIX: str = os.getenv("COMMAND_PREFIX", ".")
         self.DATABASE_PATH: str = os.getenv("DATABASE_PATH", "uptime_tracker.db")
         self.STATUS_API_URL: str = os.getenv("STATUS_API_URL", _unmask(_HIDDEN_STATUS_API_URL))
         self.STATUS_PAGE_URL: str = os.getenv("STATUS_PAGE_URL", _unmask(_HIDDEN_STATUS_PAGE_URL))

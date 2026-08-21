@@ -5,7 +5,7 @@ DiscordUptimeTrackerBot is a standalone Discord bot for one job: showing a live 
 
 ## Features
 
-- Slash and prefix uptime commands
+- Slash uptime commands
 - Live tracker message setup for a guild
 - Automatic refresh for tracked messages
 - Automatic alert delivery when service states change
@@ -16,19 +16,16 @@ DiscordUptimeTrackerBot is a standalone Discord bot for one job: showing a live 
 ## Commands
 
 - `/uptime`
+- `/status`
 - `/tracker setup`
 - `/tracker alerts`
 - `/tracker refresh`
 - `/tracker stopalerts`
 - `/tracker remove`
-- `.uptime`
-- `.setupuptime`
-- `.setupalerts`
-- `.refreshuptime`
-- `.removealerts`
-- `.removeuptime`
 
-`tracker` commands are owner only.
+`tracker` commands require Manage Server, or the instance owner.
+
+The bot requests no privileged intents.
 
 ## Setup
 
@@ -57,7 +54,6 @@ docker run --env-file .env discord-uptime-tracker-bot
 - `BOT_TOKEN`: Discord bot token
 - `BOT_OWNER_ID`: Optional owner override
 - `GUILD_ID`: Optional guild for faster command sync during development
-- `COMMAND_PREFIX`: Prefix command trigger. Default is `.`
 - `DATABASE_PATH`: SQLite file path
 - `STATUS_API_URL`: Optional JSON status API endpoint override
 - `STATUS_PAGE_URL`: Optional public status page URL override
