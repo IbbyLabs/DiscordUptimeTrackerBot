@@ -59,6 +59,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # The label is how a running container names its own build, so it is set
+      # on the per-arch image rather than only on the manifest.
+      - name: Resolve the version
+        id: version
+        run: |
+          version="${{ github.event.release.tag_name }}"
+          [ -n "$version" ] || version="${{ github.event.inputs.ref }}"
+          [ -n "$version" ] || version="${GITHUB_REF_NAME}"
+          echo "tag=${version}" >> "$GITHUB_OUTPUT"
+
       - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v6
@@ -68,6 +78,11 @@ jobs:
           platforms: ${{ matrix.platform }}
           cache-from: type=gha,scope=${{ matrix.suffix }}
           cache-to: type=gha,mode=max,scope=${{ matrix.suffix }}
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}
+            org.opencontainers.image.source=${{ github.event.repository.html_url }}
+            org.opencontainers.image.version=${{ steps.version.outputs.tag }}
+            org.opencontainers.image.revision=${{ github.sha }}
           outputs: type=image,name=${{ steps.image.outputs.name }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export the digest
