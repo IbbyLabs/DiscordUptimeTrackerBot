@@ -13,6 +13,7 @@ from discord.ext import commands, tasks
 if TYPE_CHECKING:
     from bot import DiscordUptimeTrackerBot
 
+from incidents import build_incident_messages
 from tracker_db import GUILD_SETTING_FIELDS
 
 from ui.status_layout import AlertLayout, HostLayout, StatusLayout
@@ -369,6 +370,7 @@ class UptimeCog(commands.Cog):
                 continue
             changes.append(
                 {
+                    "key": key,
                     "group": str(service.get("group") or "Other"),
                     "name": str(service.get("name") or "Unknown Service"),
                     "state": current_state,
@@ -482,31 +484,29 @@ class UptimeCog(commands.Cog):
         if not previous_states:
             return 0
         changes = self.collect_status_changes(previous_states, data)
-        if not changes:
+        messages = await build_incident_messages(self.bot.db, changes)
+        if not messages:
             return 0
         alert_channels = await self.bot.db.list_alert_channels()
         if not alert_channels:
             return 0
         sent = 0
         for item in alert_channels:
-            layout = AlertLayout(
-                self,
-                data,
-                changes,
-                **await self.guild_render_settings(item.get("guild_id")),
-            )
+            settings = await self.guild_render_settings(item.get("guild_id"))
             channel = await self.resolve_tracker_channel(int(item["channel_id"]))
             if channel is None:
                 continue
-            try:
-                await channel.send(view=layout)
-                sent += 1
-            except discord.HTTPException as exc:
-                log.error(
-                    "Failed to send alert in channel %s: %s",
-                    item["channel_id"],
-                    exc,
-                )
+            for heading, group in messages:
+                layout = AlertLayout(self, data, group, heading=heading, **settings)
+                try:
+                    await channel.send(view=layout)
+                    sent += 1
+                except discord.HTTPException as exc:
+                    log.error(
+                        "Failed to send alert in channel %s: %s",
+                        item["channel_id"],
+                        exc,
+                    )
         return sent
 
     async def _replace_tracker_message(

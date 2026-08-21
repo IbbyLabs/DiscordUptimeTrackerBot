@@ -76,6 +76,10 @@ class FakeDB:
     ) -> None:
         self.states = states or {}
         self.alert_channels = alert_channels or []
+        # A real incident store rather than stubs, so the alert path is
+        # exercised rather than satisfied.
+        self.incidents: list[dict[str, Any]] = []
+        self.incident_services: dict[int, dict[str, dict[str, Any]]] = {}
 
     async def get_service_states(self) -> dict[str, str]:
         return dict(self.states)
@@ -88,6 +92,41 @@ class FakeDB:
 
     async def get_guild_settings(self, guild_id: str) -> dict[str, object]:
         return {}
+
+    async def get_open_incident(self) -> dict[str, Any] | None:
+        for incident in reversed(self.incidents):
+            if incident["closed_at"] is None:
+                return incident
+        return None
+
+    async def open_incident(self) -> int:
+        incident_id = len(self.incidents) + 1
+        self.incidents.append({"id": incident_id, "opened_at": "now", "closed_at": None})
+        self.incident_services[incident_id] = {}
+        return incident_id
+
+    async def close_incident(self, incident_id: int) -> None:
+        for incident in self.incidents:
+            if incident["id"] == incident_id:
+                incident["closed_at"] = "now"
+
+    async def add_incident_services(self, incident_id: int, services: list[tuple[str, str]]) -> None:
+        rows = self.incident_services.setdefault(incident_id, {})
+        for key, name in services:
+            rows.setdefault(key, {"service_key": key, "name": name, "recovered_at": None})
+
+    async def mark_incident_services_down(self, incident_id: int, keys: list[str]) -> None:
+        for key in keys:
+            if key in self.incident_services.get(incident_id, {}):
+                self.incident_services[incident_id][key]["recovered_at"] = None
+
+    async def mark_incident_services_recovered(self, incident_id: int, keys: list[str]) -> None:
+        for key in keys:
+            if key in self.incident_services.get(incident_id, {}):
+                self.incident_services[incident_id][key]["recovered_at"] = "now"
+
+    async def list_incident_services(self, incident_id: int) -> list[dict[str, Any]]:
+        return list(self.incident_services.get(incident_id, {}).values())
 
 
 class FakeChannel:
@@ -198,7 +237,9 @@ def test_process_status_alerts_sends_when_service_changes() -> None:
         body = "\n".join(
             getattr(child, "content", "") for child in layout.walk_children()
         )
-        assert "Status Alerts" in body
+        # A service going down opens an incident, and the heading says so.
+        assert "Outage started" in body
+        assert "1 service is not responding" in body
         assert "Status Tracker" not in body
         assert "🔴 **API**" in body
         assert "UP → DOWN" in body

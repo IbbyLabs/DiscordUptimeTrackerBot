@@ -165,6 +165,7 @@ class AlertLayout(ui.LayoutView):
         *,
         healthy: str | None = None,
         page_url: str | None = None,
+        heading: str | None = None,
     ) -> None:
         super().__init__(timeout=None)
         page_url = page_url or cog.bot.config.STATUS_PAGE_URL
@@ -179,7 +180,10 @@ class AlertLayout(ui.LayoutView):
         chunks, dropped = _body_chunks(lines)
         footer = f"-# {dropped} more not shown here" if dropped else None
         children: list[ui.Item[Any]] = [
-            ui.TextDisplay(f"## Status Alerts\nDetected {count} status change for {noun}."),
+            ui.TextDisplay(
+                heading
+                or f"## Status Alerts\nDetected {count} status change for {noun}."
+            ),
             ui.Separator(),
             *(ui.TextDisplay(chunk) for chunk in chunks),
         ]
