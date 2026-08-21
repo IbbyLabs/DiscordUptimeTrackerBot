@@ -125,3 +125,59 @@ def test_an_unstable_outage_is_marked_differently_from_a_broken_one() -> None:
     cog = _cog()
     assert cog.outage_line(cast(Any, _flapping("Bouncing", flapping=True))).startswith("🌀")
     assert cog.outage_line(cast(Any, _flapping("Broken", flapping=False))).startswith("🔴")
+
+
+def _hc(services):
+    return _cog().headline_counts(cast(Any, {
+        "services": services,
+        "summary": {
+            "up": sum(1 for s in services if s["last"]["state"] == "UP"),
+            "down": sum(1 for s in services if s["last"]["state"] == "DOWN"),
+            "degraded": sum(1 for s in services if s["last"]["state"] == "DEGRADED"),
+        },
+    }))
+
+
+# Ibby's rule: the numbers should be addable. A flapping service is one thing
+# with something wrong, not two.
+def test_a_flapping_service_is_counted_once_under_unstable() -> None:
+    up, down, degraded, unstable = _hc([
+        _flapping("Broken", state="DOWN", flapping=False),
+        _flapping("Bouncing", state="DOWN", flapping=True),
+        _flapping("Fine", state="UP", flapping=False),
+    ])
+    assert (up, down, degraded, unstable) == (1, 1, 0, 1)
+
+
+def test_a_flapping_service_leaves_the_degraded_count_too() -> None:
+    up, down, degraded, unstable = _hc([
+        _flapping("Slow", state="DEGRADED", flapping=True),
+        _flapping("Fine", state="UP", flapping=False),
+    ])
+    assert (up, down, degraded, unstable) == (1, 0, 0, 1)
+
+
+# Held DOWN is the usual case, but a service can be flagged while reading UP.
+def test_a_flapping_service_reading_up_leaves_the_up_count() -> None:
+    up, down, degraded, unstable = _hc([
+        _flapping("Bouncing", state="UP", flapping=True),
+        _flapping("Fine", state="UP", flapping=False),
+    ])
+    assert (up, down, degraded, unstable) == (1, 0, 0, 1)
+
+
+def test_with_nothing_flapping_the_counts_are_the_payloads_own() -> None:
+    assert _hc([
+        _flapping("A", state="DOWN", flapping=False),
+        _flapping("B", state="UP", flapping=False),
+    ]) == (1, 1, 0, 0)
+
+
+def test_the_four_counts_add_up_to_the_services_shown() -> None:
+    services = [
+        _flapping("A", state="DOWN", flapping=True),
+        _flapping("B", state="DOWN", flapping=False),
+        _flapping("C", state="DEGRADED", flapping=False),
+        _flapping("D", state="UP", flapping=False),
+    ]
+    assert sum(_hc(services)) == len(services)
