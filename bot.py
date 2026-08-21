@@ -76,6 +76,22 @@ async def sync_app_commands(tree: AppCommandTreeLike, guild_id: int | None) -> b
     return False
 
 
+def presence_text(up: int, down: int, degraded: int) -> str:
+    """The one line the presence carries.
+
+    Down outranks degraded, which outranks the healthy count, so the worst
+    thing true of the estate is the thing on show.
+    """
+
+    if down:
+        return f"{down} service{'' if down == 1 else 's'} down"
+    if degraded:
+        return f"{degraded} service{'' if degraded == 1 else 's'} degraded"
+    if up:
+        return f"All {up} services up"
+    return "Waiting for the first check"
+
+
 class DiscordUptimeTrackerBot(commands.Bot):
     def __init__(self) -> None:
         config = Config()
@@ -123,26 +139,33 @@ class DiscordUptimeTrackerBot(commands.Bot):
             return parsed_emoji
         return emoji or None
 
-    async def presence_updater(self) -> None:
-        await self.wait_until_ready()
-        while not self.is_closed():
-            uptime_str = self.get_uptime_str()
-            status = f"Uptime | Up for {uptime_str}"
-            try:
-                await self.change_presence(
-                    activity=discord.CustomActivity(
-                        name=status,
-                        emoji=self._get_presence_emoji(),
-                    )
+    async def set_status_presence(self, up: int, down: int, degraded: int) -> None:
+        """Report what is being tracked.
+
+        Driven by each refresh cycle rather than a timer, because the figure
+        only moves when a cycle produces one and a timer would re-send the same
+        string between them.
+        """
+
+        if down:
+            emoji: str | discord.PartialEmoji | None = "🔴"
+        elif degraded:
+            emoji = "🟡"
+        else:
+            emoji = self._get_presence_emoji()
+        try:
+            await self.change_presence(
+                activity=discord.CustomActivity(
+                    name=presence_text(up, down, degraded),
+                    emoji=emoji,
                 )
-            except discord.DiscordException as exc:
-                log.error("Failed to update presence: %s", exc)
-            await asyncio.sleep(15)
+            )
+        except discord.DiscordException as exc:
+            log.error("Failed to update presence: %s", exc)
 
     async def setup_hook(self) -> None:
         self.db = TrackerDatabase(self.config.DATABASE_PATH)
         await self.db.init()
-        self.loop.create_task(self.presence_updater())
         await self.load_extension("cogs.uptime")
         await sync_app_commands(self.tree, self.config.GUILD_ID)
 

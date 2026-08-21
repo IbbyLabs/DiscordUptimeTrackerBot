@@ -226,6 +226,8 @@ class UptimeCog(commands.Cog):
         if not data:
             return 0, 0
         self.last_status = data
+        # The same payload the board renders, rather than a second fetch.
+        await self.bot.set_status_presence(*self._summary_counts(data))
         alerts_sent = await self.process_status_alerts(data)
         updated = await self.update_tracked_messages(data)
         return updated, alerts_sent
@@ -303,6 +305,15 @@ class UptimeCog(commands.Cog):
         return None
 
     def tracker_name(self, data: StatusData) -> str:
+        """What to call the board.
+
+        An operator who sets BRAND_NAME means it, so it outranks the status
+        API's own name; an install that sets nothing takes the API's.
+        """
+
+        override = self.bot.config.BRAND_NAME_OVERRIDE
+        if override:
+            return str(override)
         source_name = str(data.get("source", {}).get("name") or "").strip()
         return source_name or self.bot.config.BRAND_NAME
 

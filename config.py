@@ -19,17 +19,6 @@ _HIDDEN_BRAND_NAME = (
     94, 117, 117, 110, 91, 118, 117, 100, 55, 66, 103, 99, 126, 122, 114, 55, 67, 101, 118,
     116, 124, 114, 101,
 )
-_HIDDEN_BRAND_DESCRIPTION = (
-    67, 127, 126, 100, 55, 115, 118, 100, 127, 117, 120, 118, 101, 115, 55, 103, 101, 120,
-    97, 126, 115, 114, 100, 55, 101, 114, 118, 123, 55, 99, 126, 122, 114, 55, 100, 99, 118,
-    99, 98, 100, 55, 122, 120, 121, 126, 99, 120, 101, 126, 121, 112, 55, 113, 120, 101, 55,
-    68, 99, 101, 114, 122, 126, 120, 55, 86, 115, 115, 120, 121, 100, 57, 55, 68, 114, 101,
-    97, 126, 116, 114, 100, 55, 122, 118, 101, 124, 114, 115, 55, 96, 126, 99, 127, 55, 118,
-    55, 123, 120, 116, 124, 55, 118, 101, 114, 55, 103, 101, 126, 97, 118, 99, 114, 55, 118,
-    121, 115, 55, 101, 114, 102, 98, 126, 101, 114, 55, 118, 98, 99, 127, 114, 121, 99, 126,
-    116, 118, 99, 126, 120, 121, 57,
-)
-
 
 def _unmask(values: tuple[int, ...]) -> str:
     return "".join(chr(value ^ _HIDDEN_KEY) for value in values)
@@ -47,11 +36,12 @@ class Config:
         self.STATUS_API_URL: str = os.getenv("STATUS_API_URL", _unmask(_HIDDEN_STATUS_API_URL))
         self.STATUS_PAGE_URL: str = os.getenv("STATUS_PAGE_URL", _unmask(_HIDDEN_STATUS_PAGE_URL))
         self.STATUS_EMOJI: str = os.getenv("STATUS_EMOJI", "🟣")
+        # Two separate questions: what to call the board when nothing else names
+        # it, and whether the operator has asked for a particular name. Only the
+        # second outranks the status API, so an install that sets nothing shows
+        # the API's own name rather than this default.
         self.BRAND_NAME: str = os.getenv("BRAND_NAME", _unmask(_HIDDEN_BRAND_NAME))
-        self.BRAND_DESCRIPTION: str = os.getenv(
-            "BRAND_DESCRIPTION",
-            _unmask(_HIDDEN_BRAND_DESCRIPTION),
-        )
+        self.BRAND_NAME_OVERRIDE: str | None = (os.getenv("BRAND_NAME") or "").strip() or None
         self.REFRESH_MINUTES: float = float(os.getenv("REFRESH_MINUTES", "2"))
 
     def _require(self, key: str) -> str:

@@ -65,3 +65,26 @@ def test_a_line_without_a_timestamp_still_renders() -> None:
     line = _cog().outage_line(cast(Any, _svc("Api", "DOWN")))
     assert "**Api**" in line
     assert "<t:" not in line
+
+
+def _cog_with(brand_override=None, brand_name="Fallback Name"):
+    from types import SimpleNamespace as NS
+    cog = UptimeCog.__new__(UptimeCog)
+    cast(Any, cog).bot = NS(config=NS(BRAND_NAME=brand_name, BRAND_NAME_OVERRIDE=brand_override))
+    return cog
+
+
+# Documented as an override, so it has to beat the API rather than lose to it.
+def test_a_set_brand_name_beats_the_status_apis_own_name() -> None:
+    data = {"source": {"name": "Somebody Else's Tracker"}}
+    assert _cog_with(brand_override="My Board").tracker_name(cast(Any, data)) == "My Board"
+
+
+# An install that sets nothing should not show our brand on someone else's API.
+def test_an_unset_brand_name_takes_the_apis_name() -> None:
+    data = {"source": {"name": "Their Tracker"}}
+    assert _cog_with().tracker_name(cast(Any, data)) == "Their Tracker"
+
+
+def test_with_neither_the_built_in_default_is_used() -> None:
+    assert _cog_with().tracker_name(cast(Any, {"source": {}})) == "Fallback Name"
