@@ -20,7 +20,6 @@ from incidents import (
     build_page_incident_messages,
     format_page_incidents,
     plan_page_incident_alerts,
-    is_alert_suppressed,
 )
 from tracker_db import GUILD_SETTING_FIELDS
 
