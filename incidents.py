@@ -255,3 +255,82 @@ def _iso_stamp(value: str) -> str:
     except (ValueError, AttributeError):
         return str(value)
     return f"<t:{int(moment.timestamp())}:f>"
+
+
+def plan_page_incident_alerts(
+    *,
+    announced: dict[str, dict[str, bool]],
+    rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """What to announce, given the page's incidents and what we have said.
+
+    The page owns which incidents exist; this owns which have been spoken about.
+    An incident we have never seen and which is already closed is history rather
+    than news, so it is recorded silently.
+    """
+
+    to_open: list[dict[str, Any]] = []
+    to_close: list[dict[str, Any]] = []
+    silent: list[str] = []
+
+    for row in rows:
+        incident_id = row["id"]
+        if not incident_id:
+            continue
+        state = announced.get(incident_id)
+        ongoing = row["closed_at"] is None
+
+        if state is None:
+            if ongoing:
+                to_open.append(row)
+            else:
+                # Opened and closed between two cycles, or before we ever
+                # looked. Announcing both ends at once says nothing useful.
+                silent.append(incident_id)
+            continue
+
+        if ongoing and not state["opened"]:
+            to_open.append(row)
+        elif not ongoing and not state["closed"]:
+            to_close.append(row)
+
+    still_open = [r for r in rows if r["closed_at"] is None]
+    return {
+        "open": to_open,
+        "close": to_close,
+        "silent": silent,
+        "all_clear": bool(to_close) and not still_open,
+    }
+
+
+def build_page_incident_messages(plan: dict[str, Any]) -> list[tuple[str, list[str]]]:
+    """The announcements for one cycle, as heading and body lines."""
+
+    messages: list[tuple[str, list[str]]] = []
+
+    opened = plan["open"]
+    if opened:
+        verb = "service is" if len(opened) == 1 else "services are"
+        messages.append((
+            f"## 🔴 Outage started\n{len(opened)} {verb} not responding.",
+            [_incident_line(row, "🔴") for row in opened],
+        ))
+
+    closed = plan["close"]
+    if closed:
+        if plan["all_clear"]:
+            heading = "## 🟢 All clear\nEvery service is responding again."
+        else:
+            verb = "service is" if len(closed) == 1 else "services are"
+            heading = f"## 🟢 Back up\n{len(closed)} {verb} responding again."
+        messages.append((heading, [_incident_line(row, "🟢") for row in closed]))
+
+    return messages
+
+
+def _incident_line(row: dict[str, Any], marker: str) -> str:
+    where = f" ({row['group']})" if row.get("group") else ""
+    started = _iso_stamp(row["opened_at"])
+    if row.get("closed_at"):
+        return f"{marker} **{row['name']}**{where}\n-# down from {started} to {_iso_stamp(row['closed_at'])}"
+    return f"{marker} **{row['name']}**{where}\n-# since {started}"

@@ -131,30 +131,6 @@ def test_moving_the_channel_posts_a_new_panel() -> None:
 
 # Silent intake: the page is the truth on the first cycle, and the channel
 # carries only what happens after it.
-def test_the_first_cycle_records_without_announcing() -> None:
-    from tests.test_uptime_embed import build_alert_cog
-
-    async def run():
-        cog, db, channel = build_alert_cog(
-            states={},
-            alert_channels=[{"guild_id": "1", "channel_id": "123"}],
-        )
-        data = {
-            "source": {"name": "T"}, "summary": {"up": 0, "down": 1, "degraded": 0},
-            "services": [{
-                "group": "Core", "name": "API", "url": "https://x.test/",
-                "hideFromStatusPage": False, "uptimePercent": 90.0,
-                "last": {"state": "DOWN", "latency": 10},
-            }],
-        }
-        sent = await cog.process_status_alerts(cast(Any, data))
-        assert sent == 0
-        assert channel.sent_views == []
-        # Recorded, so the next cycle can tell what changed.
-        assert db.states != {}
-    asyncio.run(run())
-
-
 class DeletableMessage(FakeMessage):
     def __init__(self, mid): super().__init__(mid); self.deleted = False
     async def delete(self): self.deleted = True

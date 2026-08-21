@@ -16,8 +16,9 @@ if TYPE_CHECKING:
 import status_api
 from panels import build_panel_specs
 from incidents import (
-    build_incident_messages,
+    build_page_incident_messages,
     format_page_incidents,
+    plan_page_incident_alerts,
     is_alert_suppressed,
     is_alertable_transition,
 )
@@ -575,56 +576,64 @@ class UptimeCog(commands.Cog):
 
 
     async def process_status_alerts(self, data: StatusData) -> int:
+        """Announce what the page says has changed since we last looked.
+
+        The page owns which incidents exist; this owns which have been spoken
+        about. The first cycle records without announcing, so a fresh install
+        does not open with a burst about outages that predate it.
+        """
+
+        del data
         if self.bot.db is None:
             return 0
-        current_states = self.service_state_map(data)
-        previous_states = await self.bot.db.get_service_states()
-        await self.bot.db.replace_service_states(current_states)
-        # The first cycle takes the page as truth and says nothing. Nobody was
-        # waiting to hear about an outage that predates the bot, and a fresh
-        # install would otherwise announce the whole estate at once. The panels
-        # carry that state; the channel carries what happens from here.
-        if not previous_states:
-            log.info(
-                "First cycle: recorded %d services without announcing.", len(current_states)
-            )
+        rows = await self.fetch_incidents()
+        if not rows:
             return 0
-        changes = self.collect_status_changes(previous_states, data)
-        # Services down from before this incident opened are not part of it, so
-        # the all-clear has to know they exist before claiming everything is up.
-        down_now = {
-            self.service_key(service) for service in self.active_outages(data)
-        }
-        messages = await build_incident_messages(
-            self.bot.db,
-            changes,
-            present_keys=set(current_states),
-            still_down_elsewhere=len(down_now - {str(c["key"]) for c in changes}),
-        )
+        announced = await self.bot.db.get_announced_incidents()
+        if not announced:
+            await self.bot.db.mark_incidents_seen(
+                [row["id"] for row in rows if row["closed_at"] is None]
+            )
+            await self.bot.db.mark_incidents_seen(
+                [row["id"] for row in rows if row["closed_at"] is not None], closed=True
+            )
+            log.info("First cycle: recorded %d incidents without announcing.", len(rows))
+            return 0
+
+        plan = plan_page_incident_alerts(announced=announced, rows=rows)
+        if plan["silent"]:
+            await self.bot.db.mark_incidents_seen(plan["silent"], closed=True)
+        messages = build_page_incident_messages(plan)
         if not messages:
             return 0
-        alert_channels = await self.bot.db.list_alert_channels()
-        if not alert_channels:
+
+        sent = await self.send_alerts(messages)
+        await self.bot.db.mark_incidents_announced(
+            [row["id"] for row in plan["open"]],
+            [row["id"] for row in plan["close"]],
+        )
+        return sent
+
+    async def send_alerts(self, messages: list[tuple[str, list[str]]]) -> int:
+        """One message per announcement, to every configured alert channel."""
+
+        if self.bot.db is None:
             return 0
+        channels = await self.bot.db.list_alert_channels()
         sent = 0
-        for item in alert_channels:
-            settings = await self.guild_render_settings(item.get("guild_id"))
+        for item in channels:
             channel = await self.resolve_tracker_channel(int(item["channel_id"]))
             if channel is None:
                 continue
-            for heading, group in messages:
-                layout = AlertLayout(self, data, group, heading=heading, **settings)
+            settings = await self.guild_render_settings(str(item.get("guild_id")))
+            for heading, lines in messages:
+                accent = 0xD90429 if "Outage started" in heading else 0x2A9D8F
                 try:
-                    await channel.send(view=layout)
+                    await channel.send(view=PanelLayout(self, heading, lines, accent, **settings))
                     sent += 1
                 except discord.HTTPException as exc:
-                    log.error(
-                        "Failed to send alert in channel %s: %s",
-                        item["channel_id"],
-                        exc,
-                    )
+                    log.error("Failed to send an alert in %s: %s", item["channel_id"], exc)
         return sent
-
     async def delete_panels(self, guild_id: str) -> int:
         """Remove the panels a guild has, message and record.
 

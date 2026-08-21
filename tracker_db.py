@@ -46,6 +46,16 @@ class TrackerDatabase:
             )
             await db.execute(
                 """
+                CREATE TABLE IF NOT EXISTS announced_incidents (
+                    incident_id TEXT PRIMARY KEY,
+                    opened_announced_at TEXT,
+                    closed_announced_at TEXT,
+                    seen_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+            await db.execute(
+                """
                 CREATE TABLE IF NOT EXISTS panel_messages (
                     guild_id TEXT NOT NULL,
                     panel TEXT NOT NULL,
@@ -189,6 +199,74 @@ class TrackerDatabase:
                     VALUES (?, ?, CURRENT_TIMESTAMP)
                     """,
                     [(service_key, state) for service_key, state in states.items()],
+                )
+            await db.commit()
+
+    async def get_announced_incidents(self) -> dict[str, dict[str, bool]]:
+        """What has already been said about each incident the page has shown us.
+
+        A record of what this bot announced, not a copy of what happened; the
+        page owns the incidents themselves.
+        """
+
+        async with aiosqlite.connect(self.path) as db:
+            async with db.execute(
+                "SELECT incident_id, opened_announced_at, closed_announced_at"
+                " FROM announced_incidents"
+            ) as cursor:
+                rows = await cursor.fetchall()
+        return {
+            str(r[0]): {"opened": r[1] is not None, "closed": r[2] is not None}
+            for r in rows
+        }
+
+    async def mark_incidents_seen(
+        self, incident_ids: list[str], *, closed: bool = False
+    ) -> None:
+        """Take incidents in without announcing them.
+
+        Recorded as already-announced-open, so an outage present at intake is
+        never later reported as starting. Its recovery is still news, so the
+        closed marker is left alone unless the incident is already over.
+        """
+
+        if not incident_ids:
+            return
+        closed_at = "CURRENT_TIMESTAMP" if closed else "NULL"
+        async with aiosqlite.connect(self.path) as db:
+            await db.executemany(
+                f"""
+                INSERT OR IGNORE INTO announced_incidents
+                    (incident_id, opened_announced_at, closed_announced_at)
+                VALUES (?, CURRENT_TIMESTAMP, {closed_at})
+                """,
+                [(i,) for i in incident_ids],
+            )
+            await db.commit()
+
+    async def mark_incidents_announced(
+        self, opened: list[str], closed: list[str]
+    ) -> None:
+        async with aiosqlite.connect(self.path) as db:
+            if opened:
+                await db.executemany(
+                    """
+                    INSERT INTO announced_incidents (incident_id, opened_announced_at)
+                    VALUES (?, CURRENT_TIMESTAMP)
+                    ON CONFLICT(incident_id) DO UPDATE SET
+                        opened_announced_at = COALESCE(opened_announced_at, CURRENT_TIMESTAMP)
+                    """,
+                    [(i,) for i in opened],
+                )
+            if closed:
+                await db.executemany(
+                    """
+                    INSERT INTO announced_incidents (incident_id, closed_announced_at)
+                    VALUES (?, CURRENT_TIMESTAMP)
+                    ON CONFLICT(incident_id) DO UPDATE SET
+                        closed_announced_at = COALESCE(closed_announced_at, CURRENT_TIMESTAMP)
+                    """,
+                    [(i,) for i in closed],
                 )
             await db.commit()
 

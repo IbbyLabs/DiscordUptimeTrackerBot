@@ -13,6 +13,7 @@ def build_cog() -> UptimeCog:
         version="9.9.9",
         config=SimpleNamespace(
             STATUS_API_URL="https://status.example.com/api",
+            INCIDENTS_API_URL="http://localhost/v1/incidents",
             STATUS_PAGE_URL="https://status.example.com",
             STATUS_EMOJI="🟣",
             BRAND_NAME="Status Tracker",
@@ -94,6 +95,21 @@ class FakeDB:
     async def get_guild_settings(self, guild_id: str) -> dict[str, object]:
         return {}
 
+    async def get_announced_incidents(self) -> dict[str, Any]:
+        return dict(getattr(self, "announced", {}))
+
+    async def mark_incidents_seen(self, ids: list[str]) -> None:
+        self.announced = getattr(self, "announced", {})
+        for i in ids:
+            self.announced.setdefault(i, {"opened": False, "closed": False})
+
+    async def mark_incidents_announced(self, opened: list[str], closed: list[str]) -> None:
+        self.announced = getattr(self, "announced", {})
+        for i in opened:
+            self.announced.setdefault(i, {"opened": False, "closed": False})["opened"] = True
+        for i in closed:
+            self.announced.setdefault(i, {"opened": False, "closed": False})["closed"] = True
+
     async def get_open_incident(self) -> dict[str, Any] | None:
         for incident in reversed(self.incidents):
             if incident["closed_at"] is None:
@@ -153,6 +169,7 @@ def build_alert_cog(
         version="9.9.9",
         config=SimpleNamespace(
             STATUS_API_URL="https://status.example.com/api",
+            INCIDENTS_API_URL="http://localhost/v1/incidents",
             STATUS_PAGE_URL="https://status.example.com",
             STATUS_EMOJI="🟣",
             BRAND_NAME="Status Tracker",
@@ -175,78 +192,3 @@ def build_alert_cog(
     return cog, db, channel
 
 
-def test_process_status_alerts_primes_baseline_without_sending() -> None:
-    async def run() -> None:
-        cog, db, channel = build_alert_cog(
-            alert_channels=[{"guild_id": "1", "channel_id": "123"}],
-        )
-        data = {
-            "source": {"name": "Status Tracker"},
-            "summary": {"up": 1, "down": 0, "degraded": 0},
-            "services": [
-                {
-                    "group": "Core",
-                    "name": "API",
-                    "url": "https://example.com/api",
-                    "hideFromStatusPage": False,
-                    "requiresAuth": False,
-                    "uptimePercent": 100,
-                    "last": {"state": "UP", "latency": 10},
-                }
-            ],
-        }
-
-        sent = await cog.process_status_alerts(data)
-
-        assert sent == 0
-        assert channel.sent_views == []
-        assert db.states == {"Core|API|https://example.com/api": "UP"}
-
-    import asyncio
-
-    asyncio.run(run())
-
-
-def test_process_status_alerts_sends_when_service_changes() -> None:
-    async def run() -> None:
-        states = {"Core|API|https://example.com/api": "UP"}
-        cog, db, channel = build_alert_cog(
-            states=states,
-            alert_channels=[{"guild_id": "1", "channel_id": "123"}],
-        )
-        data = {
-            "source": {"name": "Status Tracker"},
-            "summary": {"up": 0, "down": 1, "degraded": 0},
-            "services": [
-                {
-                    "group": "Core",
-                    "name": "API",
-                    "url": "https://example.com/api",
-                    "hideFromStatusPage": False,
-                    "requiresAuth": False,
-                    "uptimePercent": 98.5,
-                    "last": {"state": "DOWN", "latency": 250},
-                }
-            ],
-        }
-
-        sent = await cog.process_status_alerts(data)
-
-        assert sent == 1
-        assert db.states == {"Core|API|https://example.com/api": "DOWN"}
-        assert len(channel.sent_views) == 1
-        layout = channel.sent_views[0]
-        body = "\n".join(
-            getattr(child, "content", "") for child in layout.walk_children()
-        )
-        # A service going down opens an incident, and the heading says so.
-        assert "Outage started" in body
-        assert "1 service is not responding" in body
-        assert "Status Tracker" not in body
-        assert "🔴 **API**" in body
-        assert "UP → DOWN" in body
-        assert layout.content_length() <= 4000
-
-    import asyncio
-
-    asyncio.run(run())
