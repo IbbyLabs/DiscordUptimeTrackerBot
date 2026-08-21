@@ -105,8 +105,11 @@ class DiscordUptimeTrackerBot(commands.Bot):
         self.config = config
         self.db: TrackerDatabase | None = None
         self.start_time = discord.utils.utcnow()
+        # release-please maintains version.txt for the simple release type, and
+        # the image label is cut from the same tag, so a board and a container
+        # cannot disagree about which build is running.
         try:
-            with open("VERSION", "r", encoding="utf-8") as handle:
+            with open("version.txt", "r", encoding="utf-8") as handle:
                 self.version = handle.read().strip()
         except FileNotFoundError:
             self.version = "0.0.0"
