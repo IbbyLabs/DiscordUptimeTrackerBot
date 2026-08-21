@@ -174,6 +174,37 @@ class StatusLayout(ui.LayoutView):
         )
 
 
+class IncidentHistoryLayout(ui.LayoutView):
+    """Recent incidents as Components V2.
+
+    Chunked like the board: a plain content string is capped at 2000 characters
+    and ten incidents naming real services passes that, which fails the whole
+    command rather than shortening it.
+    """
+
+    def __init__(
+        self,
+        cog: "UptimeCog",
+        lines: list[str],
+        *,
+        healthy: str | None = None,
+        page_url: str | None = None,
+    ) -> None:
+        super().__init__(timeout=None)
+        del healthy
+        page_url = page_url or cog.bot.config.STATUS_PAGE_URL
+        chunks, dropped = _body_chunks(lines)
+        children: list[ui.Item[Any]] = [
+            ui.TextDisplay("## Recent incidents"),
+            ui.Separator(),
+            *(ui.TextDisplay(chunk) for chunk in chunks),
+        ]
+        if dropped:
+            children.append(ui.TextDisplay(f"-# {dropped} older not shown here"))
+        self.add_item(ui.Container(*children, accent_colour=0x5865F2))
+        self.add_item(ui.ActionRow(ui.Button(label="Full Status Page", url=page_url)))
+
+
 class AlertLayout(ui.LayoutView):
     """A status change notification as Components V2."""
 

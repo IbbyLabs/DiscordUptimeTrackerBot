@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 from incidents import build_incident_messages, format_incident_history
 from tracker_db import GUILD_SETTING_FIELDS
 
-from ui.status_layout import AlertLayout, HostLayout, StatusLayout
+from ui.status_layout import AlertLayout, HostLayout, IncidentHistoryLayout, StatusLayout
 
 log = logging.getLogger("uptimebot.cogs.uptime")
 
@@ -944,11 +944,14 @@ class UptimeCog(commands.Cog):
             await interaction.followup.send("No incident history is available.", ephemeral=True)
             return
         incidents = await self.bot.db.list_recent_incidents_with_services(10)
-        lines = format_incident_history(incidents)
-        await interaction.followup.send(
-            "## Recent incidents\n" + "\n".join(lines),
-            ephemeral=True,
+        layout = IncidentHistoryLayout(
+            self,
+            format_incident_history(incidents),
+            **await self.guild_render_settings(
+                str(interaction.guild_id) if interaction.guild_id else None
+            ),
         )
+        await interaction.followup.send(view=layout, ephemeral=True)
 
     @app_commands.command(name="uptime", description="View live service uptime")
     async def uptime_slash(self, interaction: discord.Interaction) -> None:

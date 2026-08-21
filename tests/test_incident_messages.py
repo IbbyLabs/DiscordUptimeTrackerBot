@@ -13,9 +13,15 @@ class _Caller:
 
     def __init__(self, db):
         self._db = db
+        # The real caller passes every service in the payload, not only the ones
+        # that changed, so the catalogue accumulates rather than resetting.
+        self._catalogue: set[str] = set()
 
-    async def incident_messages(self, changes):
-        return await build_incident_messages(self._db, changes)
+    async def incident_messages(self, changes, present_keys=None):
+        self._catalogue.update(str(c["key"]) for c in changes)
+        if present_keys is None:
+            present_keys = set(self._catalogue)
+        return await build_incident_messages(self._db, changes, present_keys)
 
 
 def _cog(db):

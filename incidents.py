@@ -19,7 +19,7 @@ def plan_incident_alerts(
     down_keys: set[str],
     newly_down: list[tuple[str, str]],
     newly_up: list[tuple[str, str]],
-    present_keys: set[str] | None = None,
+    present_keys: set[str],
 ) -> dict[str, Any]:
     """What one refresh cycle should announce.
 
@@ -67,7 +67,7 @@ def _plural(count: int, singular: str, plural: str) -> str:
 async def build_incident_messages(
     db: Any,
     changes: list[AlertChange],
-    present_keys: set[str] | None = None,
+    present_keys: set[str],
 ) -> list[tuple[str, list[AlertChange]]]:
     """Turn a cycle's changes into announcements, recording the incident.
 

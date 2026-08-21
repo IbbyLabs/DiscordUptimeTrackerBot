@@ -2,7 +2,8 @@ from incidents import plan_incident_alerts
 
 
 def plan(**kw):
-    base = dict(incident_open=False, seen_keys=set(), down_keys=set(), newly_down=[], newly_up=[])
+    base = dict(incident_open=False, seen_keys=set(), down_keys=set(),
+                newly_down=[], newly_up=[], present_keys=set())
     base.update(kw)
     return plan_incident_alerts(**base)
 
