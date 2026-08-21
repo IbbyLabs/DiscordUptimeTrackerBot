@@ -89,7 +89,16 @@ def can_manage_guild():
 
 
 class UptimeCog(commands.Cog):
-    tracker = app_commands.Group(name="tracker", description="Manage uptime tracker messages")
+    # default_permissions tells Discord the requirement, so a member without it
+    # is not offered these at all. It does not replace can_manage_guild(): an
+    # admin can override the default in Integrations, and the check is what
+    # holds the line when they do.
+    tracker = app_commands.Group(
+        name="tracker",
+        description="Manage uptime tracker messages",
+        default_permissions=discord.Permissions(manage_guild=True),
+        guild_only=True,
+    )
 
     def __init__(self, bot: "DiscordUptimeTrackerBot") -> None:
         self.bot = bot
