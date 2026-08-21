@@ -6,6 +6,7 @@ has already named stays out of the channel when it flaps, and the panel carries
 it instead.
 """
 
+from datetime import datetime, timezone
 from typing import Any
 
 AlertChange = dict[str, Any]
@@ -130,3 +131,40 @@ async def build_incident_messages(
             await db.close_incident(incident_id)
 
     return messages
+
+
+def format_incident_history(incidents: list[dict[str, Any]]) -> list[str]:
+    """One line per incident, newest first.
+
+    An open incident is named as ongoing rather than given an end, and the
+    services are the ones the incident recorded rather than whatever is down
+    now.
+    """
+
+    if not incidents:
+        return ["No incidents recorded yet."]
+
+    lines: list[str] = []
+    for incident in incidents:
+        services = [str(row["name"]) for row in incident.get("services", [])]
+        shown = ", ".join(services[:5]) or "no services recorded"
+        if len(services) > 5:
+            shown += f" and {len(services) - 5} more"
+        opened = _stamp(str(incident.get("opened_at") or ""))
+        closed = incident.get("closed_at")
+        when = f"{opened} to {_stamp(str(closed))}" if closed else f"{opened}, ongoing"
+        marker = "🟢" if closed else "🔴"
+        lines.append(f"{marker} {when}\n-# {shown}")
+    return lines
+
+
+def _stamp(value: str) -> str:
+    """SQLite's CURRENT_TIMESTAMP is UTC without a zone, so one is added."""
+
+    for shape in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            moment = datetime.strptime(value, shape).replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+        return f"<t:{int(moment.timestamp())}:f>"
+    return value or "unknown"

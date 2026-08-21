@@ -282,6 +282,14 @@ class TrackerDatabase:
             for r in rows
         ]
 
+    async def list_recent_incidents_with_services(
+        self, limit: int = 10
+    ) -> list[dict[str, object]]:
+        incidents = await self.list_recent_incidents(limit)
+        for incident in incidents:
+            incident["services"] = await self.list_incident_services(int(incident["id"]))
+        return incidents
+
     async def list_recent_incidents(self, limit: int = 10) -> list[dict[str, object]]:
         async with aiosqlite.connect(self.path) as db:
             async with db.execute(
