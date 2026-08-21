@@ -88,3 +88,40 @@ def test_an_unset_brand_name_takes_the_apis_name() -> None:
 
 def test_with_neither_the_built_in_default_is_used() -> None:
     assert _cog_with().tracker_name(cast(Any, {"source": {}})) == "Fallback Name"
+
+
+def _flapping(name, state="DOWN", flapping=False, group="Stremio"):
+    return {
+        "id": name.lower(), "name": name, "group": group,
+        "url": f"https://{name.lower()}.test/", "hideFromStatusPage": False,
+        "downSince": "2026-08-21T10:00:00Z",
+        "last": {"state": state, "latency": 100, "flapping": flapping},
+    }
+
+
+# Not in the payload summary, so it has to be counted per service.
+def test_unstable_counts_only_services_the_monitor_flagged() -> None:
+    data = {"services": [
+        _flapping("A", flapping=True),
+        _flapping("B", flapping=False),
+        _flapping("C", state="UP", flapping=True),
+    ]}
+    assert _cog().unstable_count(cast(Any, data)) == 2
+
+
+def test_a_hidden_service_is_not_counted() -> None:
+    data = {"services": [dict(_flapping("A", flapping=True), hideFromStatusPage=True)]}
+    assert _cog().unstable_count(cast(Any, data)) == 0
+
+
+def test_nothing_flagged_counts_zero_rather_than_erroring() -> None:
+    assert _cog().unstable_count(cast(Any, {"services": [_flapping("A")]})) == 0
+    assert _cog().unstable_count(cast(Any, {"services": [{"name": "X", "last": {}}]})) == 0
+
+
+# Bouncing and broken read the same in red, and the difference is the one a
+# reader acts on.
+def test_an_unstable_outage_is_marked_differently_from_a_broken_one() -> None:
+    cog = _cog()
+    assert cog.outage_line(cast(Any, _flapping("Bouncing", flapping=True))).startswith("🌀")
+    assert cog.outage_line(cast(Any, _flapping("Broken", flapping=False))).startswith("🔴")

@@ -123,9 +123,11 @@ class StatusLayout(ui.LayoutView):
         if states:
             header += f"\n-# Filtered to {', '.join(st.lower() for st in states)}"
         up, down, degraded = cog._summary_counts(data)
+        unstable = cog.unstable_count(data)
         headline = (
             f"### {cog.get_status_text(cog.visible_services(data), healthy)}\n"
             f"**Up:** {up} | **Down:** {down} | **Degraded:** {degraded}"
+            f" | **Unstable:** {unstable}"
         )
 
         if states:

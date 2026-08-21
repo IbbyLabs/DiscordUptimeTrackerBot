@@ -66,6 +66,8 @@ def _discord_relative(iso: str) -> str:
     return f"<t:{int(moment.timestamp())}:R>"
 
 
+UNSTABLE_EMOJI = "🌀"
+
 AlertChange = dict[str, str | int | float]
 
 # Services whose transitions are not announced. Both forms are listed because a
@@ -317,6 +319,21 @@ class UptimeCog(commands.Cog):
         source_name = str(data.get("source", {}).get("name") or "").strip()
         return source_name or self.bot.config.BRAND_NAME
 
+    def unstable_count(self, data: StatusData) -> int:
+        """Services the monitor has flagged as bouncing rather than broken.
+
+        Not in the payload summary, which carries up, down, degraded, unknown
+        and maintenance, so it is counted from the per-service flag.
+        """
+
+        return sum(
+            1 for service in self.visible_services(data)
+            if (service.get("last") or {}).get("flapping") is True
+        )
+
+    def is_unstable(self, service: StatusData) -> bool:
+        return ((service.get("last") or {}).get("flapping")) is True
+
     def active_outages(self, data: StatusData) -> list[StatusData]:
         """Services the payload currently reports as not responding.
 
@@ -339,7 +356,10 @@ class UptimeCog(commands.Cog):
         group = str(service.get("group") or "Other")
         since = str(service.get("downSince") or "")
         when = f" since {_discord_relative(since)}" if since else ""
-        return f"🔴 **{name}** ({group}){when}"
+        # Bouncing and broken read the same in red, and the difference is the
+        # one a reader acts on.
+        marker = UNSTABLE_EMOJI if self.is_unstable(service) else "🔴"
+        return f"{marker} **{name}** ({group}){when}"
 
     def visible_services(self, data: StatusData) -> list[StatusData]:
         services = data.get("services", [])
