@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from urllib.parse import urlparse
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Awaitable, Callable
 
@@ -13,7 +14,37 @@ from ui.status_views import StatusDashboardView, StatusPaginationView
 if TYPE_CHECKING:
     from bot import DiscordUptimeTrackerBot
 
+from tracker_db import GUILD_SETTING_FIELDS
+
 log = logging.getLogger("uptimebot.cogs.uptime")
+
+# Per-guild field -> the config attribute it inherits from when unset.
+_SETTING_DEFAULTS = {
+    "status_emoji": "STATUS_EMOJI",
+    "status_page_url": "STATUS_PAGE_URL",
+}
+
+_SETTING_LABELS = {
+    "status_emoji": "Status emoji",
+    "status_page_url": "Status page URL",
+}
+
+
+def validate_guild_setting(field: str, value: str) -> tuple[str | None, str | None]:
+    """Returns (cleaned, error). A bad URL would break every embed for the guild."""
+    value = value.strip()
+    if field == "status_page_url":
+        parsed = urlparse(value)
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            return None, "That is not a valid URL. It needs to start with http:// or https://."
+        if len(value) > 500:
+            return None, "That URL is too long."
+        return value, None
+    if field == "status_emoji":
+        if len(value) > 64:
+            return None, "That emoji is too long."
+        return value, None
+    return None, f"Unknown setting: {field}"
 
 StatusData = dict[str, Any]
 StatusSender = Callable[[discord.Embed], Awaitable[object]]
@@ -37,18 +68,73 @@ def is_bot_owner():
     return app_commands.check(predicate)
 
 
+def can_manage_guild():
+    """Whoever administers this server, plus the instance owner.
+
+    Every `/tracker` command configures one guild, so gating them on a single
+    BOT_OWNER_ID locks out every server but the operator's. The owner stays
+    permitted so a self-hosted single-guild install behaves as it did.
+    """
+
+    def predicate(interaction: discord.Interaction) -> bool:
+        config = getattr(interaction.client, "config", None)
+        owner_id = getattr(config, "BOT_OWNER_ID", None) if config else None
+        if owner_id is not None and interaction.user.id == owner_id:
+            return True
+        perms = getattr(interaction.user, "guild_permissions", None)
+        return bool(perms and perms.manage_guild)
+
+    return app_commands.check(predicate)
+
+
 class UptimeCog(commands.Cog):
     tracker = app_commands.Group(name="tracker", description="Manage uptime tracker messages")
 
     def __init__(self, bot: "DiscordUptimeTrackerBot") -> None:
         self.bot = bot
         self.status_api_url = bot.config.STATUS_API_URL
+        # Last successful cycle. Read paths serve this rather than fetching, so
+        # command traffic does not reach the status API at all.
+        self.last_status: StatusData | None = None
+        self._settings_cache: dict[str, dict[str, Any]] = {}
+
+    async def guild_setting(self, guild_id: int | str | None, field: str) -> Any:
+        """A guild's override for `field`, or the instance default.
+
+        A guild with no row, or a NULL column, inherits. That keeps an
+        untouched install behaving exactly as it does today.
+        """
+        default = getattr(self.bot.config, _SETTING_DEFAULTS[field])
+        if guild_id is None:
+            return default
+        key = str(guild_id)
+        row = self._settings_cache.get(key)
+        if row is None:
+            row = await self.bot.db.get_guild_settings(key) or {}
+            self._settings_cache[key] = row
+        value = row.get(field)
+        return default if value is None else value
+
+    async def guild_render_settings(self, guild_id: int | str | None) -> dict[str, Any]:
+        """Every per-guild value the embed builders take, as keyword arguments.
+
+        Call sites spread `**` this rather than naming each setting, so adding
+        one reaches every render without touching them.
+        """
+        return {
+            "healthy": await self.guild_setting(guild_id, "status_emoji"),
+            "page_url": await self.guild_setting(guild_id, "status_page_url"),
+        }
+
+    def invalidate_guild_settings(self, guild_id: int | str) -> None:
+        self._settings_cache.pop(str(guild_id), None)
 
     async def cog_load(self) -> None:
         self.refresh_status_task.change_interval(minutes=self.bot.config.REFRESH_MINUTES)
         self.refresh_status_task.start()
         data = await self.fetch_status()
         if data:
+            self.last_status = data
             self.bot.add_view(StatusDashboardView(self.bot, self, data))
 
     async def cog_unload(self) -> None:
@@ -63,6 +149,7 @@ class UptimeCog(commands.Cog):
         data = await self.fetch_status()
         if not data:
             return 0, 0
+        self.last_status = data
         alerts_sent = await self.process_status_alerts(data)
         updated = await self.update_tracked_messages(data)
         return updated, alerts_sent
@@ -104,8 +191,8 @@ class UptimeCog(commands.Cog):
             groups.setdefault(group_name, []).append(service)
         return groups
 
-    def get_state_emoji(self, state: str) -> str:
-        healthy = self.bot.config.STATUS_EMOJI
+    def get_state_emoji(self, state: str, healthy: str | None = None) -> str:
+        healthy = healthy or self.bot.config.STATUS_EMOJI
         if healthy.isdigit():
             healthy = f"<:emoji:{healthy}>"
         if state == "DOWN":
@@ -118,7 +205,7 @@ class UptimeCog(commands.Cog):
             return "⚪"
         return healthy
 
-    def get_status_text(self, services: list[StatusData]) -> str:
+    def get_status_text(self, services: list[StatusData], healthy: str | None = None) -> str:
         down_count = sum(
             1 for service in services if service.get("last", {}).get("state") == "DOWN"
         )
@@ -135,7 +222,7 @@ class UptimeCog(commands.Cog):
             return "🟡 Services Degraded"
         if maintenance_count > 0:
             return "🛠️ Under Maintenance"
-        return f"{self.get_state_emoji('UP')} All Systems Operational"
+        return f"{self.get_state_emoji('UP', healthy)} All Systems Operational"
 
     def get_uptime_bar(self, percent: float) -> str:
         filled = max(0, min(10, round(percent / 10)))
@@ -198,18 +285,21 @@ class UptimeCog(commands.Cog):
         self,
         data: StatusData,
         changes: list[AlertChange],
+        healthy: str | None = None,
+        page_url: str | None = None,
     ) -> discord.Embed:
+        page_url = page_url or self.bot.config.STATUS_PAGE_URL
         tracker_name = self.tracker_name(data)
         change_count = len(changes)
         noun = "service" if change_count == 1 else "services"
         embed = discord.Embed(
-            title=f"{tracker_name} Alerts",
+            title="Status Alerts",
             description=(
                 f"Detected {change_count} status change for {noun}.\n\n"
-                f"View the full status page: {self.bot.config.STATUS_PAGE_URL}"
+                f"View the full status page: {page_url}"
             ),
             color=self.alert_color(changes),
-            url=self.bot.config.STATUS_PAGE_URL,
+            url=page_url,
         )
         for change in changes[:25]:
             name = str(change["name"])
@@ -219,7 +309,7 @@ class UptimeCog(commands.Cog):
             latency = int(change["latency"])
             uptime_percent = float(change["uptime_percent"])
             embed.add_field(
-                name=f"{self.get_state_emoji(current_state)} {name}",
+                name=f"{self.get_state_emoji(current_state, healthy)} {name}",
                 value=(
                     f"Group: {group}\n"
                     f"State: {previous_state} -> {current_state}\n"
@@ -236,7 +326,7 @@ class UptimeCog(commands.Cog):
             embed.set_author(
                 name=tracker_name,
                 icon_url=self.bot.user.display_avatar.url,
-                url=self.bot.config.STATUS_PAGE_URL,
+                url=page_url,
             )
         return embed
 
@@ -262,24 +352,28 @@ class UptimeCog(commands.Cog):
         data: StatusData,
         page_info: tuple[int, int] | None,
     ) -> str:
-        embed_title = self.tracker_name(data)
         if page_info:
-            return f"{embed_title} Page {page_info[0]}/{page_info[1]}"
-        return embed_title
+            return f"Page {page_info[0]}/{page_info[1]}"
+        return ""
 
     def _embed_description(
         self,
         data: StatusData,
         services: list[StatusData],
+        healthy: str | None = None,
+        summary_mode: bool = False,
+        page_url: str | None = None,
     ) -> str:
-        tracker_name = self.tracker_name(data)
         up_count, down_count, degraded_count = self._summary_counts(data)
+        # The author line already names the tracker. The tagline is for a
+        # one-off /uptime; the tracker message re-renders every couple of
+        # minutes and carries it forever.
+        intro = "" if summary_mode else f"{self.bot.config.BRAND_DESCRIPTION}\n\n"
         return (
-            f"**Welcome to {tracker_name}**\n\n"
-            f"{self.bot.config.BRAND_DESCRIPTION}\n\n"
+            f"{intro}"
             f"You can view the full status page at: "
-            f"**{self.bot.config.STATUS_PAGE_URL}**\n\n"
-            f"### {self.get_status_text(services)}\n"
+            f"**{page_url or self.bot.config.STATUS_PAGE_URL}**\n\n"
+            f"### {self.get_status_text(services, healthy)}\n"
             f"**Up:** {up_count} | **Down:** {down_count} | "
             f"**Degraded:** {degraded_count}"
         )
@@ -298,16 +392,22 @@ class UptimeCog(commands.Cog):
             return None
         return channel
 
-    def _summary_field_value(self, services: list[StatusData]) -> str:
+    def _summary_field_value(self, services: list[StatusData], healthy: str | None = None) -> str:
         group_up = sum(1 for item in services if item.get("last", {}).get("state") == "UP")
         group_total = len(services)
         affected = group_total - group_up
-        group_emoji = self.get_state_emoji("UP") if affected == 0 else "🔴"
+        group_emoji = self.get_state_emoji("UP", healthy) if affected == 0 else "🔴"
         noun = "Service" if affected == 1 else "Services"
         status_text = "Operational" if affected == 0 else f"{affected} {noun} Affected"
         return f"{group_emoji} {group_up}/{group_total} {status_text}"
 
-    def _detail_lines(self, services: list[StatusData], has_auth: bool) -> list[str]:
+    def _detail_lines(
+        self,
+        services: list[StatusData],
+        has_auth: bool,
+        healthy: str | None = None,
+        page_url: str | None = None,
+    ) -> list[str]:
         lines: list[str] = []
         if has_auth:
             lines.append("Some services are behind authentication and marked with a lock.")
@@ -316,13 +416,13 @@ class UptimeCog(commands.Cog):
             state = str(last.get("state") or "UNKNOWN")
             latency = int(last.get("latency") or 0)
             uptime_percent = float(service.get("uptimePercent") or 0)
-            url = str(service.get("url") or self.bot.config.STATUS_PAGE_URL)
+            url = str(service.get("url") or page_url or self.bot.config.STATUS_PAGE_URL)
             name = str(service.get("name") or "Unknown Service")
             if service.get("requiresAuth"):
                 name = f"{name} 🔒"
             uptime_bar = self.get_uptime_bar(uptime_percent)
             lines.append(
-                f"{self.get_state_emoji(state)} **[{name}]({url})**: "
+                f"{self.get_state_emoji(state, healthy)} **[{name}]({url})**: "
                 f"{state} ({latency}ms)\n"
                 f"{uptime_bar} {uptime_percent:.1f}% uptime"
             )
@@ -352,6 +452,8 @@ class UptimeCog(commands.Cog):
         data: StatusData,
         *,
         summary_mode: bool,
+        healthy: str | None = None,
+        page_url: str | None = None,
     ) -> None:
         for group_name, group_items in self.group_services(data).items():
             has_auth = any(item.get("requiresAuth") for item in group_items)
@@ -359,13 +461,13 @@ class UptimeCog(commands.Cog):
             if summary_mode:
                 embed.add_field(
                     name=display_name,
-                    value=self._summary_field_value(group_items),
+                    value=self._summary_field_value(group_items, healthy),
                     inline=True,
                 )
                 continue
             for field_name, field_value in self._field_chunks(
                 display_name,
-                self._detail_lines(group_items, has_auth),
+                self._detail_lines(group_items, has_auth, healthy, page_url),
             ):
                 embed.add_field(name=field_name, value=field_value, inline=False)
 
@@ -374,18 +476,23 @@ class UptimeCog(commands.Cog):
         data: StatusData,
         page_info: tuple[int, int] | None = None,
         summary_mode: bool = False,
+        healthy: str | None = None,
+        page_url: str | None = None,
     ) -> discord.Embed:
+        page_url = page_url or self.bot.config.STATUS_PAGE_URL
         services = self.visible_services(data)
         description = (
-            self._embed_description(data, services)
+            self._embed_description(data, services, healthy, summary_mode, page_url)
         )
         embed = discord.Embed(
             title=self._embed_title(data, page_info),
             description=description,
             color=0x5A189A,
-            url=self.bot.config.STATUS_PAGE_URL,
+            url=page_url,
         )
-        self._add_group_fields(embed, data, summary_mode=summary_mode)
+        self._add_group_fields(
+            embed, data, summary_mode=summary_mode, healthy=healthy, page_url=page_url
+        )
         embed.add_field(
             name="Last Updated",
             value=f"<t:{self.last_updated_unix(data)}:R>",
@@ -396,7 +503,7 @@ class UptimeCog(commands.Cog):
             embed.set_author(
                 name=self.tracker_name(data),
                 icon_url=self.bot.user.display_avatar.url,
-                url=self.bot.config.STATUS_PAGE_URL,
+                url=page_url,
             )
         return embed
 
@@ -414,9 +521,13 @@ class UptimeCog(commands.Cog):
         alert_channels = await self.bot.db.list_alert_channels()
         if not alert_channels:
             return 0
-        embed = self.create_alert_embed(data, changes)
         sent = 0
         for item in alert_channels:
+            embed = self.create_alert_embed(
+                data,
+                changes,
+                **await self.guild_render_settings(item.get("guild_id")),
+            )
             channel = await self.resolve_tracker_channel(int(item["channel_id"]))
             if channel is None:
                 continue
@@ -441,11 +552,12 @@ class UptimeCog(commands.Cog):
             data = await self.fetch_status()
         if not data:
             return 0
-        view = StatusDashboardView(self.bot, self, data)
-        embed = self.create_status_embed(data, summary_mode=True)
         updated = 0
         for item in tracked_messages:
             guild_id = str(item["guild_id"])
+            settings = await self.guild_render_settings(guild_id)
+            view = StatusDashboardView(self.bot, self, data, page_url=settings["page_url"])
+            embed = self.create_status_embed(data, summary_mode=True, **settings)
             channel_id = int(item["channel_id"])
             message_id = int(item["message_id"])
             channel = await self.resolve_tracker_channel(channel_id)
@@ -482,8 +594,16 @@ class UptimeCog(commands.Cog):
         send_embed: StatusSender,
         send_error: ErrorSender,
         send_embed_with_view: StatusViewSender,
+        guild_id: int | str | None = None,
     ) -> None:
-        data = await self.fetch_status()
+        # Serve the last cycle rather than fetching. This path is per-user, so
+        # fetching here scales with people; the cycle already holds data no
+        # older than one refresh interval.
+        data = self.last_status
+        if data is None:
+            data = await self.fetch_status()
+            if data:
+                self.last_status = data
         if not data:
             await send_error("I could not fetch status data right now.")
             return
@@ -498,6 +618,7 @@ class UptimeCog(commands.Cog):
             page_data,
             page_info=(1, len(view.group_names)),
             summary_mode=False,
+            **await self.guild_render_settings(guild_id),
         )
         if len(view.group_names) > 1:
             await send_embed_with_view(embed, view)
@@ -505,7 +626,7 @@ class UptimeCog(commands.Cog):
         await send_embed(embed)
 
     @tracker.command(name="setup", description="Create a live uptime tracker message")
-    @is_bot_owner()
+    @can_manage_guild()
     async def setup_tracker(self, interaction: discord.Interaction) -> None:
         if not interaction.guild or not isinstance(
             interaction.channel,
@@ -524,8 +645,9 @@ class UptimeCog(commands.Cog):
                 ephemeral=True,
             )
             return
-        embed = self.create_status_embed(data, summary_mode=True)
-        view = StatusDashboardView(self.bot, self, data)
+        settings = await self.guild_render_settings(interaction.guild_id)
+        embed = self.create_status_embed(data, summary_mode=True, **settings)
+        view = StatusDashboardView(self.bot, self, data, page_url=settings["page_url"])
         message = await interaction.channel.send(embed=embed, view=view)
         await self.bot.db.upsert_tracked_message(
             str(interaction.guild_id),
@@ -538,7 +660,7 @@ class UptimeCog(commands.Cog):
         )
 
     @tracker.command(name="refresh", description="Refresh all live uptime tracker messages")
-    @is_bot_owner()
+    @can_manage_guild()
     async def refresh_tracker(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
         count, alerts_sent = await self.run_status_cycle()
@@ -548,7 +670,7 @@ class UptimeCog(commands.Cog):
         )
 
     @tracker.command(name="alerts", description="Send status alerts to this channel")
-    @is_bot_owner()
+    @can_manage_guild()
     async def setup_alerts(self, interaction: discord.Interaction) -> None:
         if not interaction.guild or not interaction.channel or self.bot.db is None:
             await interaction.response.send_message(
@@ -579,8 +701,78 @@ class UptimeCog(commands.Cog):
             ephemeral=True,
         )
 
+    @tracker.command(name="settings", description="Show this server's tracker settings")
+    @can_manage_guild()
+    async def show_settings(self, interaction: discord.Interaction) -> None:
+        if not interaction.guild or self.bot.db is None:
+            await interaction.response.send_message(
+                "Cannot use this command here.",
+                ephemeral=True,
+            )
+            return
+        row = await self.bot.db.get_guild_settings(str(interaction.guild_id)) or {}
+        lines = []
+        for field in GUILD_SETTING_FIELDS:
+            label = _SETTING_LABELS[field]
+            override = row.get(field)
+            default = getattr(self.bot.config, _SETTING_DEFAULTS[field])
+            if override is None:
+                lines.append(f"**{label}**: {default} (default)")
+            else:
+                lines.append(f"**{label}**: {override}")
+        await interaction.response.send_message(
+            "\n".join(lines) + "\n\nChange one with `/tracker set`.",
+            ephemeral=True,
+        )
+
+    @tracker.command(name="set", description="Change a tracker setting for this server")
+    @app_commands.describe(
+        field="Which setting to change",
+        value="The new value. Leave this empty to go back to the default.",
+    )
+    @app_commands.choices(
+        field=[
+            app_commands.Choice(name="Status emoji", value="status_emoji"),
+            app_commands.Choice(name="Status page URL", value="status_page_url"),
+        ]
+    )
+    @can_manage_guild()
+    async def set_setting(
+        self,
+        interaction: discord.Interaction,
+        field: app_commands.Choice[str],
+        value: str | None = None,
+    ) -> None:
+        if not interaction.guild or self.bot.db is None:
+            await interaction.response.send_message(
+                "Cannot use this command here.",
+                ephemeral=True,
+            )
+            return
+        guild_id = str(interaction.guild_id)
+        label = _SETTING_LABELS[field.value]
+        if value is None or not value.strip():
+            await self.bot.db.set_guild_setting(guild_id, field.value, None)
+            self.invalidate_guild_settings(guild_id)
+            default = getattr(self.bot.config, _SETTING_DEFAULTS[field.value])
+            await interaction.response.send_message(
+                f"{label} is back to the default: {default}",
+                ephemeral=True,
+            )
+            return
+        cleaned, error = validate_guild_setting(field.value, value)
+        if error:
+            await interaction.response.send_message(error, ephemeral=True)
+            return
+        await self.bot.db.set_guild_setting(guild_id, field.value, cleaned)
+        self.invalidate_guild_settings(guild_id)
+        await interaction.response.send_message(
+            f"{label} is now {cleaned}. It applies from the next refresh.",
+            ephemeral=True,
+        )
+
     @tracker.command(name="stopalerts", description="Stop sending status alerts in this guild")
-    @is_bot_owner()
+    @can_manage_guild()
     async def remove_alerts(self, interaction: discord.Interaction) -> None:
         if not interaction.guild or self.bot.db is None:
             await interaction.response.send_message(
@@ -598,7 +790,7 @@ class UptimeCog(commands.Cog):
         name="remove",
         description="Stop tracking the live uptime message for this guild",
     )
-    @is_bot_owner()
+    @can_manage_guild()
     async def remove_tracker(self, interaction: discord.Interaction) -> None:
         if not interaction.guild or self.bot.db is None:
             await interaction.response.send_message(
@@ -619,6 +811,7 @@ class UptimeCog(commands.Cog):
             lambda embed: interaction.followup.send(embed=embed, ephemeral=True),
             lambda text: interaction.followup.send(text, ephemeral=True),
             lambda embed, view: interaction.followup.send(embed=embed, view=view, ephemeral=True),
+            guild_id=interaction.guild_id,
         )
 
     @commands.command(name="setupuptime")
@@ -635,8 +828,9 @@ class UptimeCog(commands.Cog):
         if not data:
             await ctx.send("I could not fetch status data right now.", delete_after=10)
             return
-        embed = self.create_status_embed(data, summary_mode=True)
-        view = StatusDashboardView(self.bot, self, data)
+        settings = await self.guild_render_settings(ctx.guild.id if ctx.guild else None)
+        embed = self.create_status_embed(data, summary_mode=True, **settings)
+        view = StatusDashboardView(self.bot, self, data, page_url=settings["page_url"])
         message = await ctx.send(embed=embed, view=view)
         if ctx.guild:
             await self.bot.db.upsert_tracked_message(
@@ -709,6 +903,7 @@ class UptimeCog(commands.Cog):
             lambda embed: ctx.send(embed=embed, delete_after=60),
             lambda text: ctx.send(text, delete_after=60),
             lambda embed, view: ctx.send(embed=embed, view=view, delete_after=60),
+            guild_id=ctx.guild.id if ctx.guild else None,
         )
 
 

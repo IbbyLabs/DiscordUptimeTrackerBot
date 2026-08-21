@@ -54,8 +54,16 @@ def test_create_status_embed_builds_summary_fields() -> None:
 
     embed = cog.create_status_embed(data, summary_mode=True)
 
-    assert embed.title == "Status Tracker"
-    assert "Welcome to Status Tracker" in (embed.description or "")
+    # Identity belongs on the author line and nowhere else. Asserting the count
+    # rather than the absence, so the repetition cannot creep back in one field
+    # at a time.
+    body = "\n".join(
+        [embed.title or "", embed.description or ""]
+        + [f.name or "" for f in embed.fields]
+        + [str(f.value or "") for f in embed.fields]
+    )
+    assert body.count("Status Tracker") == 0
+    assert "Welcome to" not in body
     assert embed.fields[0].name == "Stremio 🔒"
     assert "1/2" in (embed.fields[0].value or "")
 
@@ -77,6 +85,9 @@ class FakeDB:
 
     async def list_alert_channels(self) -> list[dict[str, str]]:
         return list(self.alert_channels)
+
+    async def get_guild_settings(self, guild_id: str) -> dict[str, object]:
+        return {}
 
 
 class FakeChannel:
@@ -184,7 +195,8 @@ def test_process_status_alerts_sends_when_service_changes() -> None:
         assert db.states == {"Core|API|https://example.com/api": "DOWN"}
         assert len(channel.sent_embeds) == 1
         embed = channel.sent_embeds[0]
-        assert embed.title == "Status Tracker Alerts"
+        assert embed.title == "Status Alerts"
+        assert "Status Tracker" not in (embed.title or "")
         assert embed.fields[0].name == "🔴 API"
         assert "UP -> DOWN" in (embed.fields[0].value or "")
 

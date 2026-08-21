@@ -65,6 +65,7 @@ class StatusPaginationView(ui.View):
             page_data,
             page_info=(self.current_page + 1, self.total_pages),
             summary_mode=False,
+            **await self.cog.guild_render_settings(interaction.guild_id),
         )
         await interaction.response.edit_message(embed=embed, view=self)
 
@@ -75,15 +76,17 @@ class StatusDashboardView(ui.View):
         bot: "DiscordUptimeTrackerBot",
         cog: "UptimeCog",
         data: dict[str, Any],
+        page_url: str | None = None,
     ) -> None:
         super().__init__(timeout=None)
         self.bot = bot
         self.cog = cog
+        self.page_url = page_url or bot.config.STATUS_PAGE_URL
         groups = cog.group_services(data)
         self.add_item(
             ui.Button(
                 label="Full Status Page",
-                url=bot.config.STATUS_PAGE_URL,
+                url=self.page_url,
                 row=4,
             )
         )
@@ -100,7 +103,7 @@ class StatusDashboardView(ui.View):
 
     def _create_group_callback(self, group_name: str):
         async def callback(interaction: discord.Interaction) -> None:
-            data = await self.cog.fetch_status()
+            data = self.cog.last_status or await self.cog.fetch_status()
             if not data:
                 await interaction.response.send_message(
                     "I could not fetch status data right now.",
@@ -117,8 +120,12 @@ class StatusDashboardView(ui.View):
                 return
             page_data = data.copy()
             page_data["services"] = services
-            embed = self.cog.create_status_embed(page_data, summary_mode=False)
-            embed.title = f"{self.cog.tracker_name(data)} {group_name}"
+            embed = self.cog.create_status_embed(
+                page_data,
+                summary_mode=False,
+                **await self.cog.guild_render_settings(interaction.guild_id),
+            )
+            embed.title = group_name
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
         return callback

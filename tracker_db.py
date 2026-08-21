@@ -2,6 +2,11 @@ from typing import Any
 
 import aiosqlite
 
+# The per-guild columns. Whitelisted rather than interpolated, since a column
+# name cannot be bound as a parameter.
+GUILD_SETTING_FIELDS = ("status_emoji", "status_page_url")
+_GUILD_SETTING_COLUMNS = ", ".join(GUILD_SETTING_FIELDS)
+
 
 class TrackerDatabase:
     def __init__(self, path: str) -> None:
@@ -35,6 +40,17 @@ class TrackerDatabase:
                 CREATE TABLE IF NOT EXISTS service_states (
                     service_key TEXT PRIMARY KEY,
                     state TEXT NOT NULL,
+                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+                """
+            )
+            await db.execute(
+                """
+                CREATE TABLE IF NOT EXISTS guild_settings (
+                    guild_id TEXT PRIMARY KEY,
+                    status_emoji TEXT,
+                    status_page_url TEXT,
+                    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
                 """
@@ -141,4 +157,49 @@ class TrackerDatabase:
                     """,
                     [(service_key, state) for service_key, state in states.items()],
                 )
+            await db.commit()
+
+    async def get_guild_settings(self, guild_id: str) -> dict[str, Any] | None:
+        async with aiosqlite.connect(self.path) as db:
+            db.row_factory = aiosqlite.Row
+            async with db.execute(
+                f"SELECT {_GUILD_SETTING_COLUMNS} "
+                "FROM guild_settings WHERE guild_id = ?",
+                (guild_id,),
+            ) as cursor:
+                row = await cursor.fetchone()
+        if row is None:
+            return None
+        return dict(row)
+
+    async def list_guild_settings(self) -> dict[str, dict[str, Any]]:
+        async with aiosqlite.connect(self.path) as db:
+            db.row_factory = aiosqlite.Row
+            async with db.execute(
+                f"SELECT guild_id, {_GUILD_SETTING_COLUMNS} "
+                "FROM guild_settings"
+            ) as cursor:
+                rows = await cursor.fetchall()
+        return {row["guild_id"]: dict(row) for row in rows}
+
+    async def set_guild_setting(self, guild_id: str, field: str, value: Any) -> None:
+        # Whitelisted rather than interpolated: the column name cannot be bound.
+        if field not in GUILD_SETTING_FIELDS:
+            raise ValueError(f"unknown guild setting: {field}")
+        async with aiosqlite.connect(self.path) as db:
+            await db.execute(
+                f"""
+                INSERT INTO guild_settings (guild_id, {field})
+                VALUES (?, ?)
+                ON CONFLICT(guild_id) DO UPDATE SET
+                    {field} = excluded.{field},
+                    updated_at = CURRENT_TIMESTAMP
+                """,
+                (guild_id, value),
+            )
+            await db.commit()
+
+    async def clear_guild_settings(self, guild_id: str) -> None:
+        async with aiosqlite.connect(self.path) as db:
+            await db.execute("DELETE FROM guild_settings WHERE guild_id = ?", (guild_id,))
             await db.commit()

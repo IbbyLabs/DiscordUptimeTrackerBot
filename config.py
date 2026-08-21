@@ -53,7 +53,7 @@ class Config:
             "BRAND_DESCRIPTION",
             _unmask(_HIDDEN_BRAND_DESCRIPTION),
         )
-        self.REFRESH_MINUTES: float = float(os.getenv("REFRESH_MINUTES", "10"))
+        self.REFRESH_MINUTES: float = float(os.getenv("REFRESH_MINUTES", "2"))
 
     def _require(self, key: str) -> str:
         value = os.getenv(key)
