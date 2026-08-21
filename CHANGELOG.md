@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.5.0...v0.6.0) (2026-08-21)
+
+
+### Features
+
+* **tracker:** count unstable services on the board ([d8bb51f](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/d8bb51ff24a65b7e4982c8d3b9cdd7be3b771fd8))
+
 ## [0.5.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.4.0...v0.5.0) (2026-08-21)
 
 
