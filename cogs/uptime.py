@@ -89,14 +89,15 @@ def is_alertable_transition(previous_state: object, current_state: object) -> bo
     """Crossing the DOWN boundary, in either direction.
 
     DOWN is the state where the check got no answer; every other reported state
-    means it answered. UNKNOWN is unmeasured on either side of the change.
+    means it answered. UNKNOWN is unmeasured and maintenance is planned, so
+    neither is a verdict about availability on either side of the change.
     """
 
     previous = str(previous_state or "").strip().upper()
     current = str(current_state or "").strip().upper()
     if not previous or not current:
         return False
-    if "UNKNOWN" in (previous, current):
+    if {previous, current} & {"UNKNOWN", "MAINTENANCE"}:
         return False
     return (previous == "DOWN") != (current == "DOWN")
 

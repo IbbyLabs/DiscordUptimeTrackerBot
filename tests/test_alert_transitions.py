@@ -6,7 +6,7 @@ def test_crossing_into_down_alerts_from_any_answering_state() -> None:
     # A service that answered slowly and then stopped answering is an outage
     # beginning, and it reaches DOWN without ever passing through UP.
     assert is_alertable_transition("DEGRADED", "DOWN") is True
-    assert is_alertable_transition("MAINTENANCE", "DOWN") is True
+
 
 
 def test_leaving_down_alerts() -> None:
@@ -17,9 +17,14 @@ def test_leaving_down_alerts() -> None:
 def test_changes_that_never_cross_the_boundary_stay_quiet() -> None:
     assert is_alertable_transition("UP", "DEGRADED") is False
     assert is_alertable_transition("DEGRADED", "UP") is False
-    assert is_alertable_transition("UP", "MAINTENANCE") is False
     assert is_alertable_transition("DOWN", "DOWN") is False
     assert is_alertable_transition("UP", "UP") is False
+
+
+def test_maintenance_is_planned_and_announces_nothing() -> None:
+    assert is_alertable_transition("MAINTENANCE", "DOWN") is False
+    assert is_alertable_transition("DOWN", "MAINTENANCE") is False
+    assert is_alertable_transition("UP", "MAINTENANCE") is False
 
 
 def test_unknown_is_unmeasured_on_either_side() -> None:
