@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.3.0...v0.4.0) (2026-08-21)
+
+
+### Features
+
+* **alerts:** make the incident the unit rather than the service ([06528fc](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/06528fc07eaee066ccf955ca06379aaadb72d260))
+* **tracker:** add /incidents for recent outage history ([a1a48d0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/a1a48d0e59ae4c929b96897e6f48b34f5f0771f0))
+* **tracker:** show active outages at the top of the board ([e5e4bc7](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/e5e4bc76293aef652f161db2807808d26c2a4b07))
+
+
+### Bug Fixes
+
+* **alerts:** count only services the payload still carries ([348d6b8](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/348d6b892bdf4bc37ae28581e6dd0aa3287b2eac))
+* **tracker:** render /incidents as a chunked container ([e3c7c3c](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/e3c7c3c66f8415ec4aed1f7522ffab694761ff27))
+
 ## [0.3.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.2.0...v0.3.0) (2026-08-21)
 
 
