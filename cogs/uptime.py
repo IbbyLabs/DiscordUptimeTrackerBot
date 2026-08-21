@@ -52,6 +52,54 @@ StatusSender = Callable[[discord.ui.LayoutView], Awaitable[object]]
 ErrorSender = Callable[[str], Awaitable[object]]
 StatusViewSender = Callable[[discord.Embed, discord.ui.View], Awaitable[object]]
 AlertChange = dict[str, str | int | float]
+
+# Services whose transitions are not announced. Both forms are listed because a
+# status source can rename a service without changing its id, or the reverse.
+_ALERT_SUPPRESSED_NAMES = {
+    "webstreamr",
+    "webstreamer",
+    "webstreamer mbg",
+}
+_ALERT_SUPPRESSED_IDS = {
+    "webstreamr",
+    "webstreamer",
+    "webstreamr_mbg",
+    "webstreamrmbg",
+    "webstreamer_mbg",
+}
+
+
+def _alert_filter_name(value: object) -> str:
+    return " ".join(str(value or "").strip().lower().split())
+
+
+def _alert_filter_id(value: object) -> str:
+    normalized = str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+    return "_".join(part for part in normalized.split("_") if part)
+
+
+def is_alert_suppressed(service: dict[str, object]) -> bool:
+    return (
+        _alert_filter_name(service.get("name")) in _ALERT_SUPPRESSED_NAMES
+        or _alert_filter_id(service.get("id")) in _ALERT_SUPPRESSED_IDS
+    )
+
+
+def is_alertable_transition(previous_state: object, current_state: object) -> bool:
+    """Crossing the DOWN boundary, in either direction.
+
+    DOWN is the state where the check got no answer; every other reported state
+    means it answered. UNKNOWN is unmeasured on either side of the change.
+    """
+
+    previous = str(previous_state or "").strip().upper()
+    current = str(current_state or "").strip().upper()
+    if not previous or not current:
+        return False
+    if "UNKNOWN" in (previous, current):
+        return False
+    return (previous == "DOWN") != (current == "DOWN")
+
 TRACKER_CHANNEL_TYPES = (
     discord.TextChannel,
     discord.Thread,
@@ -313,6 +361,10 @@ class UptimeCog(commands.Cog):
             current_state = str(service.get("last", {}).get("state") or "UNKNOWN")
             previous_state = previous_states.get(key)
             if previous_state is None or previous_state == current_state:
+                continue
+            if not is_alertable_transition(previous_state, current_state):
+                continue
+            if is_alert_suppressed(service):
                 continue
             changes.append(
                 {
