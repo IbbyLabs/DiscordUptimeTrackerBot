@@ -6,7 +6,7 @@ has already named stays out of the channel when it flaps, and the panel carries
 it instead.
 """
 
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 
 AlertChange = dict[str, Any]
@@ -194,38 +194,64 @@ async def build_incident_messages(
     return messages
 
 
-def format_incident_history(incidents: list[dict[str, Any]]) -> list[str]:
-    """One line per incident, newest first.
+def normalise_page_incidents(payload: Any) -> list[dict[str, Any]]:
+    """The status page's own incident records, in the shape the panel renders.
 
-    An open incident is named as ongoing rather than given an end, and the
-    services are the ones the incident recorded rather than whatever is down
-    now.
+    Taken from the page rather than rebuilt locally: it holds outages that
+    started before this bot did, and the times they actually began.
     """
 
-    if not incidents:
+    items = payload.get("incidents") if isinstance(payload, dict) else payload
+    if not isinstance(items, list):
+        return []
+
+    rows: list[dict[str, Any]] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        service = item.get("service") if isinstance(item.get("service"), dict) else {}
+        opened = str(item.get("openedAt") or "")
+        if not opened:
+            continue
+        rows.append({
+            "id": str(item.get("id") or ""),
+            "name": str(service.get("name") or service.get("id") or "Unknown service"),
+            "group": str(service.get("group") or ""),
+            "state": str(item.get("state") or "").upper(),
+            "opened_at": opened,
+            "closed_at": str(item.get("closedAt")) if item.get("closedAt") else None,
+        })
+    # Newest first, since a reader asking what happened means recently.
+    rows.sort(key=lambda row: row["opened_at"], reverse=True)
+    return rows
+
+
+def format_page_incidents(rows: list[dict[str, Any]], limit: int = 10) -> list[str]:
+    """One line per incident, ongoing ones first and newest within that."""
+
+    if not rows:
         return ["No incidents recorded yet."]
 
+    ongoing = [r for r in rows if not r["closed_at"]]
+    closed = [r for r in rows if r["closed_at"]]
     lines: list[str] = []
-    for incident in incidents:
-        services = [str(row["name"]) for row in incident.get("services", [])]
-        shown = ", ".join(services[:5]) or "no services recorded"
-        if len(services) > 5:
-            shown += f" and {len(services) - 5} more"
-        opened = _stamp(str(incident.get("opened_at") or ""))
-        closed = incident.get("closed_at")
-        when = f"{opened} to {_stamp(str(closed))}" if closed else f"{opened}, ongoing"
-        marker = "🟢" if closed else "🔴"
-        lines.append(f"{marker} {when}\n-# {shown}")
+    for row in (ongoing + closed)[:limit]:
+        marker = "🔴" if not row["closed_at"] else "🟢"
+        where = f" ({row['group']})" if row["group"] else ""
+        when = _iso_stamp(row["opened_at"])
+        if row["closed_at"]:
+            when = f"{when} to {_iso_stamp(row['closed_at'])}"
+        else:
+            when = f"{when}, ongoing"
+        lines.append(f"{marker} **{row['name']}**{where}\n-# {when}")
     return lines
 
 
-def _stamp(value: str) -> str:
-    """SQLite's CURRENT_TIMESTAMP is UTC without a zone, so one is added."""
+def _iso_stamp(value: str) -> str:
+    """An ISO timestamp as Discord's own, so it reads in the reader's zone."""
 
-    for shape in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
-        try:
-            moment = datetime.strptime(value, shape).replace(tzinfo=timezone.utc)
-        except ValueError:
-            continue
-        return f"<t:{int(moment.timestamp())}:f>"
-    return value or "unknown"
+    try:
+        moment = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except (ValueError, AttributeError):
+        return str(value)
+    return f"<t:{int(moment.timestamp())}:f>"

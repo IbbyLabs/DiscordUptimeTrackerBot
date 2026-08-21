@@ -35,6 +35,13 @@ class Config:
         self.DATABASE_PATH: str = os.getenv("DATABASE_PATH", "uptime_tracker.db")
         self.STATUS_API_URL: str = os.getenv("STATUS_API_URL", _unmask(_HIDDEN_STATUS_API_URL))
         self.STATUS_PAGE_URL: str = os.getenv("STATUS_PAGE_URL", _unmask(_HIDDEN_STATUS_PAGE_URL))
+        # Derived from the status API rather than configured separately: they
+        # are two routes on one service, and letting them drift would let the
+        # board and its history describe different estates.
+        self.INCIDENTS_API_URL: str = os.getenv(
+            "INCIDENTS_API_URL",
+            self.STATUS_API_URL.replace("/v1/status", "/v1/incidents"),
+        )
         self.STATUS_EMOJI: str = os.getenv("STATUS_EMOJI", "🟣")
         # Two separate questions: what to call the board when nothing else names
         # it, and whether the operator has asked for a particular name. Only the

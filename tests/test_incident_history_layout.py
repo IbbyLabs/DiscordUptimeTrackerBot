@@ -6,7 +6,7 @@ os.environ.setdefault("BOT_TOKEN", "x")
 os.environ.setdefault("STATUS_API_URL", "http://localhost/api")
 
 from cogs.uptime import UptimeCog
-from incidents import format_incident_history
+from incidents import format_page_incidents, normalise_page_incidents
 from ui.status_layout import IncidentHistoryLayout
 
 
@@ -20,18 +20,19 @@ def _cog():
 
 
 def _incidents(count, name):
-    return [
-        {"id": i, "opened_at": "2026-08-21 10:00:00", "closed_at": "2026-08-21 11:00:00",
-         "services": [{"name": name} for _ in range(5)]}
+    return normalise_page_incidents({"incidents": [
+        {"id": f"{i}", "service": {"id": "s", "name": name, "group": "Debrid Services"},
+         "state": "DOWN", "openedAt": f"2026-08-{10 + i:02d}T10:00:00Z",
+         "closedAt": f"2026-08-{10 + i:02d}T11:00:00Z"}
         for i in range(count)
-    ]
+    ]})
 
 
 # Ten incidents naming real services runs past the 2000-character content limit,
 # which fails the command outright rather than shortening it.
 def test_a_history_that_would_overflow_a_message_is_split() -> None:
-    long_name = "eXtended Ratings DataBase (XRDB Dev Build)"
-    lines = format_incident_history(_incidents(10, long_name))
+    long_name = "eXtended Ratings DataBase (XRDB Dev Build) " * 4
+    lines = format_page_incidents(_incidents(10, long_name), limit=10)
     assert len("\n".join(lines)) > 2000, "the fixture no longer exceeds the limit it exists to test"
 
     layout = IncidentHistoryLayout(_cog(), lines)
@@ -45,13 +46,13 @@ def test_a_history_that_would_overflow_a_message_is_split() -> None:
 
 
 def test_a_short_history_renders_in_one_piece() -> None:
-    layout = IncidentHistoryLayout(_cog(), format_incident_history(_incidents(1, "Api")))
+    layout = IncidentHistoryLayout(_cog(), format_page_incidents(_incidents(1, "Api")))
     body = "\n".join(getattr(c, "content", "") for c in layout.walk_children())
     assert "Recent incidents" in body
     assert "Api" in body
 
 
 def test_an_empty_history_still_renders() -> None:
-    layout = IncidentHistoryLayout(_cog(), format_incident_history([]))
+    layout = IncidentHistoryLayout(_cog(), format_page_incidents([]))
     body = "\n".join(getattr(c, "content", "") for c in layout.walk_children())
     assert "No incidents recorded yet." in body

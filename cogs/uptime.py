@@ -13,9 +13,10 @@ from discord.ext import commands, tasks
 if TYPE_CHECKING:
     from bot import DiscordUptimeTrackerBot
 
+import status_api
 from incidents import (
     build_incident_messages,
-    format_incident_history,
+    format_page_incidents,
     is_alert_suppressed,
     is_alertable_transition,
 )
@@ -197,27 +198,10 @@ class UptimeCog(commands.Cog):
         return updated, alerts_sent
 
     async def fetch_status(self) -> StatusData | None:
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    self.status_api_url,
-                    timeout=aiohttp.ClientTimeout(total=10),
-                ) as response:
-                    if response.status != 200:
-                        log.error("Failed to fetch status: HTTP %s", response.status)
-                        return None
-                    payload = await response.json()
-                    if not isinstance(payload, dict):
-                        log.error(
-                            "Unexpected status payload type: %s",
-                            type(payload).__name__,
-                        )
-                        return None
-                    return payload
-        except (aiohttp.ClientError, asyncio.TimeoutError, ValueError) as exc:
-            log.error("Error fetching status: %s", exc)
-            return None
+        return await status_api.fetch_status(self.status_api_url)
 
+    async def fetch_incidents(self) -> list[dict[str, Any]]:
+        return await status_api.fetch_incidents(self.bot.config.INCIDENTS_API_URL)
     async def fetch_service_detail(
         self,
         service_id: str,
@@ -978,13 +962,9 @@ class UptimeCog(commands.Cog):
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.guild_id)
     async def incidents_slash(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
-        if self.bot.db is None:
-            await interaction.followup.send("No incident history is available.", ephemeral=True)
-            return
-        incidents = await self.bot.db.list_recent_incidents_with_services(10)
         layout = IncidentHistoryLayout(
             self,
-            format_incident_history(incidents),
+            format_page_incidents(await self.fetch_incidents()),
             **await self.guild_render_settings(
                 str(interaction.guild_id) if interaction.guild_id else None
             ),
