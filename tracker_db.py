@@ -37,15 +37,6 @@ class TrackerDatabase:
             )
             await db.execute(
                 """
-                CREATE TABLE IF NOT EXISTS service_states (
-                    service_key TEXT PRIMARY KEY,
-                    state TEXT NOT NULL,
-                    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-                )
-                """
-            )
-            await db.execute(
-                """
                 CREATE TABLE IF NOT EXISTS announced_incidents (
                     incident_id TEXT PRIMARY KEY,
                     opened_announced_at TEXT,
@@ -63,27 +54,6 @@ class TrackerDatabase:
                     message_id TEXT NOT NULL,
                     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     PRIMARY KEY (guild_id, panel)
-                )
-                """
-            )
-            await db.execute(
-                """
-                CREATE TABLE IF NOT EXISTS incidents (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    opened_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    closed_at TEXT
-                )
-                """
-            )
-            await db.execute(
-                """
-                CREATE TABLE IF NOT EXISTS incident_services (
-                    incident_id INTEGER NOT NULL,
-                    service_key TEXT NOT NULL,
-                    name TEXT NOT NULL,
-                    joined_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    recovered_at TEXT,
-                    PRIMARY KEY (incident_id, service_key)
                 )
                 """
             )
@@ -179,27 +149,6 @@ class TrackerDatabase:
     async def delete_alert_channel(self, guild_id: str) -> None:
         async with aiosqlite.connect(self.path) as db:
             await db.execute("DELETE FROM alert_channels WHERE guild_id = ?", (guild_id,))
-            await db.commit()
-
-    async def get_service_states(self) -> dict[str, str]:
-        async with aiosqlite.connect(self.path) as db:
-            async with db.execute(
-                "SELECT service_key, state FROM service_states ORDER BY service_key"
-            ) as cursor:
-                rows = await cursor.fetchall()
-        return {str(service_key): str(state) for service_key, state in rows}
-
-    async def replace_service_states(self, states: dict[str, str]) -> None:
-        async with aiosqlite.connect(self.path) as db:
-            await db.execute("DELETE FROM service_states")
-            if states:
-                await db.executemany(
-                    """
-                    INSERT INTO service_states (service_key, state, updated_at)
-                    VALUES (?, ?, CURRENT_TIMESTAMP)
-                    """,
-                    [(service_key, state) for service_key, state in states.items()],
-                )
             await db.commit()
 
     async def get_announced_incidents(self) -> dict[str, dict[str, bool]]:
@@ -303,121 +252,6 @@ class TrackerDatabase:
         async with aiosqlite.connect(self.path) as db:
             await db.execute("DELETE FROM panel_messages WHERE guild_id = ?", (guild_id,))
             await db.commit()
-
-    async def get_open_incident(self) -> dict[str, object] | None:
-        async with aiosqlite.connect(self.path) as db:
-            async with db.execute(
-                "SELECT id, opened_at FROM incidents"
-                " WHERE closed_at IS NULL ORDER BY id DESC LIMIT 1"
-            ) as cursor:
-                row = await cursor.fetchone()
-        if row is None:
-            return None
-        return {"id": int(row[0]), "opened_at": str(row[1])}
-
-    async def open_incident(self) -> int:
-        async with aiosqlite.connect(self.path) as db:
-            cursor = await db.execute(
-                "INSERT INTO incidents (opened_at) VALUES (CURRENT_TIMESTAMP)"
-            )
-            await db.commit()
-            return int(cursor.lastrowid or 0)
-
-    async def close_incident(self, incident_id: int) -> None:
-        async with aiosqlite.connect(self.path) as db:
-            await db.execute(
-                "UPDATE incidents SET closed_at = CURRENT_TIMESTAMP"
-                " WHERE id = ? AND closed_at IS NULL",
-                (incident_id,),
-            )
-            await db.commit()
-
-    async def add_incident_services(
-        self, incident_id: int, services: list[tuple[str, str]]
-    ) -> None:
-        """Record services as part of an incident.
-
-        A service already recorded keeps its original joined_at and stays
-        recovered or not, so a flap does not re-open its entry.
-        """
-
-        if not services:
-            return
-        async with aiosqlite.connect(self.path) as db:
-            await db.executemany(
-                """
-                INSERT OR IGNORE INTO incident_services (incident_id, service_key, name, joined_at)
-                VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-                """,
-                [(incident_id, key, name) for key, name in services],
-            )
-            await db.commit()
-
-    async def mark_incident_services_recovered(
-        self, incident_id: int, service_keys: list[str]
-    ) -> None:
-        if not service_keys:
-            return
-        async with aiosqlite.connect(self.path) as db:
-            await db.executemany(
-                """
-                UPDATE incident_services SET recovered_at = CURRENT_TIMESTAMP
-                WHERE incident_id = ? AND service_key = ? AND recovered_at IS NULL
-                """,
-                [(incident_id, key) for key in service_keys],
-            )
-            await db.commit()
-
-    async def mark_incident_services_down(
-        self, incident_id: int, service_keys: list[str]
-    ) -> None:
-        """Clear the recovery on services that have failed again.
-
-        The announcement stays quiet for a service the incident already named,
-        but the all-clear has to wait for it, so its recovery is withdrawn.
-        """
-
-        if not service_keys:
-            return
-        async with aiosqlite.connect(self.path) as db:
-            await db.executemany(
-                """
-                UPDATE incident_services SET recovered_at = NULL
-                WHERE incident_id = ? AND service_key = ?
-                """,
-                [(incident_id, key) for key in service_keys],
-            )
-            await db.commit()
-
-    async def list_incident_services(self, incident_id: int) -> list[dict[str, object]]:
-        async with aiosqlite.connect(self.path) as db:
-            async with db.execute(
-                """
-                SELECT service_key, name, joined_at, recovered_at FROM incident_services
-                WHERE incident_id = ? ORDER BY joined_at, service_key
-                """,
-                (incident_id,),
-            ) as cursor:
-                rows = await cursor.fetchall()
-        return [
-            {"service_key": str(r[0]), "name": str(r[1]),
-             "joined_at": str(r[2]),
-             "recovered_at": None if r[3] is None else str(r[3])}
-            for r in rows
-        ]
-
-    async def list_recent_incidents(self, limit: int = 10) -> list[dict[str, object]]:
-        async with aiosqlite.connect(self.path) as db:
-            async with db.execute(
-                "SELECT id, opened_at, closed_at FROM incidents ORDER BY id DESC LIMIT ?",
-                (limit,),
-            ) as cursor:
-                rows = await cursor.fetchall()
-        return [
-            {"id": int(r[0]), "opened_at": str(r[1]),
-             "closed_at": None if r[2] is None else str(r[2])}
-            for r in rows
-        ]
 
     async def get_guild_settings(self, guild_id: str) -> dict[str, Any] | None:
         async with aiosqlite.connect(self.path) as db:
