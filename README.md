@@ -6,6 +6,9 @@ DiscordUptimeTrackerBot is a standalone Discord bot for one job: showing a live 
 ## Features
 
 - Slash uptime commands
+- Active outages listed at the top of the board
+- Incident history, with the services each outage affected
+- Alerts when a service stops answering and when it starts again
 - Live tracker message setup for a guild
 - Automatic refresh for tracked messages
 - Automatic alert delivery when service states change
@@ -17,13 +20,15 @@ DiscordUptimeTrackerBot is a standalone Discord bot for one job: showing a live 
 
 - `/uptime`
 - `/status`
+- `/incidents`
 - `/tracker setup`
 - `/tracker alerts`
 - `/tracker refresh`
 - `/tracker stopalerts`
 - `/tracker remove`
 
-`tracker` commands require Manage Server, or the instance owner.
+`tracker` commands require Manage Server, or the instance owner. `/uptime`,
+`/status` and `/incidents` are open to any member.
 
 The bot requests no privileged intents.
 
