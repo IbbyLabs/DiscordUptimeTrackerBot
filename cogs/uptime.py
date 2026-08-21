@@ -13,7 +13,12 @@ from discord.ext import commands, tasks
 if TYPE_CHECKING:
     from bot import DiscordUptimeTrackerBot
 
-from incidents import build_incident_messages, format_incident_history
+from incidents import (
+    build_incident_messages,
+    format_incident_history,
+    is_alert_suppressed,
+    is_alertable_transition,
+)
 from tracker_db import GUILD_SETTING_FIELDS
 
 from ui.status_layout import (
@@ -72,64 +77,15 @@ def _discord_relative(iso: str) -> str:
     return f"<t:{int(moment.timestamp())}:R>"
 
 
-UNSTABLE_EMOJI = "🌀"
-
-AlertChange = dict[str, str | int | float]
-
-# Services whose transitions are not announced. Both forms are listed because a
-# status source can rename a service without changing its id, or the reverse.
-_ALERT_SUPPRESSED_NAMES = {
-    "webstreamr",
-    "webstreamer",
-    "webstreamer mbg",
-}
-_ALERT_SUPPRESSED_IDS = {
-    "webstreamr",
-    "webstreamer",
-    "webstreamr_mbg",
-    "webstreamrmbg",
-    "webstreamer_mbg",
-}
-
-
-def _alert_filter_name(value: object) -> str:
-    return " ".join(str(value or "").strip().lower().split())
-
-
-def _alert_filter_id(value: object) -> str:
-    normalized = str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
-    return "_".join(part for part in normalized.split("_") if part)
-
-
-def is_alert_suppressed(service: dict[str, object]) -> bool:
-    return (
-        _alert_filter_name(service.get("name")) in _ALERT_SUPPRESSED_NAMES
-        or _alert_filter_id(service.get("id")) in _ALERT_SUPPRESSED_IDS
-    )
-
-
-def is_alertable_transition(previous_state: object, current_state: object) -> bool:
-    """Crossing the DOWN boundary, in either direction.
-
-    DOWN is the state where the check got no answer; every other reported state
-    means it answered. UNKNOWN is unmeasured and maintenance is planned, so
-    neither is a verdict about availability on either side of the change.
-    """
-
-    previous = str(previous_state or "").strip().upper()
-    current = str(current_state or "").strip().upper()
-    if not previous or not current:
-        return False
-    if {previous, current} & {"UNKNOWN", "MAINTENANCE"}:
-        return False
-    return (previous == "DOWN") != (current == "DOWN")
-
 TRACKER_CHANNEL_TYPES = (
     discord.TextChannel,
     discord.Thread,
     discord.VoiceChannel,
 )
 
+UNSTABLE_EMOJI = "🌀"
+
+AlertChange = dict[str, str | int | float]
 
 def is_bot_owner():
     def predicate(interaction: discord.Interaction) -> bool:
@@ -332,10 +288,28 @@ class UptimeCog(commands.Cog):
         and maintenance, so it is counted from the per-service flag.
         """
 
-        return sum(
-            1 for service in self.visible_services(data)
-            if (service.get("last") or {}).get("flapping") is True
-        )
+        return sum(1 for service in self.visible_services(data) if self.is_unstable(service))
+
+    def headline_counts(self, data: StatusData) -> tuple[int, int, int, int]:
+        """Up, down, degraded and unstable, as four counts that add up.
+
+        A bouncing service is reported once, under Unstable, so a reader adding
+        the numbers gets the number of services with something wrong.
+        """
+
+        up, down, degraded = self._summary_counts(data)
+        unstable = self.unstable_count(data)
+        for service in self.visible_services(data):
+            if not self.is_unstable(service):
+                continue
+            state = str((service.get("last") or {}).get("state") or "").upper()
+            if state == "DOWN":
+                down -= 1
+            elif state == "DEGRADED":
+                degraded -= 1
+            else:
+                up -= 1
+        return max(up, 0), max(down, 0), max(degraded, 0), unstable
 
     def is_unstable(self, service: StatusData) -> bool:
         return ((service.get("last") or {}).get("flapping")) is True
@@ -393,18 +367,25 @@ class UptimeCog(commands.Cog):
         return healthy
 
     def get_status_text(self, services: list[StatusData], healthy: str | None = None) -> str:
-        down_count = sum(
-            1 for service in services if service.get("last", {}).get("state") == "DOWN"
-        )
-        degraded_count = sum(
-            1 for service in services if service.get("last", {}).get("state") == "DEGRADED"
-        )
-        maintenance_count = sum(
-            1 for service in services if service.get("last", {}).get("state") == "MAINTENANCE"
-        )
+        # Counted the same way as the headline numbers, so the sentence and the
+        # figures beneath it cannot disagree about how many are down.
+        def count(state: str) -> int:
+            return sum(
+                1 for service in services
+                if service.get("last", {}).get("state") == state
+                and not self.is_unstable(service)
+            )
+
+        down_count = count("DOWN")
+        degraded_count = count("DEGRADED")
+        maintenance_count = count("MAINTENANCE")
+        unstable_count = sum(1 for service in services if self.is_unstable(service))
         if down_count > 0:
             noun = "Service" if down_count == 1 else "Services"
             return f"🔴 {down_count} {noun} Down"
+        if unstable_count > 0:
+            noun = "Service" if unstable_count == 1 else "Services"
+            return f"{UNSTABLE_EMOJI} {unstable_count} {noun} Unstable"
         if degraded_count > 0:
             return "🟡 Services Degraded"
         if maintenance_count > 0:
@@ -559,8 +540,16 @@ class UptimeCog(commands.Cog):
         if not previous_states:
             return 0
         changes = self.collect_status_changes(previous_states, data)
+        # Services down from before this incident opened are not part of it, so
+        # the all-clear has to know they exist before claiming everything is up.
+        down_now = {
+            self.service_key(service) for service in self.active_outages(data)
+        }
         messages = await build_incident_messages(
-            self.bot.db, changes, present_keys=set(current_states)
+            self.bot.db,
+            changes,
+            present_keys=set(current_states),
+            still_down_elsewhere=len(down_now - {str(c["key"]) for c in changes}),
         )
         if not messages:
             return 0

@@ -1,4 +1,4 @@
-from cogs.uptime import is_alertable_transition, is_alert_suppressed
+from incidents import is_alertable_transition, is_alert_suppressed
 
 
 def test_crossing_into_down_alerts_from_any_answering_state() -> None:

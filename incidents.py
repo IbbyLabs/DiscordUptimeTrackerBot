@@ -12,6 +12,55 @@ from typing import Any
 AlertChange = dict[str, Any]
 
 
+# Services whose transitions are not announced. Both forms are listed because a
+# status source can rename a service without changing its id, or the reverse.
+_ALERT_SUPPRESSED_NAMES = {
+    "webstreamr",
+    "webstreamer",
+    "webstreamer mbg",
+}
+_ALERT_SUPPRESSED_IDS = {
+    "webstreamr",
+    "webstreamer",
+    "webstreamr_mbg",
+    "webstreamrmbg",
+    "webstreamer_mbg",
+}
+
+
+def _alert_filter_name(value: object) -> str:
+    return " ".join(str(value or "").strip().lower().split())
+
+
+def _alert_filter_id(value: object) -> str:
+    normalized = str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+    return "_".join(part for part in normalized.split("_") if part)
+
+
+def is_alert_suppressed(service: dict[str, object]) -> bool:
+    return (
+        _alert_filter_name(service.get("name")) in _ALERT_SUPPRESSED_NAMES
+        or _alert_filter_id(service.get("id")) in _ALERT_SUPPRESSED_IDS
+    )
+
+
+def is_alertable_transition(previous_state: object, current_state: object) -> bool:
+    """Crossing the DOWN boundary, in either direction.
+
+    DOWN is the state where the check got no answer; every other reported state
+    means it answered. UNKNOWN is unmeasured and maintenance is planned, so
+    neither is a verdict about availability on either side of the change.
+    """
+
+    previous = str(previous_state or "").strip().upper()
+    current = str(current_state or "").strip().upper()
+    if not previous or not current:
+        return False
+    if {previous, current} & {"UNKNOWN", "MAINTENANCE"}:
+        return False
+    return (previous == "DOWN") != (current == "DOWN")
+
+
 def plan_incident_alerts(
     *,
     incident_open: bool,
@@ -68,6 +117,7 @@ async def build_incident_messages(
     db: Any,
     changes: list[AlertChange],
     present_keys: set[str],
+    still_down_elsewhere: int = 0,
 ) -> list[tuple[str, list[AlertChange]]]:
     """Turn a cycle's changes into announcements, recording the incident.
 
@@ -126,7 +176,18 @@ async def build_incident_messages(
 
     if plan["closing"]:
         if back:
-            messages.append(("## All clear\nEvery affected service is responding again.", back))
+            # The incident's own services, not the estate. Others can be down
+            # from before it opened, and calling that all clear is a false
+            # statement to anyone looking at the board.
+            if still_down_elsewhere:
+                noun = "service is" if still_down_elsewhere == 1 else "services are"
+                heading = (
+                    "## Outage resolved\nThe services this outage affected are responding"
+                    f" again. {still_down_elsewhere} other {noun} still down."
+                )
+            else:
+                heading = "## All clear\nEvery service is responding again."
+            messages.append((heading, back))
         if incident_id:
             await db.close_incident(incident_id)
 
