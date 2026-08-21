@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.4.0...v0.5.0) (2026-08-21)
+
+
+### Features
+
+* **bot:** report tracked services in the presence ([bce2ea0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/bce2ea075d13ef37bfa3c2f28d97ae6d15ae7b33))
+
 ## [0.4.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.3.0...v0.4.0) (2026-08-21)
 
 
