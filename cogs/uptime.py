@@ -298,6 +298,44 @@ class UptimeCog(commands.Cog):
         source_name = str(data.get("source", {}).get("name") or "").strip()
         return source_name or self.bot.config.BRAND_NAME
 
+    def bulletin(self, data: StatusData) -> dict[str, Any] | None:
+        """The operator's own announcement, if one is set.
+
+        Written by hand on the status page for the things a red dot cannot say
+        — a service discontinued, a provider changing terms — so it goes above
+        everything the board derives.
+        """
+
+        bulletin = data.get("bulletin")
+        if not isinstance(bulletin, dict) or bulletin.get("active") is not True:
+            return None
+        if not str(bulletin.get("message") or "").strip():
+            return None
+        return bulletin
+
+    def bulletin_lines(self, bulletin: dict[str, Any]) -> list[str]:
+        title = str(bulletin.get("title") or "").strip()
+        message = str(bulletin.get("message") or "").strip()
+        head = f"📢 **{title}**" if title else "📢 **Notice**"
+        lines = [head, message]
+
+        affected = bulletin.get("affectedServices")
+        names = [
+            str(item.get("name") or item.get("id") or "").strip()
+            for item in affected if isinstance(item, dict)
+        ] if isinstance(affected, list) else []
+        names = [name for name in names if name]
+        if names:
+            shown = ", ".join(names[:5])
+            if len(names) > 5:
+                shown += f" and {len(names) - 5} more"
+            lines.append(f"-# Affects {shown}")
+
+        updated = str(bulletin.get("updatedAt") or "")
+        if updated:
+            lines.append(f"-# Updated {_discord_relative(updated)}")
+        return lines
+
     def known_issues(self, data: StatusData) -> list[StatusData]:
         """Services deliberately taken offline, with the reason given.
 

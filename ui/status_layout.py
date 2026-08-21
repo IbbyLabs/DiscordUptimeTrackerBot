@@ -154,6 +154,11 @@ class StatusLayout(ui.LayoutView):
                 for name, items in groups.items()
             ]
             lines = _with_outages(cog, data, lines)
+            # Above everything the board derives: the operator wrote it because
+            # a state cannot say it.
+            bulletin = cog.bulletin(data)
+            if bulletin:
+                lines = [*cog.bulletin_lines(bulletin), "", *lines]
         else:
             items = groups.get(group_name, [])
             has_auth = any(item.get("requiresAuth") for item in items)
