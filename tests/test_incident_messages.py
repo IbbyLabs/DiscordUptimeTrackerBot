@@ -158,3 +158,61 @@ def test_a_real_recovery_still_announces_the_all_clear() -> None:
             os.unlink(path)
 
     asyncio.run(run())
+
+
+# The message the bot actually sent said "Every affected service is responding
+# again" while two others were still down, which is a false statement to anyone
+# looking at the board.
+def test_the_all_clear_does_not_claim_more_than_the_incident_knows() -> None:
+    async def run() -> None:
+        db, path = await _fresh()
+        try:
+            cog = _cog(db)
+            await cog.incident_messages([_change("a", "A", "DOWN", "UP")])
+            msgs = await build_incident_messages(
+                db, [_change("a", "A", "UP", "DOWN")], present_keys={"a"},
+                still_down_elsewhere=2,
+            )
+            heading = msgs[0][0]
+            assert "Outage resolved" in heading
+            assert "2 other services are still down" in heading
+            assert "All clear" not in heading
+        finally:
+            os.unlink(path)
+
+    asyncio.run(run())
+
+
+def test_the_all_clear_is_unqualified_when_nothing_else_is_down() -> None:
+    async def run() -> None:
+        db, path = await _fresh()
+        try:
+            cog = _cog(db)
+            await cog.incident_messages([_change("a", "A", "DOWN", "UP")])
+            msgs = await build_incident_messages(
+                db, [_change("a", "A", "UP", "DOWN")], present_keys={"a"},
+                still_down_elsewhere=0,
+            )
+            assert "All clear" in msgs[0][0]
+            assert "still down" not in msgs[0][0]
+        finally:
+            os.unlink(path)
+
+    asyncio.run(run())
+
+
+def test_one_other_service_down_reads_as_singular() -> None:
+    async def run() -> None:
+        db, path = await _fresh()
+        try:
+            cog = _cog(db)
+            await cog.incident_messages([_change("a", "A", "DOWN", "UP")])
+            msgs = await build_incident_messages(
+                db, [_change("a", "A", "UP", "DOWN")], present_keys={"a"},
+                still_down_elsewhere=1,
+            )
+            assert "1 other service is still down" in msgs[0][0]
+        finally:
+            os.unlink(path)
+
+    asyncio.run(run())
