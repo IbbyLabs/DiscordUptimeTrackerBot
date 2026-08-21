@@ -596,6 +596,7 @@ class UptimeCog(commands.Cog):
         )
 
     @tracker.command(name="refresh", description="Refresh all live uptime tracker messages")
+    @app_commands.checks.cooldown(1, 60.0, key=lambda i: i.guild_id)
     @can_manage_guild()
     async def refresh_tracker(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
