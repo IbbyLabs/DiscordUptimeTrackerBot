@@ -625,6 +625,34 @@ class UptimeCog(commands.Cog):
                     )
         return sent
 
+    async def delete_panels(self, guild_id: str) -> int:
+        """Remove the panels a guild has, message and record.
+
+        A panel left behind does not read as stale — it reads as current, being
+        the same message that was accurate when it stopped. Someone acts on a
+        week-old outage. An empty channel is the honest state.
+        """
+
+        if self.bot.db is None:
+            return 0
+        removed = 0
+        for panel in ("outages", "known_issues", "history"):
+            stored = await self.bot.db.get_panel_message(guild_id, panel)
+            if not stored:
+                continue
+            channel = await self.resolve_tracker_channel(int(stored["channel_id"]))
+            if channel is not None:
+                try:
+                    message = await channel.fetch_message(int(stored["message_id"]))
+                    await message.delete()
+                except discord.NotFound:
+                    pass
+                except discord.HTTPException as exc:
+                    log.warning("Could not delete the %s panel: %s", panel, exc)
+            removed += 1
+        await self.bot.db.delete_panel_messages(guild_id)
+        return removed
+
     async def sync_panel(
         self,
         guild_id: str,
@@ -1023,11 +1051,15 @@ class UptimeCog(commands.Cog):
                 ephemeral=True,
             )
             return
-        await self.bot.db.delete_alert_channel(str(interaction.guild_id))
-        await interaction.response.send_message(
-            "Status alerts are now disabled for this guild.",
-            ephemeral=True,
-        )
+        await interaction.response.defer(ephemeral=True)
+        guild_id = str(interaction.guild_id)
+        await self.bot.db.delete_alert_channel(guild_id)
+        removed = await self.delete_panels(guild_id)
+        detail = "Status alerts are now disabled for this guild."
+        if removed:
+            noun = "panel" if removed == 1 else "panels"
+            detail += f" {removed} {noun} removed."
+        await interaction.followup.send(detail, ephemeral=True)
 
     @tracker.command(
         name="remove",
@@ -1041,11 +1073,28 @@ class UptimeCog(commands.Cog):
                 ephemeral=True,
             )
             return
-        await self.bot.db.delete_tracked_message(str(interaction.guild_id))
-        await interaction.response.send_message(
-            "Removed the tracked uptime message for this guild.",
-            ephemeral=True,
-        )
+        await interaction.response.defer(ephemeral=True)
+        guild_id = str(interaction.guild_id)
+        # The board goes with its record. Left behind it reads as current rather
+        # than as stopped, being the same message that was accurate a moment ago.
+        stored = await self.bot.db.get_tracked_message(guild_id)
+        await self.bot.db.delete_tracked_message(guild_id)
+        deleted = False
+        if stored:
+            channel = await self.resolve_tracker_channel(int(stored["channel_id"]))
+            if channel is not None:
+                try:
+                    message = await channel.fetch_message(int(stored["message_id"]))
+                    await message.delete()
+                    deleted = True
+                except discord.NotFound:
+                    deleted = True
+                except discord.HTTPException as exc:
+                    log.warning("Could not delete the board for %s: %s", guild_id, exc)
+        detail = "Removed the tracked uptime message for this guild."
+        if stored and not deleted:
+            detail += " The board itself could not be deleted and is now stale."
+        await interaction.followup.send(detail, ephemeral=True)
 
     # Read-only and ephemeral, so it sits beside /uptime rather than inside the
     # manager-gated group: an outage is what an ordinary member wants to look up.

@@ -153,3 +153,51 @@ def test_the_first_cycle_records_without_announcing() -> None:
         # Recorded, so the next cycle can tell what changed.
         assert db.states != {}
     asyncio.run(run())
+
+
+class DeletableMessage(FakeMessage):
+    def __init__(self, mid): super().__init__(mid); self.deleted = False
+    async def delete(self): self.deleted = True
+
+
+def test_stopping_alerts_removes_the_panels_and_their_records() -> None:
+    async def run():
+        db, path = await _db()
+        try:
+            cog = _cog(db)
+            msg = DeletableMessage(501)
+            ch = FakeChannel(existing=msg)
+            cast(Any, cog).bot.get_channel = lambda _id: ch
+            cast(Any, cog).resolve_tracker_channel = lambda _id: _ready(ch)
+
+            for panel in ("outages", "known_issues", "history"):
+                await db.upsert_panel_message("g", panel, "1", "501")
+
+            removed = await cog.delete_panels("g")
+            assert removed == 3
+            assert msg.deleted is True
+            for panel in ("outages", "known_issues", "history"):
+                assert await db.get_panel_message("g", panel) is None
+        finally:
+            os.unlink(path)
+    asyncio.run(run())
+
+
+async def _ready(value):
+    return value
+
+
+# A panel someone already deleted should not stop the rest being cleaned up.
+def test_a_missing_panel_message_does_not_block_the_cleanup() -> None:
+    async def run():
+        db, path = await _db()
+        try:
+            cog = _cog(db)
+            ch = FakeChannel(existing=None)
+            cast(Any, cog).resolve_tracker_channel = lambda _id: _ready(ch)
+            await db.upsert_panel_message("g", "outages", "1", "999")
+            assert await cog.delete_panels("g") == 1
+            assert await db.get_panel_message("g", "outages") is None
+        finally:
+            os.unlink(path)
+    asyncio.run(run())
