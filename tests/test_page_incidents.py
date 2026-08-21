@@ -37,7 +37,7 @@ def test_ongoing_incidents_come_first_then_newest() -> None:
         _row("Ongoing", "2026-08-19T10:00:00Z", None),
         _row("Recent", "2026-08-21T10:00:00Z", "2026-08-21T11:00:00Z"),
     ]})
-    names = [line.split("**")[1] for line in format_page_incidents(rows)]
+    names = [line.split("**")[1] for line in format_page_incidents(rows) if "**" in line]
     assert names == ["Ongoing", "Recent", "Old"]
 
 
@@ -60,7 +60,8 @@ def test_the_list_is_capped() -> None:
     rows = normalise_page_incidents({"incidents": [
         _row(f"S{i}", f"2026-08-{10+i:02d}T10:00:00Z", "2026-08-21T11:00:00Z") for i in range(15)
     ]})
-    assert len(format_page_incidents(rows, limit=10)) == 10
+    # The trailing note explaining the filter is a line too.
+    assert len([l for l in format_page_incidents(rows, limit=10) if "**" in l]) == 10
 
 
 # The live payload, so the reader is checked against the shape it will meet

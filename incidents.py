@@ -104,6 +104,85 @@ def normalise_page_incidents(payload: Any) -> list[dict[str, Any]]:
     return rows
 
 
+# Matching src/incidents.mjs, so the bot's history and the status page agree
+# about which outages count as one and which are too brief to list.
+MAJOR_INCIDENT_MINUTES = 30
+MAJOR_INCIDENT_MERGE_WINDOW_MINUTES = 30
+_ACTIVE_STATES = {"DOWN", "DEGRADED", "UNKNOWN"}
+_SEVERITY = {"DOWN": 2, "UNKNOWN": 1, "DEGRADED": 1}
+
+
+def _epoch_ms(value: Any) -> int | None:
+    try:
+        return int(datetime.fromisoformat(str(value).replace("Z", "+00:00")).timestamp() * 1000)
+    except (ValueError, AttributeError, TypeError):
+        return None
+
+
+def major_incidents(
+    rows: list[dict[str, Any]],
+    now_ms: int,
+    *,
+    min_minutes: int = MAJOR_INCIDENT_MINUTES,
+    merge_window_minutes: int = MAJOR_INCIDENT_MERGE_WINDOW_MINUTES,
+) -> list[dict[str, Any]]:
+    """The outages the status page would call major, by its own rule.
+
+    Two short outages close together are one longer one, and anything still
+    under the minimum is left out unless it is ongoing. Ported from
+    buildMajorIncidentEntries rather than reinvented, so the two lists match.
+    """
+
+    merge_window_ms = max(1, merge_window_minutes) * 60 * 1000
+    min_duration_ms = max(1, min_minutes) * 60 * 1000
+
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        opened_ms = _epoch_ms(row.get("opened_at"))
+        if opened_ms is None:
+            continue
+        closed_ms = _epoch_ms(row.get("closed_at")) if row.get("closed_at") else None
+        entry = dict(row)
+        entry["opened_ms"] = opened_ms
+        entry["closed_ms"] = closed_ms
+        entry["ongoing"] = closed_ms is None
+        entry["duration_ms"] = max(0, (closed_ms if closed_ms is not None else now_ms) - opened_ms)
+        entry["merged_count"] = 1
+        grouped.setdefault(str(row.get("service_id") or row.get("name") or "?"), []).append(entry)
+
+    merged: list[dict[str, Any]] = []
+    for entries in grouped.values():
+        current: dict[str, Any] | None = None
+        for entry in sorted(entries, key=lambda e: e["opened_ms"]):
+            if current is None:
+                current = dict(entry)
+                continue
+            current_closed = current["closed_ms"] if current["closed_ms"] is not None else now_ms
+            if max(0, entry["opened_ms"] - current_closed) <= merge_window_ms:
+                current["closed_at"] = entry["closed_at"]
+                current["closed_ms"] = entry["closed_ms"]
+                current["ongoing"] = entry["ongoing"]
+                current["error"] = entry.get("error") or current.get("error")
+                current["duration_ms"] += entry["duration_ms"]
+                current["merged_count"] += entry["merged_count"]
+                if _SEVERITY.get(entry["state"], 0) > _SEVERITY.get(current["state"], 0):
+                    current["state"] = entry["state"]
+                current["events"] = [*current.get("events", []), *entry.get("events", [])]
+                continue
+            merged.append(current)
+            current = dict(entry)
+        if current is not None:
+            merged.append(current)
+
+    kept = [
+        entry for entry in merged
+        if entry["duration_ms"] >= min_duration_ms
+        or (entry["ongoing"] and entry["state"] in _ACTIVE_STATES)
+    ]
+    kept.sort(key=lambda e: e["opened_ms"], reverse=True)
+    return kept
+
+
 def format_page_incidents(rows: list[dict[str, Any]], limit: int = 10) -> list[str]:
     """One line per incident, ongoing ones first and newest within that."""
 
@@ -126,6 +205,12 @@ def format_page_incidents(rows: list[dict[str, Any]], limit: int = 10) -> list[s
         if chain:
             line += f"\n-# {chain}"
         lines.append(line)
+    # A reader comparing this with the status page would otherwise see two
+    # different lists with nothing saying why.
+    lines.append(
+        f"-# Outages under {MAJOR_INCIDENT_MINUTES} minutes are not listed;"
+        " nearby ones count as one."
+    )
     return lines
 
 

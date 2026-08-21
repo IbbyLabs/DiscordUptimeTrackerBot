@@ -7,7 +7,9 @@ loop that delivers them.
 
 from typing import Any
 
-from incidents import format_page_incidents
+import time
+
+from incidents import format_page_incidents, major_incidents
 
 OUTAGE_RED = 0xD90429
 HEALTHY_GREEN = 0x2A9D8F
@@ -43,7 +45,7 @@ def build_panel_specs(
         (
             "history",
             "## 📡 Incident history",
-            format_page_incidents(incidents),
+            format_page_incidents(major_incidents(incidents, int(time.time() * 1000))),
             HISTORY_BLURPLE,
         ),
     ]

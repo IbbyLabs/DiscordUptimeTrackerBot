@@ -19,6 +19,7 @@ from incidents import (
     alertable_rows,
     build_page_incident_messages,
     format_page_incidents,
+    major_incidents,
     plan_page_incident_alerts,
 )
 from tracker_db import GUILD_SETTING_FIELDS
