@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.1...v0.8.2) (2026-08-22)
+
+
+### Bug Fixes
+
+* **tracker:** stop calling a recovering service not responding (BUG-269) ([521026a](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/521026a28572da2771b3282dcde16be7370c2033))
+
 ## [0.8.1](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.0...v0.8.1) (2026-08-22)
 
 
