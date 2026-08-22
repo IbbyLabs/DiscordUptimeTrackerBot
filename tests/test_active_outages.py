@@ -102,7 +102,7 @@ def _flapping(name, state="DOWN", flapping=False, group="Stremio"):
 # Not in the payload summary, so it has to be counted per service.
 def test_unstable_counts_only_services_the_monitor_flagged() -> None:
     data = {"services": [
-        _flapping("A", flapping=True),
+        _flapping("A", state="UP", flapping=True),
         _flapping("B", flapping=False),
         _flapping("C", state="UP", flapping=True),
     ]}
@@ -110,21 +110,13 @@ def test_unstable_counts_only_services_the_monitor_flagged() -> None:
 
 
 def test_a_hidden_service_is_not_counted() -> None:
-    data = {"services": [dict(_flapping("A", flapping=True), hideFromStatusPage=True)]}
+    data = {"services": [dict(_flapping("A", state="UP", flapping=True), hideFromStatusPage=True)]}
     assert _cog().unstable_count(cast(Any, data)) == 0
 
 
 def test_nothing_flagged_counts_zero_rather_than_erroring() -> None:
     assert _cog().unstable_count(cast(Any, {"services": [_flapping("A")]})) == 0
     assert _cog().unstable_count(cast(Any, {"services": [{"name": "X", "last": {}}]})) == 0
-
-
-# Bouncing and broken read the same in red, and the difference is the one a
-# reader acts on.
-def test_an_unstable_outage_is_marked_differently_from_a_broken_one() -> None:
-    cog = _cog()
-    assert cog.outage_line(cast(Any, _flapping("Bouncing", flapping=True))).startswith("🌀")
-    assert cog.outage_line(cast(Any, _flapping("Broken", flapping=False))).startswith("🔴")
 
 
 def _hc(services):
@@ -138,23 +130,23 @@ def _hc(services):
     }))
 
 
-# Ibby's rule: the numbers should be addable. A flapping service is one thing
-# with something wrong, not two.
-def test_a_flapping_service_is_counted_once_under_unstable() -> None:
+# Ibby's rule: the numbers should be addable. A service is one thing with
+# something wrong, not two.
+def test_two_services_that_are_down_both_count_as_down() -> None:
     up, down, degraded, unstable = _hc([
         _flapping("Broken", state="DOWN", flapping=False),
         _flapping("Bouncing", state="DOWN", flapping=True),
         _flapping("Fine", state="UP", flapping=False),
     ])
-    assert (up, down, degraded, unstable) == (1, 1, 0, 1)
+    assert (up, down, degraded, unstable) == (1, 2, 0, 0)
 
 
-def test_a_flapping_service_leaves_the_degraded_count_too() -> None:
+def test_a_degraded_service_under_a_hold_stays_degraded() -> None:
     up, down, degraded, unstable = _hc([
         _flapping("Slow", state="DEGRADED", flapping=True),
         _flapping("Fine", state="UP", flapping=False),
     ])
-    assert (up, down, degraded, unstable) == (1, 0, 0, 1)
+    assert (up, down, degraded, unstable) == (1, 0, 1, 0)
 
 
 # Held DOWN is the usual case, but a service can be flagged while reading UP.
@@ -181,3 +173,36 @@ def test_the_four_counts_add_up_to_the_services_shown() -> None:
         _flapping("D", state="UP", flapping=False),
     ]
     assert sum(_hc(services)) == len(services)
+
+
+# A service answering 503 on every check is down, whatever the recovery hold
+# says. Unstable describes a service that is up and not yet trusted.
+def test_a_service_that_is_down_is_not_called_unstable() -> None:
+    service = _flapping("Stremio App", state="DOWN", flapping=True)
+    assert _cog().is_unstable(cast(Any, service)) is False
+
+
+def test_a_service_that_is_up_under_a_hold_is_unstable() -> None:
+    service = _flapping("Stremio App", state="UP", flapping=True)
+    assert _cog().is_unstable(cast(Any, service)) is True
+
+
+def test_the_headline_calls_a_down_service_down() -> None:
+    services = [_flapping("Stremio App", state="DOWN", flapping=True)]
+    assert _cog().get_status_text(cast(Any, services), healthy="🟢") == "🔴 1 Service Down"
+
+
+def test_a_down_service_is_listed_in_red() -> None:
+    service = _flapping("Stremio App", state="DOWN", flapping=True)
+    assert _cog().outage_line(cast(Any, service)).startswith("🔴")
+
+
+def test_the_counts_agree_with_the_outage_list() -> None:
+    services = [
+        _flapping("Stremio App", state="DOWN", flapping=True),
+        _flapping("Torbox", state="UP", flapping=True),
+        _flapping("Real-Debrid", state="UP", flapping=False),
+    ]
+    up, down, degraded, unstable = _hc(services)
+    assert (up, down, degraded, unstable) == (1, 1, 0, 1)
+    assert len(_cog().active_outages(cast(Any, {"services": services}))) == down

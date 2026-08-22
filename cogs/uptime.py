@@ -363,7 +363,7 @@ class UptimeCog(commands.Cog):
         return f"🛠️ **{name}**{when}\n-# {reason}"
 
     def unstable_count(self, data: StatusData) -> int:
-        """Services the monitor has flagged as bouncing rather than broken.
+        """Services that are answering but still under a recovery hold.
 
         Not in the payload summary, which carries up, down, degraded, unknown
         and maintenance, so it is counted from the per-service flag.
@@ -374,26 +374,20 @@ class UptimeCog(commands.Cog):
     def headline_counts(self, data: StatusData) -> tuple[int, int, int, int]:
         """Up, down, degraded and unstable, as four counts that add up.
 
-        A bouncing service is reported once, under Unstable, so a reader adding
-        the numbers gets the number of services with something wrong.
+        Unstable is drawn from the up services, so each service is counted once.
         """
 
         up, down, degraded = self._summary_counts(data)
         unstable = self.unstable_count(data)
-        for service in self.visible_services(data):
-            if not self.is_unstable(service):
-                continue
-            state = str((service.get("last") or {}).get("state") or "").upper()
-            if state == "DOWN":
-                down -= 1
-            elif state == "DEGRADED":
-                degraded -= 1
-            else:
-                up -= 1
-        return max(up, 0), max(down, 0), max(degraded, 0), unstable
+        return max(up - unstable, 0), max(down, 0), max(degraded, 0), unstable
 
     def is_unstable(self, service: StatusData) -> bool:
-        return ((service.get("last") or {}).get("flapping")) is True
+        # The flag marks a recovery hold, which outlives the bouncing that
+        # started it. A service currently failing is reported by its state.
+        last = service.get("last") or {}
+        if last.get("flapping") is not True:
+            return False
+        return str(last.get("state") or "").upper() not in ("DOWN", "DEGRADED")
 
     def active_outages(self, data: StatusData) -> list[StatusData]:
         """Services the payload currently reports as not responding.
@@ -417,10 +411,7 @@ class UptimeCog(commands.Cog):
         group = str(service.get("group") or "Other")
         since = str(service.get("downSince") or "")
         when = f" since {_discord_relative(since)}" if since else ""
-        # Bouncing and broken read the same in red, and the difference is the
-        # one a reader acts on.
-        marker = UNSTABLE_EMOJI if self.is_unstable(service) else "🔴"
-        return f"{marker} **{name}** ({group}){when}"
+        return f"🔴 **{name}** ({group}){when}"
 
     def visible_services(self, data: StatusData) -> list[StatusData]:
         services = data.get("services", [])
