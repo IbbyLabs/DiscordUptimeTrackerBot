@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.1](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.7.0...v0.7.1) (2026-08-22)
+
+
+### Bug Fixes
+
+* **tracker:** fetch the incident history in one request ([b725409](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/b725409b9e181ecabe0c6648a6140322e67acb26))
+* **tracker:** say how many major outages the panel leaves out ([eea7b39](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/eea7b396ff2d1aabb836ac6eb6a1d07f6a4118b1))
+
+
+### Code Refactoring
+
+* **tracker:** read the label the status page publishes ([77d32c7](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/77d32c7))
+
 ## [0.7.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.6.0...v0.7.0) (2026-08-22)
 
 
