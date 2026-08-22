@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.7.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.6.0...v0.7.0) (2026-08-22)
+
+
+### Features
+
+* **alerts:** drive announcements from the page's incidents ([b65605f](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/b65605f183a48d5b1768ff8af2e073e7a0a06e19))
+* **tracker:** credit IbbyLabs on the board and add /about ([0c3a94f](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/0c3a94f1fe589c7a0af64b80a4293dc13cdc20c7))
+* **tracker:** keep three panels current in the alert channel ([8c69aa5](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/8c69aa52f2b1962d30c668eae7983eea31f1f3dc))
+* **tracker:** list the outages the status page calls major ([3479c0f](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/3479c0f98b9d65fd108967c0b3654b3a27b63a08))
+* **tracker:** read incident history from the status page ([236bffa](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/236bffa68e690fd04c4874f7f4198d4a077b6caa))
+* **tracker:** show how an incident went, not just when it opened ([1c6cfa3](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/1c6cfa312366465e24ebd617f0162fd4477b9238))
+* **tracker:** show the status page bulletin on the board ([9145f6f](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/9145f6f78a6a96bf16520666e396b60ea850d728))
+
+
+### Bug Fixes
+
+* **alerts:** keep the suppression list on the page-driven path ([8fa072f](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/8fa072f6a5de1ab5e00da67c713b23f17f25a370))
+* **alerts:** name the services still down when an incident closes ([359a427](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/359a42747faa2a520f4c130185e7d6da8f6bd5bc))
+* **alerts:** take the all-clear from the status payload ([e0d104d](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/e0d104d69ae96b00c37514f2e8e221835263751b))
+* **bot:** read the version release-please maintains ([6b4823a](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/6b4823a27dd542431cfcc17c2eab5ea6dd24df0d))
+* **tracker:** count a bouncing service once, under Unstable ([7922081](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/7922081971e45515464410035ef9aa426a57940d))
+* **tracker:** delete the panels and board when tracking stops ([afc6969](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/afc69694d5d780d6824ef7c8882bff154cbae74a))
+* **tracker:** report a service that is failing as down ([7ade053](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/7ade0531b5c1f5d4af7af7da8cea4dcd4abeb22e))
+
 ## [0.6.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.5.0...v0.6.0) (2026-08-21)
 
 
