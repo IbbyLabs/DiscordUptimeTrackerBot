@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.4](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.3...v0.8.4) (2026-08-22)
+
+
+### Bug Fixes
+
+* **tracker:** say when the status page has stopped updating ([95e9ed7](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/95e9ed7a69484f230a7e7a1eb517b12131aaac79))
+
 ## [0.8.3](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.2...v0.8.3) (2026-08-22)
 
 
