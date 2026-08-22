@@ -72,7 +72,12 @@ async def fetch_incidents(url: str) -> list[dict[str, Any]]:
 
     # One request. 100 is the largest page the endpoint serves and costs the
     # same as asking for fewer, so it buys the widest window available for it.
+    # majorOnly applies the status page's own 30-minute rule and merges
+    # neighbouring outages, so the panel renders the page's list rather than a
+    # second copy of the rule.
     separator = "&" if "?" in url else "?"
     return normalise_page_incidents(
-        await _get_json(f"{url}{separator}limit={INCIDENT_PAGE_SIZE}", "incidents")
+        await _get_json(
+            f"{url}{separator}limit={INCIDENT_PAGE_SIZE}&majorOnly=true", "incidents"
+        )
     )

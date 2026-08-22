@@ -15,15 +15,10 @@ if TYPE_CHECKING:
 
 import status_api
 from panels import build_panel_specs
-
-PANEL_KEYS = ("outages", "known_issues", "history")
-# Pinned panels sit at the top of the channel rather than scrolling away.
-PINNED_PANELS = PANEL_KEYS
 from incidents import (
     alertable_rows,
     build_page_incident_messages,
     format_page_incidents,
-    major_incidents,
     plan_page_incident_alerts,
 )
 from tracker_db import GUILD_SETTING_FIELDS
@@ -37,6 +32,10 @@ from ui.status_layout import (
 )
 
 log = logging.getLogger("uptimebot.cogs.uptime")
+
+PANEL_KEYS = ("outages", "known_issues", "history")
+# Pinned panels sit at the top of the channel rather than scrolling away.
+PINNED_PANELS = PANEL_KEYS
 
 # Per-guild field -> the config attribute it inherits from when unset.
 _SETTING_DEFAULTS = {
