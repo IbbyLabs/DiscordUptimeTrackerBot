@@ -630,15 +630,32 @@ class UptimeCog(commands.Cog):
             channel = await self.resolve_tracker_channel(int(item["channel_id"]))
             if channel is None:
                 continue
-            settings = await self.guild_render_settings(str(item.get("guild_id")))
+            guild_id = str(item.get("guild_id"))
+            settings = await self.guild_render_settings(guild_id)
+            live_url = await self.panel_jump_url(guild_id, "outages")
             for heading, lines in messages:
                 accent = 0xD90429 if "Outage started" in heading else 0x2A9D8F
                 try:
-                    await channel.send(view=PanelLayout(self, heading, lines, accent, **settings))
+                    await channel.send(
+                        view=PanelLayout(self, heading, lines, accent, live_url=live_url, **settings)
+                    )
                     sent += 1
                 except discord.HTTPException as exc:
                     log.error("Failed to send an alert in %s: %s", item["channel_id"], exc)
         return sent
+    async def panel_jump_url(self, guild_id: str, panel: str) -> str | None:
+        """A link straight to a pinned panel, or None when there is not one."""
+
+        if self.bot.db is None:
+            return None
+        stored = await self.bot.db.get_panel_message(guild_id, panel)
+        if not stored:
+            return None
+        return (
+            f"https://discord.com/channels/{guild_id}/"
+            f"{stored['channel_id']}/{stored['message_id']}"
+        )
+
     async def delete_panels(self, guild_id: str) -> int:
         """Remove the panels a guild has, message and record.
 

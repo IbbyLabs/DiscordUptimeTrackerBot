@@ -208,6 +208,7 @@ class PanelLayout(ui.LayoutView):
         *,
         healthy: str | None = None,
         page_url: str | None = None,
+        live_url: str | None = None,
     ) -> None:
         super().__init__(timeout=None)
         del healthy
@@ -220,6 +221,10 @@ class PanelLayout(ui.LayoutView):
         ]
         if dropped:
             children.append(ui.TextDisplay(f"-# {dropped} more not shown here"))
+        # An alert is one moment; the panels are the current picture. Omitted
+        # when there is no panel to point at rather than rendering a dead link.
+        if live_url:
+            children.append(ui.TextDisplay(f"-# Live status: [pinned panels]({live_url})"))
         children.append(ui.TextDisplay(f"-# Developed by IbbyLabs • v{cog.bot.version}"))
         self.add_item(ui.Container(*children, accent_colour=accent))
         self.add_item(ui.ActionRow(ui.Button(label="Full Status Page", url=page_url)))
