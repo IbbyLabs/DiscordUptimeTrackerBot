@@ -495,10 +495,12 @@ class UptimeCog(commands.Cog):
                 # stopped calling that an all-clear. Saying it here anyway would
                 # put the two boards back into disagreement.
                 headline = verdict.get("headline") or ALL_CLEAR
-                emoji = self.get_state_emoji("UP", healthy)
-                if headline != ALL_CLEAR and sentence:
-                    return f"{emoji} {headline} · {sentence}"
-                return f"{emoji} {headline}"
+                if headline == ALL_CLEAR:
+                    return f"{self.get_state_emoji('UP', healthy)} {headline}"
+                # Green is read before the words are, and these words are not
+                # the all-clear.
+                amber = self.get_state_emoji("DEGRADED", healthy)
+                return f"{amber} {headline} · {sentence}" if sentence else f"{amber} {headline}"
 
         # Counted the same way as the headline numbers, so the sentence and the
         # figures beneath it cannot disagree about how many are down.

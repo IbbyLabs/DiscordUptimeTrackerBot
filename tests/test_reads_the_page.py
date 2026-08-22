@@ -125,12 +125,13 @@ def test_an_up_verdict_with_services_down_is_not_an_all_clear() -> None:
         "overall": {
             "state": "UP",
             "reason": "2 services not responding",
-            "headline": "Mostly Operational",
+            "headline": "Partial Disruption",
         },
     }
     text = _cog().get_status_text(cast(Any, data["services"]), "🟢", cast(Any, data))
     assert "All Systems Operational" not in text, text
-    assert "Mostly Operational" in text
+    assert text.startswith("🟡"), text
+    assert "Partial Disruption" in text
     assert "2 services not responding" in text
 
 
