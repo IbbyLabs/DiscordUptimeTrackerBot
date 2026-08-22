@@ -133,7 +133,7 @@ class StatusLayout(ui.LayoutView):
             header += f"\n-# Filtered to {', '.join(st.lower() for st in states)}"
         up, down, degraded, unstable = cog.headline_counts(data)
         headline = (
-            f"### {cog.get_status_text(cog.visible_services(data), healthy)}\n"
+            f"### {cog.get_status_text(cog.visible_services(data), healthy, data)}\n"
             f"**Up:** {up} | **Down:** {down} | **Degraded:** {degraded}"
             f" | **Unstable:** {unstable}"
         )
@@ -151,7 +151,7 @@ class StatusLayout(ui.LayoutView):
                 lines = ["Nothing in that state right now."]
         elif group_name is None:
             lines = [
-                cog.group_summary_line(name, items, healthy)
+                cog.group_summary_line(name, items, healthy, cog.published_group_state(data, name))
                 for name, items in groups.items()
             ]
             lines = _with_outages(cog, data, lines)

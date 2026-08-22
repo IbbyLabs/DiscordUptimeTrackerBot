@@ -33,6 +33,29 @@ def service_state(service: dict[str, Any]) -> str:
     return label or "UNKNOWN"
 
 
+def overall(data: dict[str, Any]) -> dict[str, Any] | None:
+    """The page's own verdict on the estate, or None on a payload without one.
+
+    Which services are core, which are critical and where the thresholds sit are
+    the page's; this bot cannot reach the same answer by counting states.
+    """
+
+    value = data.get("overall") if isinstance(data, dict) else None
+    if not isinstance(value, dict):
+        return None
+    state = str(value.get("state") or "").upper()
+    return {"state": state, "reason": str(value.get("reason") or "")} if state else None
+
+
+def published_groups(data: dict[str, Any]) -> list[dict[str, Any]]:
+    """Each group's state and the order the page shows it in. Empty when absent."""
+
+    value = data.get("groups") if isinstance(data, dict) else None
+    if not isinstance(value, list):
+        return []
+    return [group for group in value if isinstance(group, dict) and group.get("name")]
+
+
 def service_unstable(service: dict[str, Any]) -> bool:
     """Answering, but still inside its recovery hold."""
 

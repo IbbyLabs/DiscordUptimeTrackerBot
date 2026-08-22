@@ -427,7 +427,28 @@ class UptimeCog(commands.Cog):
         for service in self.visible_services(data):
             group_name = str(service.get("group") or "Other")
             groups.setdefault(group_name, []).append(service)
-        return groups
+        # The page publishes the order sections appear in. Without it the board
+        # shows them in whatever order the services arrived.
+        order = {
+            str(group.get("name")): group.get("order")
+            for group in status_api.published_groups(data)
+            if isinstance(group.get("order"), int)
+        }
+        if not order:
+            return groups
+        return {
+            name: groups[name]
+            for name in sorted(groups, key=lambda n: (order.get(n, 10_000), n))
+        }
+
+    def published_group_state(self, data: StatusData, name: str) -> str | None:
+        """The state the page gives a group, or None when it publishes none."""
+
+        for group in status_api.published_groups(data):
+            if str(group.get("name")) == name:
+                state = str(group.get("state") or "").upper()
+                return state or None
+        return None
 
     def get_state_emoji(self, state: str, healthy: str | None = None) -> str:
         healthy = healthy or self.bot.config.STATUS_EMOJI
@@ -443,7 +464,26 @@ class UptimeCog(commands.Cog):
             return "⚪"
         return healthy
 
-    def get_status_text(self, services: list[StatusData], healthy: str | None = None) -> str:
+    def get_status_text(
+        self,
+        services: list[StatusData],
+        healthy: str | None = None,
+        data: StatusData | None = None,
+    ) -> str:
+        # The page publishes its verdict and why. Reading it is the only way the
+        # two boards say the same thing: counting states cannot reproduce a rule
+        # built on core services, critical services and group ratios.
+        verdict = status_api.overall(data) if isinstance(data, dict) else None
+        if verdict:
+            reason = verdict["reason"]
+            sentence = reason[:1].upper() + reason[1:] if reason else ""
+            if verdict["state"] == "DOWN":
+                return f"🔴 {sentence}" if sentence else "🔴 Services Down"
+            if verdict["state"] == "DEGRADED":
+                return f"🟡 {sentence}" if sentence else "🟡 Services Degraded"
+            if verdict["state"] == "UP":
+                return f"{self.get_state_emoji('UP', healthy)} All Systems Operational"
+
         # Counted the same way as the headline numbers, so the sentence and the
         # figures beneath it cannot disagree about how many are down.
         def count(state: str) -> int:
@@ -534,6 +574,7 @@ class UptimeCog(commands.Cog):
         name: str,
         services: list[StatusData],
         healthy: str | None = None,
+        published_state: str | None = None,
     ) -> str:
         group_up = sum(
             1 for item in services
@@ -541,7 +582,15 @@ class UptimeCog(commands.Cog):
         )
         group_total = len(services)
         affected = group_total - group_up
-        group_emoji = self.get_state_emoji("UP", healthy) if affected == 0 else "🔴"
+        # One bad service in a healthy group is degraded, not down. The page
+        # publishes which; without it, any affected service reads red.
+        if published_state:
+            group_emoji = (
+                self.get_state_emoji("UP", healthy) if published_state == "UP"
+                else self.get_state_emoji(published_state, healthy)
+            )
+        else:
+            group_emoji = self.get_state_emoji("UP", healthy) if affected == 0 else "🔴"
         noun = "service" if affected == 1 else "services"
         status_text = "operational" if affected == 0 else f"{affected} {noun} affected"
         if any(item.get("requiresAuth") for item in services):
