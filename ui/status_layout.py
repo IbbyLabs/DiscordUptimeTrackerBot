@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, Any
 
 import discord
 from discord import ui
+import status_api
 
 if TYPE_CHECKING:
     from bot import DiscordUptimeTrackerBot
@@ -142,7 +143,7 @@ class StatusLayout(ui.LayoutView):
             matched = [
                 service
                 for service in cog.visible_services(data)
-                if str((service.get("last") or {}).get("state") or "") in wanted
+                if status_api.service_state(service) in wanted
             ]
             if matched:
                 lines = cog._detail_lines(matched, False, healthy, page_url)
@@ -410,7 +411,7 @@ class HostLayout(ui.LayoutView):
         self.cog = cog
         page_url = page_url or cog.bot.config.STATUS_PAGE_URL
         last = service.get("last") or {}
-        state = str(last.get("state") or "UNKNOWN")
+        state = status_api.service_state(service)
         name = str(service.get("name") or "Unknown service")
         if service.get("requiresAuth"):
             name = f"{name} 🔒"

@@ -31,7 +31,7 @@ def test_degradation_is_not_reported_as_an_outage():
         "id": "svc",
         "name": "Alpha",
         "group": "Core",
-        "last": {"state": "UP", "status": 200, "latency": 20},
+        "displayState": "UP", "last": {"state": "UP", "status": 200, "latency": 20},
         "uptimeWindows": {"d7": 100.0},
         "historyTimeline": {
             "d7": {"buckets": [bucket("DEGRADED")] * 5 + [bucket("UP")] * 5}
@@ -50,7 +50,7 @@ def test_a_real_outage_is_reported_as_one():
         "id": "svc",
         "name": "Alpha",
         "group": "Core",
-        "last": {"state": "DOWN", "status": 503, "latency": 0},
+        "displayState": "DOWN", "last": {"state": "DOWN", "status": 503, "latency": 0},
         "uptimeWindows": {"d7": 91.0},
         "historyTimeline": {"d7": {"buckets": [bucket("DOWN")] * 2 + [bucket("UP")] * 8}},
     }
@@ -72,7 +72,7 @@ def test_partial_history_is_only_flagged_when_it_matters():
         "buckets": [bucket("UP")] * 4,
     }
     service = {
-        "id": "s", "name": "A", "last": {"state": "UP"},
+        "id": "s", "name": "A", "displayState": "UP", "last": {"state": "UP"},
         "uptimeWindows": {}, "historyTimeline": {"d7": trivial},
     }
     body = "\n".join(
@@ -93,7 +93,7 @@ def test_partial_history_is_only_flagged_when_it_matters():
 def test_the_host_view_stays_inside_the_components_ceilings():
     service = {
         "id": "svc", "name": "Alpha", "group": "Core",
-        "last": {"state": "UP", "status": 200, "latency": 20},
+        "displayState": "UP", "last": {"state": "UP", "status": 200, "latency": 20},
         "uptimeWindows": {"h1": 100, "h12": 100, "h24": 100, "d7": 99.9, "d30": 100},
         "historyTimeline": {"d30": {"buckets": [bucket("UP")] * 90}},
         "history": [
@@ -111,7 +111,7 @@ def _board_data():
         return {
             "group": "Core", "name": name, "url": "https://x.example",
             "hideFromStatusPage": False, "requiresAuth": False, "uptimePercent": 99,
-            "last": {"state": state, "latency": 10},
+            "displayState": state, "last": {"state": state, "latency": 10},
         }
     return {
         "source": {"name": "Status Tracker"},

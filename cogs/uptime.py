@@ -382,12 +382,7 @@ class UptimeCog(commands.Cog):
         return max(up - unstable, 0), max(down, 0), max(degraded, 0), unstable
 
     def is_unstable(self, service: StatusData) -> bool:
-        # The flag marks a recovery hold, which outlives the bouncing that
-        # started it. A service currently failing is reported by its state.
-        last = service.get("last") or {}
-        if last.get("flapping") is not True:
-            return False
-        return str(last.get("state") or "").upper() not in ("DOWN", "DEGRADED")
+        return status_api.service_unstable(service)
 
     def active_outages(self, data: StatusData) -> list[StatusData]:
         """Services the payload currently reports as not responding.
@@ -400,7 +395,7 @@ class UptimeCog(commands.Cog):
         down = [
             service
             for service in self.visible_services(data)
-            if str((service.get("last") or {}).get("state") or "").upper() == "DOWN"
+            if status_api.service_state(service) == "DOWN"
         ]
         # Longest outage first: the one that has been broken longest is the one
         # someone is most likely asking about.
@@ -444,7 +439,7 @@ class UptimeCog(commands.Cog):
         def count(state: str) -> int:
             return sum(
                 1 for service in services
-                if service.get("last", {}).get("state") == state
+                if status_api.service_state(service) == state
                 and not self.is_unstable(service)
             )
 
@@ -530,7 +525,10 @@ class UptimeCog(commands.Cog):
         services: list[StatusData],
         healthy: str | None = None,
     ) -> str:
-        group_up = sum(1 for item in services if item.get("last", {}).get("state") == "UP")
+        group_up = sum(
+            1 for item in services
+            if status_api.service_state(item) == "UP"
+        )
         group_total = len(services)
         affected = group_total - group_up
         group_emoji = self.get_state_emoji("UP", healthy) if affected == 0 else "🔴"
@@ -552,7 +550,7 @@ class UptimeCog(commands.Cog):
             lines.append("Some services are behind authentication and marked with a lock.")
         for service in services:
             last = service.get("last", {})
-            state = str(last.get("state") or "UNKNOWN")
+            state = status_api.service_state(service)
             latency = int(last.get("latency") or 0)
             uptime_percent = float(service.get("uptimePercent") or 0)
             url = str(service.get("url") or page_url or self.bot.config.STATUS_PAGE_URL)

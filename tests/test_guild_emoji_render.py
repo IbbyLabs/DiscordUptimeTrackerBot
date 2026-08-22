@@ -19,7 +19,7 @@ def _data(state="UP"):
                 "hideFromStatusPage": False,
                 "requiresAuth": False,
                 "uptimePercent": 100,
-                "last": {"state": state, "latency": 10},
+                "displayState": state, "last": {"state": state, "latency": 10},
             }
         ],
     }

@@ -40,7 +40,7 @@ def test_create_status_embed_builds_summary_fields() -> None:
                 "hideFromStatusPage": False,
                 "requiresAuth": False,
                 "uptimePercent": 100,
-                "last": {"state": "UP", "latency": 10},
+                "displayState": "UP", "last": {"state": "UP", "latency": 10},
             },
             {
                 "group": "Stremio",
@@ -49,7 +49,7 @@ def test_create_status_embed_builds_summary_fields() -> None:
                 "hideFromStatusPage": False,
                 "requiresAuth": True,
                 "uptimePercent": 98.5,
-                "last": {"state": "DOWN", "latency": 20},
+                "displayState": "DOWN", "last": {"state": "DOWN", "latency": 20},
             },
         ],
     }

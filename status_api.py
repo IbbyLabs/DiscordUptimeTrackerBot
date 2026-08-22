@@ -24,6 +24,25 @@ INCIDENT_PAGE_SIZE = 100
 INCIDENT_PAGE_CAP = 20
 
 
+def service_state(service: dict[str, Any]) -> str:
+    """The label the status page resolved for this service.
+
+    RECOVERING sits over a service that is still held down, so counting and
+    listing treat it as DOWN, exactly as the page does.
+    """
+
+    label = str(service.get("displayState") or "").upper()
+    if label == "RECOVERING":
+        return "DOWN"
+    return label or "UNKNOWN"
+
+
+def service_unstable(service: dict[str, Any]) -> bool:
+    """Answering, but still inside its recovery hold."""
+
+    return service.get("unstable") is True
+
+
 async def _get_json(url: str, what: str) -> Any:
     try:
         async with aiohttp.ClientSession() as session:

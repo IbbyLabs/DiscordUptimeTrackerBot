@@ -14,6 +14,8 @@ def _svc(name, state, group="Debrid Services", down_since=None, hidden=False):
         "url": f"https://{name.lower()}.test/",
         "hideFromStatusPage": hidden,
         "downSince": down_since,
+        "displayState": state,
+        "unstable": False,
         "last": {"state": state, "latency": 100},
     }
 
@@ -95,6 +97,8 @@ def _flapping(name, state="DOWN", flapping=False, group="Stremio"):
         "id": name.lower(), "name": name, "group": group,
         "url": f"https://{name.lower()}.test/", "hideFromStatusPage": False,
         "downSince": "2026-08-21T10:00:00Z",
+        "displayState": state,
+        "unstable": flapping and state not in ("DOWN", "DEGRADED"),
         "last": {"state": state, "latency": 100, "flapping": flapping},
     }
 
