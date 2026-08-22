@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.6](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.5...v0.8.6) (2026-08-22)
+
+
+### Bug Fixes
+
+* **board:** name the staleness threshold rather than a check interval ([b5c9c36](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/b5c9c36493b169c0add42802c5fac9b8be3d557c))
+
 ## [0.8.5](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.4...v0.8.5) (2026-08-22)
 
 
