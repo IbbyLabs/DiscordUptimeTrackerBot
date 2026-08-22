@@ -85,3 +85,46 @@ def test_both_numbers_still_reach_the_reader() -> None:
     line = _cog().staleness_line(cast(Any, STALE))
     assert "60m" in line, "how long it has been"
     assert "6m" in line, "the threshold it passed"
+
+
+# The API publishes openedAtIsFloor and nothing read it, so an approximate start
+# printed as though it were exact and the outage read shorter than it was.
+def _rows(floor: bool):
+    from incidents import normalise_page_incidents
+
+    return normalise_page_incidents({"incidents": [{
+        "id": "svc-1",
+        "service": {"id": "svc", "name": "Svc", "group": "Tools"},
+        "state": "DOWN",
+        "openedAt": "2026-08-22T18:08:00.000Z",
+        "closedAt": "2026-08-22T19:10:00.000Z",
+        "openedAtIsFloor": floor,
+    }]})
+
+
+def test_a_floored_start_is_marked_approximate() -> None:
+    from incidents import format_page_incidents
+
+    line = "\n".join(format_page_incidents(_rows(True)))
+    assert line.count("about") == 1, line
+
+
+def test_an_exact_start_is_not_hedged() -> None:
+    from incidents import format_page_incidents
+
+    line = "\n".join(format_page_incidents(_rows(False)))
+    assert "about" not in line, line
+
+
+def test_an_absent_flag_does_not_read_as_approximate() -> None:
+    from incidents import format_page_incidents, normalise_page_incidents
+
+    rows = normalise_page_incidents({"incidents": [{
+        "id": "svc-1",
+        "service": {"id": "svc", "name": "Svc"},
+        "state": "DOWN",
+        "openedAt": "2026-08-22T18:08:00.000Z",
+        "closedAt": "2026-08-22T19:10:00.000Z",
+    }]})
+    assert rows[0]["opened_at_is_floor"] is False
+    assert "about" not in "\n".join(format_page_incidents(rows))

@@ -87,6 +87,9 @@ def normalise_page_incidents(payload: Any) -> list[dict[str, Any]]:
             "group": str(service.get("group") or ""),
             "state": str(item.get("state") or "").upper(),
             "opened_at": opened,
+            # The oldest reading held was already down, so the outage began at
+            # or before this.
+            "opened_at_is_floor": item.get("openedAtIsFloor") is True,
             "closed_at": str(item.get("closedAt")) if item.get("closedAt") else None,
             "error": str(item.get("error") or "").strip(),
             "events": [
@@ -117,6 +120,8 @@ def format_page_incidents(rows: list[dict[str, Any]], limit: int = 10) -> list[s
         marker = "🔴" if not row["closed_at"] else "🟢"
         where = f" ({row['group']})" if row["group"] else ""
         when = _iso_stamp(row["opened_at"])
+        if row.get("opened_at_is_floor"):
+            when = f"about {when}"
         if row["closed_at"]:
             when = f"{when} to {_iso_stamp(row['closed_at'])}"
         else:
