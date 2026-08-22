@@ -582,6 +582,8 @@ class UptimeCog(commands.Cog):
         )
         group_total = len(services)
         affected = group_total - group_up
+        # No uptime figure here on purpose: the page owns the group average.
+        # Publish it if this row ever needs one.
         # One bad service in a healthy group is degraded, not down. The page
         # publishes which; without it, any affected service reads red.
         if published_state:
