@@ -40,3 +40,24 @@ def test_an_overlong_emoji_is_refused():
 
 def test_an_emoji_is_accepted():
     assert validate_guild_setting("status_emoji", "🟢") == ("🟢", None)
+
+
+# Fixed rather than configured: an operator cannot point the board at something
+# that does not answer in the shape it expects.
+def test_the_status_urls_ignore_the_environment(monkeypatch) -> None:
+    import importlib
+
+    monkeypatch.setenv("STATUS_API_URL", "https://wrong.example/v1/status")
+    monkeypatch.setenv("STATUS_PAGE_URL", "https://wrong.example/")
+    monkeypatch.setenv("INCIDENTS_API_URL", "https://wrong.example/v1/incidents")
+    monkeypatch.setenv("BOT_TOKEN", "x")
+
+    import config as config_module
+    importlib.reload(config_module)
+    cfg = config_module.Config()
+
+    assert "wrong.example" not in cfg.STATUS_API_URL
+    assert "wrong.example" not in cfg.STATUS_PAGE_URL
+    assert "wrong.example" not in cfg.INCIDENTS_API_URL
+    assert cfg.STATUS_API_URL.endswith("/v1/status")
+    assert cfg.INCIDENTS_API_URL.endswith("/v1/incidents")

@@ -33,14 +33,15 @@ class Config:
         )
         self.GUILD_ID: int | None = self._optional_int("GUILD_ID")
         self.DATABASE_PATH: str = os.getenv("DATABASE_PATH", "uptime_tracker.db")
-        self.STATUS_API_URL: str = os.getenv("STATUS_API_URL", _unmask(_HIDDEN_STATUS_API_URL))
-        self.STATUS_PAGE_URL: str = os.getenv("STATUS_PAGE_URL", _unmask(_HIDDEN_STATUS_PAGE_URL))
-        # Derived from the status API rather than configured separately: they
-        # are two routes on one service, and letting them drift would let the
-        # board and its history describe different estates.
-        self.INCIDENTS_API_URL: str = os.getenv(
-            "INCIDENTS_API_URL",
-            self.STATUS_API_URL.replace("/v1/status", "/v1/incidents"),
+        # Fixed rather than configured. The bot reads one status service, and a
+        # setting that can be pointed elsewhere is a setting that can be pointed
+        # at something that does not answer in the shape the board expects.
+        self.STATUS_API_URL: str = _unmask(_HIDDEN_STATUS_API_URL)
+        self.STATUS_PAGE_URL: str = _unmask(_HIDDEN_STATUS_PAGE_URL)
+        # Two routes on one service, so it follows the API rather than standing
+        # on its own.
+        self.INCIDENTS_API_URL: str = self.STATUS_API_URL.replace(
+            "/v1/status", "/v1/incidents"
         )
         self.STATUS_EMOJI: str = os.getenv("STATUS_EMOJI", "🟣")
         # Two separate questions: what to call the board when nothing else names

@@ -60,8 +60,6 @@ docker run --env-file .env discord-uptime-tracker-bot
 - `BOT_OWNER_ID`: Optional owner override
 - `GUILD_ID`: Optional guild for faster command sync during development
 - `DATABASE_PATH`: SQLite file path
-- `STATUS_API_URL`: Optional JSON status API endpoint override
-- `STATUS_PAGE_URL`: Optional public status page URL override
 - `STATUS_EMOJI`: Emoji used for healthy states and presence
 - `BRAND_NAME`: Board title. Set it and it wins; leave it unset and the
   status API's own name is used

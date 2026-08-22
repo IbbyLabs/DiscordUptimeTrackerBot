@@ -45,27 +45,35 @@ def _run(pages):
     return rows, seen
 
 
-# The page loops to total; 100 reaches back about ten days, not thirty.
-def test_it_keeps_paging_until_it_has_them_all() -> None:
-    pages = {0: _page(100, 258, 0), 100: _page(100, 258, 100), 200: _page(58, 258, 200)}
-    rows, seen = _run(pages)
-    assert len(rows) == 258
-    assert len(seen) == 3
+# The panel shows ten, so a wider fetch buys nothing and costs requests against
+# our own Worker. One request, and the largest page it serves.
+def test_it_makes_exactly_one_request() -> None:
+    rows, seen = _run({0: _page(100, 258, 0), 100: _page(100, 258, 100)})
+    assert len(seen) == 1
+    assert len(rows) == 100
 
 
-def test_one_page_is_enough_when_that_is_all_there_is() -> None:
-    rows, seen = _run({0: _page(12, 12, 0)})
-    assert len(rows) == 12
+def test_it_asks_for_the_largest_page() -> None:
+    _, seen = _run({0: _page(100, 258, 0)})
+    assert "limit=100" in seen[0]
+    assert "offset=" not in seen[0]
+
+
+def test_a_failed_request_leaves_the_panel_empty_rather_than_erroring() -> None:
+    rows, seen = _run({0: None})
+    assert rows == []
     assert len(seen) == 1
 
 
-def test_it_stops_rather_than_looping_when_a_page_fails() -> None:
-    rows, seen = _run({0: _page(100, 258, 0), 100: None})
-    assert len(rows) == 100
-    assert len(seen) == 2
+def test_a_service_without_the_label_reads_unknown() -> None:
+    assert status_api.service_state({"last": {"state": "DOWN"}}) == "UNKNOWN"
+    assert status_api.service_state({}) == "UNKNOWN"
 
 
-def test_ids_are_not_duplicated_across_pages() -> None:
-    pages = {0: _page(100, 258, 0), 100: _page(100, 258, 100), 200: _page(58, 258, 200)}
-    rows, _ = _run(pages)
-    assert len({r["id"] for r in rows}) == 258
+def test_the_label_wins_when_both_are_there() -> None:
+    svc = {"displayState": "MAINTENANCE", "last": {"state": "UP"}}
+    assert status_api.service_state(svc) == "MAINTENANCE"
+
+
+def test_a_held_service_reads_down_beneath_its_label() -> None:
+    assert status_api.service_state({"displayState": "RECOVERING"}) == "DOWN"

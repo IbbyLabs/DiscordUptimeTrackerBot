@@ -84,7 +84,7 @@ def test_the_live_payload_loses_the_short_ones() -> None:
 def test_the_panel_names_the_same_scope_as_the_page() -> None:
     lines = format_page_incidents(major_incidents(
         normalise_page_incidents(json.load(open(LIVE))), NOW))
-    assert lines[-1].endswith("major outages in the last 30 days.")
+    assert lines[-1].endswith("Full history on the status page.")
 
 
 # The filter has to be reached by the panel, not merely available beside it.
@@ -110,7 +110,7 @@ def test_the_history_panel_applies_the_rule() -> None:
     named = [line for line in history[2] if "**" in line]
     assert len(named) == 1, f"expected only the long one, got {named}"
     assert "long" in named[0]
-    assert any("last 30 days" in line for line in history[2])
+    assert any("Full history on the status page" in line for line in history[2])
 
 
 # 107 major outages over the window and a panel that shows ten: naming only the
@@ -121,7 +121,7 @@ def test_the_note_says_how_many_the_cap_leaves_out() -> None:
         for n in range(14)
     ]
     lines = format_page_incidents(major_incidents(rows, NOW))
-    assert lines[-1] == "-# 10 most recent of 14 major outages in the last 30 days."
+    assert lines[-1] == "-# The 10 most recent major outages. Full history on the status page."
 
 
 def test_the_note_claims_no_cap_when_there_is_none() -> None:
@@ -130,4 +130,4 @@ def test_the_note_claims_no_cap_when_there_is_none() -> None:
         for n in range(3)
     ]
     lines = format_page_incidents(major_incidents(rows, NOW))
-    assert lines[-1] == "-# Major outages from the last 30 days."
+    assert lines[-1] == "-# Major outages. Full history on the status page."
