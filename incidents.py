@@ -108,10 +108,13 @@ def normalise_page_incidents(payload: Any) -> list[dict[str, Any]]:
 # DEFAULT_MAJOR_INCIDENT_MERGE_WINDOW_MINUTES in the status page's
 # src/incidents.mjs, and nothing tells this copy when those change.
 #
-# The page already applies the rule behind /v1/incidents/history, which answers
-# 401 without credentials this bot does not hold. Once the public handler reads
-# majorOnly from the query string, fetch /v1/incidents?majorOnly=true and delete
-# major_incidents along with these constants.
+# /v1/incidents?majorOnly=true now applies the same rule, and its output agrees
+# with this port on every incident both can see. It is not used because that
+# response carries no `events`: merging several incidents into one leaves no
+# single chain, and the chain is what shows a service degrading before it fails.
+#
+# Remove this port when the filtered response carries the event chain, not
+# merely when the filter is reachable.
 MAJOR_INCIDENT_MINUTES = 30
 MAJOR_INCIDENT_MERGE_WINDOW_MINUTES = 30
 _ACTIVE_STATES = {"DOWN", "DEGRADED", "UNKNOWN"}
