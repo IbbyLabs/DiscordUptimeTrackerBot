@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.8.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.7.1...v0.8.0) (2026-08-22)
+
+
+### Features
+
+* **tracker:** pin the panels, and post known issues only when set ([a582102](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/a5821025cbdc03822dd1852e36dcb99cf583fd99))
+* **tracker:** point transient alerts at the pinned panels ([81bfc42](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/81bfc422d7b4e38e7bfdbebed9b514a6ff421dd7))
+* **tracker:** read the page's verdict, group states and section order ([2189873](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/21898730ca5201d4364158117bbdf535eff6cd8e))
+
 ## [0.7.1](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.7.0...v0.7.1) (2026-08-22)
 
 
