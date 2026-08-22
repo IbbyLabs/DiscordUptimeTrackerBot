@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 from incidents import (
     MAJOR_INCIDENT_MINUTES,
@@ -7,7 +8,8 @@ from incidents import (
     normalise_page_incidents,
 )
 
-LIVE = "/home/ubuntu/.claude/jobs/e7d81c08/tmp/inc.json"
+FIXTURES = Path(__file__).parent / "fixtures"
+LIVE = FIXTURES / "incidents.json"
 NOW = 1_787_400_000_000  # fixed, so nothing here depends on the clock
 MINUTE = 60_000
 

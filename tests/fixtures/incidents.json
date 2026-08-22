@@ -1,0 +1,1331 @@
+{
+  "incidents": [
+    {
+      "id": "subsource-strem-top-2026-08-21T22:15:05.991Z",
+      "service": {
+        "id": "subsource-strem-top",
+        "name": "SubSource Subtitles",
+        "group": "Subtitles"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-21T22:15:05.991Z",
+      "closedAt": "2026-08-21T22:50:21.531Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-21T22:15:05.991Z",
+          "duration": "35m 15s",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-21T22:50:21.531Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "stremio-app-2026-08-21T18:59:00.042Z",
+      "service": {
+        "id": "stremio-app",
+        "name": "Stremio App",
+        "group": "Stremio"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-21T18:59:00.042Z",
+      "closedAt": null,
+      "error": "HTTP 503",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-21T18:59:00.042Z",
+          "duration": null,
+          "error": "HTTP 503"
+        }
+      ]
+    },
+    {
+      "id": "aiometadata-atbp-2026-08-21T18:17:05.740Z",
+      "service": {
+        "id": "aiometadata-atbp",
+        "name": "AIOMetadata (ATBP)",
+        "group": "AIOMetadata"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-21T18:17:05.740Z",
+      "closedAt": "2026-08-21T18:39:05.888Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-21T18:17:05.740Z",
+          "duration": "22m 0s",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-21T18:39:05.888Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "stremthru-atbp-2026-08-21T18:17:04.002Z",
+      "service": {
+        "id": "stremthru-atbp",
+        "name": "StremThru (ATBP)",
+        "group": "StremThru"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-21T18:17:04.002Z",
+      "closedAt": "2026-08-21T18:39:03.756Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-21T18:17:04.002Z",
+          "duration": "21m 59s",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-21T18:39:03.756Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "aiostreams-atbp-2026-08-21T18:17:02.506Z",
+      "service": {
+        "id": "aiostreams-atbp",
+        "name": "AIOStreams (ATBP Stable)",
+        "group": "AIOStreams"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-21T18:17:02.506Z",
+      "closedAt": "2026-08-21T18:39:02.173Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-21T18:17:02.506Z",
+          "duration": "21m 59s",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-21T18:39:02.173Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "tmdb-elfhosted-2026-08-21T17:59:04.332Z",
+      "service": {
+        "id": "tmdb-elfhosted",
+        "name": "TMDB (ElfHosted)",
+        "group": "Metadata & Catalogs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-21T17:59:04.332Z",
+      "closedAt": null,
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DEGRADED",
+          "startedAt": "2026-08-21T17:59:04.332Z",
+          "duration": "7m 59s",
+          "error": "High latency detected"
+        },
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-21T18:07:04.181Z",
+          "duration": null,
+          "error": "timeout"
+        }
+      ]
+    },
+    {
+      "id": "webstreamrmbg-2026-08-21T15:55:01.090Z",
+      "service": {
+        "id": "webstreamrmbg",
+        "name": "WebStreamr MBG",
+        "group": "Content Scrapers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-21T15:55:01.090Z",
+      "closedAt": "2026-08-21T20:43:03.080Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-21T15:55:01.090Z",
+          "duration": "4h 48m",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-21T20:43:03.080Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "torbox-app-2026-08-21T15:33:13.665Z",
+      "service": {
+        "id": "torbox-app",
+        "name": "Torbox",
+        "group": "Debrid Services"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-21T15:33:13.665Z",
+      "closedAt": "2026-08-21T18:43:16.763Z",
+      "error": "Timeout or unreachable",
+      "events": [
+        {
+          "state": "DEGRADED",
+          "startedAt": "2026-08-21T15:33:13.665Z",
+          "duration": "3m 55s",
+          "error": null
+        },
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-21T15:37:09.313Z",
+          "duration": "3h 6m",
+          "error": null
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-21T18:43:16.763Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "torbox-app-2026-08-21T04:46:51.178Z",
+      "service": {
+        "id": "torbox-app",
+        "name": "Torbox",
+        "group": "Debrid Services"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-21T04:46:51.178Z",
+      "closedAt": "2026-08-21T08:06:42.389Z",
+      "error": "Timeout or unreachable",
+      "events": [
+        {
+          "state": "DEGRADED",
+          "startedAt": "2026-08-21T04:46:51.178Z",
+          "duration": "3m 54s",
+          "error": null
+        },
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-21T04:50:45.910Z",
+          "duration": "3h 15m",
+          "error": null
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-21T08:06:42.389Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "webstreamrmbg-2026-08-21T00:08:41.669Z",
+      "service": {
+        "id": "webstreamrmbg",
+        "name": "WebStreamr MBG",
+        "group": "Content Scrapers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-21T00:08:41.669Z",
+      "closedAt": "2026-08-21T03:54:41.662Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-21T00:08:41.669Z",
+          "duration": "3h 45m",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-21T03:54:41.662Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "aiostreams-wizaardd-stable-2026-08-21T00:06:42.607Z",
+      "service": {
+        "id": "aiostreams-wizaardd-stable",
+        "name": "AIOStreams (Wizaardd Stable)",
+        "group": "AIOStreams"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-21T00:06:42.607Z",
+      "closedAt": "2026-08-21T00:34:42.893Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-21T00:06:42.607Z",
+          "duration": "28m 0s",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-21T00:34:42.893Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "torbox-app-2026-08-20T23:56:47.389Z",
+      "service": {
+        "id": "torbox-app",
+        "name": "Torbox",
+        "group": "Debrid Services"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T23:56:47.389Z",
+      "closedAt": "2026-08-21T02:50:45.541Z",
+      "error": "Timeout or unreachable",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T23:56:47.389Z",
+          "duration": "2h 53m",
+          "error": null
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-21T02:50:45.541Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "trakt-api-2026-08-20T21:38:45.010Z",
+      "service": {
+        "id": "trakt-api",
+        "name": "Trakt API",
+        "group": "Progress Trackers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T21:38:45.010Z",
+      "closedAt": "2026-08-21T04:24:43.870Z",
+      "error": "navigation_failed",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T21:38:45.010Z",
+          "duration": "6h 45m",
+          "error": "navigation_failed"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-21T04:24:43.870Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "tmdb-elfhosted-2026-08-20T20:50:16.219Z",
+      "service": {
+        "id": "tmdb-elfhosted",
+        "name": "TMDB (ElfHosted)",
+        "group": "Metadata & Catalogs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T20:50:16.219Z",
+      "closedAt": "2026-08-21T04:42:42.848Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T20:50:16.219Z",
+          "duration": "7h 52m",
+          "error": null
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-21T04:42:42.848Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "webstreamrmbg-2026-08-20T20:50:13.026Z",
+      "service": {
+        "id": "webstreamrmbg",
+        "name": "WebStreamr MBG",
+        "group": "Content Scrapers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T20:50:13.026Z",
+      "closedAt": "2026-08-20T23:06:41.686Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T20:50:13.026Z",
+          "duration": "2h 16m",
+          "error": null
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-20T23:06:41.686Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "xperience-2026-08-20T18:12:23.211Z",
+      "service": {
+        "id": "xperience",
+        "name": "Xperience",
+        "group": "Metadata & Catalogs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T18:12:23.211Z",
+      "closedAt": "2026-08-20T19:00:25.815Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T18:12:23.211Z",
+          "duration": "48m 2s",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-20T19:00:25.815Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "tmdb-elfhosted-2026-08-20T17:38:17.824Z",
+      "service": {
+        "id": "tmdb-elfhosted",
+        "name": "TMDB (ElfHosted)",
+        "group": "Metadata & Catalogs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T17:38:17.824Z",
+      "closedAt": "2026-08-21T04:42:42.848Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DEGRADED",
+          "startedAt": "2026-08-20T17:38:17.824Z",
+          "duration": "12m 2s",
+          "error": "High latency detected"
+        },
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T17:50:20.187Z",
+          "duration": "10h 52m",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-21T04:42:42.848Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "webstreamrmbg-2026-08-20T17:20:12.939Z",
+      "service": {
+        "id": "webstreamrmbg",
+        "name": "WebStreamr MBG",
+        "group": "Content Scrapers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T17:20:12.939Z",
+      "closedAt": "2026-08-20T23:06:41.686Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T17:20:12.939Z",
+          "duration": "5h 46m",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-20T23:06:41.686Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "premiumize-2026-08-20T17:20:11.827Z",
+      "service": {
+        "id": "premiumize",
+        "name": "Premiumize",
+        "group": "Debrid Services"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T17:20:11.827Z",
+      "closedAt": "2026-08-20T18:08:12.149Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T17:20:11.827Z",
+          "duration": "48m 0s",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-20T18:08:12.149Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "webstreamrmbg-2026-08-20T14:50:13.549Z",
+      "service": {
+        "id": "webstreamrmbg",
+        "name": "WebStreamr MBG",
+        "group": "Content Scrapers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T14:50:13.549Z",
+      "closedAt": "2026-08-20T15:18:13.760Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T14:50:13.549Z",
+          "duration": "28m 0s",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-20T15:18:13.760Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "torbox-app-2026-08-20T14:36:30.575Z",
+      "service": {
+        "id": "torbox-app",
+        "name": "Torbox",
+        "group": "Debrid Services"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T14:36:30.575Z",
+      "closedAt": "2026-08-20T19:32:24.171Z",
+      "error": "Timeout or unreachable",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T14:36:30.575Z",
+          "duration": "4h 55m",
+          "error": null
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-20T19:32:24.171Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "offcloud-2026-08-20T14:02:25.895Z",
+      "service": {
+        "id": "offcloud",
+        "name": "Offcloud",
+        "group": "Debrid Services"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T14:02:25.895Z",
+      "closedAt": "2026-08-20T14:38:11.812Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DEGRADED",
+          "startedAt": "2026-08-20T14:02:25.895Z",
+          "duration": "11m 59s",
+          "error": "High latency detected"
+        },
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T14:14:25.187Z",
+          "duration": "23m 46s",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-20T14:38:11.812Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "eweka-2026-08-20T13:40:31.471Z",
+      "service": {
+        "id": "eweka",
+        "name": "Eweka",
+        "group": "Usenet Providers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T13:40:31.471Z",
+      "closedAt": "2026-08-20T17:02:26.919Z",
+      "error": "HTTP 503",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T13:40:31.471Z",
+          "duration": "3h 21m",
+          "error": "HTTP 503"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-20T17:02:26.919Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "torbox-app-2026-08-20T06:16:35.335Z",
+      "service": {
+        "id": "torbox-app",
+        "name": "Torbox",
+        "group": "Debrid Services"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T06:16:35.335Z",
+      "closedAt": "2026-08-20T06:42:30.670Z",
+      "error": "Timeout or unreachable",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T06:16:35.335Z",
+          "duration": "25m 55s",
+          "error": null
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-20T06:42:30.670Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "tmdb-elfhosted-2026-08-20T04:06:33.534Z",
+      "service": {
+        "id": "tmdb-elfhosted",
+        "name": "TMDB (ElfHosted)",
+        "group": "Metadata & Catalogs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T04:06:33.534Z",
+      "closedAt": "2026-08-20T04:30:33.298Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T04:06:33.534Z",
+          "duration": "23m 59s",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-20T04:30:33.298Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "aiostreams-wizaardd-stable-2026-08-20T01:42:52.929Z",
+      "service": {
+        "id": "aiostreams-wizaardd-stable",
+        "name": "AIOStreams (Wizaardd Stable)",
+        "group": "AIOStreams"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-20T01:42:52.929Z",
+      "closedAt": "2026-08-20T02:06:52.806Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-20T01:42:52.929Z",
+          "duration": "23m 59s",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-20T02:06:52.806Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "aiometadata-omni-2026-08-19T18:09:01.203Z",
+      "service": {
+        "id": "aiometadata-omni",
+        "name": "AIOMetadata (Omni)",
+        "group": "AIOMetadata"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-19T18:09:01.203Z",
+      "closedAt": "2026-08-19T23:10:56.177Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-19T18:09:01.203Z",
+          "duration": "5h 1m",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-19T23:10:56.177Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "aiostreams-omni-2026-08-19T18:08:53.969Z",
+      "service": {
+        "id": "aiostreams-omni",
+        "name": "AIOStreams (Omni Stable)",
+        "group": "AIOStreams"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-19T18:08:53.969Z",
+      "closedAt": "2026-08-19T23:10:52.803Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-19T18:08:53.969Z",
+          "duration": "5h 1m",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-19T23:10:52.803Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "webstreamrmbg-2026-08-19T17:50:51.755Z",
+      "service": {
+        "id": "webstreamrmbg",
+        "name": "WebStreamr MBG",
+        "group": "Content Scrapers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-19T17:50:51.755Z",
+      "closedAt": "2026-08-20T04:42:31.945Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-19T17:50:51.755Z",
+          "duration": "10h 51m",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-20T04:42:31.945Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "webstreamrmbg-2026-08-19T16:56:51.751Z",
+      "service": {
+        "id": "webstreamrmbg",
+        "name": "WebStreamr MBG",
+        "group": "Content Scrapers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-19T16:56:51.751Z",
+      "closedAt": "2026-08-19T17:28:51.895Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-19T16:56:51.751Z",
+          "duration": "32m 0s",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-19T17:28:51.895Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "xperience-2026-08-19T14:49:00.532Z",
+      "service": {
+        "id": "xperience",
+        "name": "Xperience",
+        "group": "Metadata & Catalogs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-19T14:49:00.532Z",
+      "closedAt": "2026-08-19T17:13:01.480Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-19T14:49:00.532Z",
+          "duration": "2h 24m",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-19T17:13:01.480Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "webstreamrmbg-2026-08-19T13:44:54.542Z",
+      "service": {
+        "id": "webstreamrmbg",
+        "name": "WebStreamr MBG",
+        "group": "Content Scrapers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-19T13:44:54.542Z",
+      "closedAt": "2026-08-19T14:08:54.862Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-19T13:44:54.542Z",
+          "duration": "24m 0s",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-19T14:08:54.862Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "drunkenslug-2026-08-19T13:12:57.588Z",
+      "service": {
+        "id": "drunkenslug",
+        "name": "DrunkenSlug",
+        "group": "Usenet Indexers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-19T13:12:57.588Z",
+      "closedAt": "2026-08-19T13:32:57.695Z",
+      "error": "HTTP 503",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-19T13:12:57.588Z",
+          "duration": "20m 0s",
+          "error": "HTTP 503"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-19T13:32:57.695Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "tmdb-elfhosted-2026-08-19T01:24:55.743Z",
+      "service": {
+        "id": "tmdb-elfhosted",
+        "name": "TMDB (ElfHosted)",
+        "group": "Metadata & Catalogs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-19T01:24:55.743Z",
+      "closedAt": "2026-08-19T03:56:55.660Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DEGRADED",
+          "startedAt": "2026-08-19T01:24:55.743Z",
+          "duration": "6m 0s",
+          "error": "High latency detected"
+        },
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-19T01:30:55.833Z",
+          "duration": "2h 25m",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-19T03:56:55.660Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "aiometadata-omni-2026-08-18T23:16:56.472Z",
+      "service": {
+        "id": "aiometadata-omni",
+        "name": "AIOMetadata (Omni)",
+        "group": "AIOMetadata"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T23:16:56.472Z",
+      "closedAt": "2026-08-19T01:52:56.201Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T23:16:56.472Z",
+          "duration": "2h 35m",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-19T01:52:56.201Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "aiostreams-omni-2026-08-18T23:16:55.400Z",
+      "service": {
+        "id": "aiostreams-omni",
+        "name": "AIOStreams (Omni Stable)",
+        "group": "AIOStreams"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T23:16:55.400Z",
+      "closedAt": "2026-08-19T01:54:55.232Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T23:16:55.400Z",
+          "duration": "2h 37m",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-19T01:54:55.232Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "webstreamrmbg-2026-08-18T18:10:50.778Z",
+      "service": {
+        "id": "webstreamrmbg",
+        "name": "WebStreamr MBG",
+        "group": "Content Scrapers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T18:10:50.778Z",
+      "closedAt": "2026-08-19T03:08:54.492Z",
+      "error": "timeout",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T18:10:50.778Z",
+          "duration": "8h 58m",
+          "error": "timeout"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-19T03:08:54.492Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "vps-proxy-2026-08-18T06:09:21.217Z",
+      "service": {
+        "id": "vps-proxy",
+        "name": "VPS Proxy",
+        "group": "IbbyLabs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T06:09:21.217Z",
+      "closedAt": "2026-08-18T06:27:00.987Z",
+      "error": "HTTP 525",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T06:09:21.217Z",
+          "duration": "17m 39s",
+          "error": "HTTP 525"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-18T06:27:00.987Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "nzbfinder-2026-08-18T06:09:20.030Z",
+      "service": {
+        "id": "nzbfinder",
+        "name": "NZBFinder",
+        "group": "Usenet Indexers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T06:09:20.030Z",
+      "closedAt": "2026-08-18T06:27:00.833Z",
+      "error": "proxy_error: status=525 error code: 525\n",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T06:09:20.030Z",
+          "duration": "17m 40s",
+          "error": "proxy_error: status=525 error code: 525\n"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-18T06:27:00.833Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "drunkenslug-2026-08-18T06:09:20.028Z",
+      "service": {
+        "id": "drunkenslug",
+        "name": "DrunkenSlug",
+        "group": "Usenet Indexers"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T06:09:20.028Z",
+      "closedAt": "2026-08-18T06:27:00.814Z",
+      "error": "proxy_error: status=525 error code: 525\n",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T06:09:20.028Z",
+          "duration": "17m 40s",
+          "error": "proxy_error: status=525 error code: 525\n"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-18T06:27:00.814Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "xrdb-ibbylabs-2026-08-18T06:09:19.644Z",
+      "service": {
+        "id": "xrdb-ibbylabs",
+        "name": "eXtended Ratings DataBase (XRDB)",
+        "group": "Metadata & Catalogs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T06:09:19.644Z",
+      "closedAt": "2026-08-18T06:27:00.731Z",
+      "error": "HTTP 525",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T06:09:19.644Z",
+          "duration": "17m 41s",
+          "error": "HTTP 525"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-18T06:27:00.731Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "xrdb-ibbylabs-dev-2026-08-18T06:09:19.338Z",
+      "service": {
+        "id": "xrdb-ibbylabs-dev",
+        "name": "eXtended Ratings DataBase (XRDB Dev Build)",
+        "group": "Metadata & Catalogs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T06:09:19.338Z",
+      "closedAt": "2026-08-18T06:27:00.702Z",
+      "error": "HTTP 525",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T06:09:19.338Z",
+          "duration": "17m 41s",
+          "error": "HTTP 525"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-18T06:27:00.702Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "xperience-2026-08-18T06:09:19.079Z",
+      "service": {
+        "id": "xperience",
+        "name": "Xperience",
+        "group": "Metadata & Catalogs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T06:09:19.079Z",
+      "closedAt": "2026-08-18T06:27:00.697Z",
+      "error": "proxy_error: status=404 404 page not found\n",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T06:09:19.079Z",
+          "duration": "17m 41s",
+          "error": "proxy_error: status=404 404 page not found\n"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-18T06:27:00.697Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "uptime-proxy-ibbylabs-2026-08-18T06:09:01.343Z",
+      "service": {
+        "id": "uptime-proxy-ibbylabs",
+        "name": "UptimeProxy",
+        "group": "IbbyLabs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T06:09:01.343Z",
+      "closedAt": "2026-08-18T06:27:00.568Z",
+      "error": "HTTP 525",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T06:09:01.343Z",
+          "duration": "17m 59s",
+          "error": "HTTP 525"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-18T06:27:00.568Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "ttsr-ibbylabs-2026-08-18T06:09:01.271Z",
+      "service": {
+        "id": "ttsr-ibbylabs",
+        "name": "TikTok Stream Relay (TTSR)",
+        "group": "IbbyLabs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T06:09:01.271Z",
+      "closedAt": "2026-08-18T06:27:00.526Z",
+      "error": "HTTP 525",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T06:09:01.271Z",
+          "duration": "17m 59s",
+          "error": "HTTP 525"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-18T06:27:00.526Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "mediastorm-ibbylabs-2026-08-18T06:09:01.255Z",
+      "service": {
+        "id": "mediastorm-ibbylabs",
+        "name": "MediaStorm",
+        "group": "IbbyLabs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T06:09:01.255Z",
+      "closedAt": "2026-08-18T06:27:00.482Z",
+      "error": "HTTP 525",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T06:09:01.255Z",
+          "duration": "17m 59s",
+          "error": "HTTP 525"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-18T06:27:00.482Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "submaker-ibbylabs-2026-08-18T06:09:01.236Z",
+      "service": {
+        "id": "submaker-ibbylabs",
+        "name": "Submaker",
+        "group": "IbbyLabs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T06:09:01.236Z",
+      "closedAt": "2026-08-18T06:27:00.427Z",
+      "error": "HTTP 525",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T06:09:01.236Z",
+          "duration": "17m 59s",
+          "error": "HTTP 525"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-18T06:27:00.427Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "aiomanager-ibbylabs-2026-08-18T06:09:01.204Z",
+      "service": {
+        "id": "aiomanager-ibbylabs",
+        "name": "AIOManager (IbbyLabs)",
+        "group": "AIOManager"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T06:09:01.204Z",
+      "closedAt": "2026-08-18T06:27:00.416Z",
+      "error": "HTTP 523",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T06:09:01.204Z",
+          "duration": "17m 59s",
+          "error": "HTTP 523"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-18T06:27:00.416Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "tbm-ibbylabs-2026-08-18T06:09:01.179Z",
+      "service": {
+        "id": "tbm-ibbylabs",
+        "name": "(TBM) Torbox Account Manager (IbbyLabs)",
+        "group": "IbbyLabs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T06:09:01.179Z",
+      "closedAt": "2026-08-18T06:27:00.326Z",
+      "error": "HTTP 523",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T06:09:01.179Z",
+          "duration": "17m 59s",
+          "error": "HTTP 523"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-18T06:27:00.326Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    },
+    {
+      "id": "watchmuse-ibbylabs-2026-08-18T06:09:00.903Z",
+      "service": {
+        "id": "watchmuse-ibbylabs",
+        "name": "WatchMuse",
+        "group": "IbbyLabs"
+      },
+      "state": "DOWN",
+      "openedAt": "2026-08-18T06:09:00.903Z",
+      "closedAt": "2026-08-18T06:27:00.173Z",
+      "error": "HTTP 525",
+      "events": [
+        {
+          "state": "DOWN",
+          "startedAt": "2026-08-18T06:09:00.903Z",
+          "duration": "17m 59s",
+          "error": "HTTP 525"
+        },
+        {
+          "state": "UP",
+          "startedAt": "2026-08-18T06:27:00.173Z",
+          "duration": "0s",
+          "error": null
+        }
+      ]
+    }
+  ],
+  "limit": 50,
+  "offset": 0,
+  "total": 257
+}

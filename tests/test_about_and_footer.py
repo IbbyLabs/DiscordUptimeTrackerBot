@@ -8,6 +8,10 @@ os.environ.setdefault("STATUS_API_URL", "http://localhost/api")
 from cogs.uptime import UptimeCog
 from ui.status_layout import AboutLayout
 
+from pathlib import Path
+
+FIXTURES = Path(__file__).parent / "fixtures"
+
 
 def _cog(version="1.2.3"):
     cog = UptimeCog.__new__(UptimeCog)
@@ -65,7 +69,7 @@ def test_about_uses_the_guilds_page_url_and_emoji() -> None:
 def test_the_board_footer_credits_ibbylabs_and_names_the_build() -> None:
     import json
     from ui.status_layout import StatusLayout
-    data = json.load(open("/home/ubuntu/.claude/jobs/e7d81c08/tmp/live.json"))
+    data = json.load(open(FIXTURES / "status.json"))
     body = _text(StatusLayout(_cog(version="7.8.9"), data))
     assert "Developed by IbbyLabs • v7.8.9" in body
 
@@ -75,7 +79,7 @@ def test_the_board_footer_credits_ibbylabs_and_names_the_build() -> None:
 def test_the_board_carries_no_links_beyond_the_status_page() -> None:
     import json
     from ui.status_layout import StatusLayout
-    data = json.load(open("/home/ubuntu/.claude/jobs/e7d81c08/tmp/live.json"))
+    data = json.load(open(FIXTURES / "status.json"))
     view = StatusLayout(_cog(), data)
     for unwanted in ("kofi.ibbylabs.dev", "discord.ibbylabs.dev", "dm.ibbylabs.dev"):
         assert unwanted not in "\n".join(_urls(view)) + _text(view), unwanted

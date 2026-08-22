@@ -2,7 +2,11 @@ import json
 
 from incidents import format_page_incidents, normalise_page_incidents
 
-LIVE = "/home/ubuntu/.claude/jobs/e7d81c08/tmp/inc.json"
+from pathlib import Path
+
+FIXTURES = Path(__file__).parent / "fixtures"
+
+LIVE = FIXTURES / "incidents.json"
 
 
 def _row(name="Api", opened="2026-08-21T10:00:00.000Z", closed=None, group="Debrid"):

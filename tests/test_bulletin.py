@@ -9,6 +9,10 @@ os.environ.setdefault("STATUS_API_URL", "http://localhost/api")
 from cogs.uptime import UptimeCog
 from ui.status_layout import StatusLayout
 
+from pathlib import Path
+
+FIXTURES = Path(__file__).parent / "fixtures"
+
 
 def _cog():
     cog = UptimeCog.__new__(UptimeCog)
@@ -77,7 +81,7 @@ def test_no_affected_services_omits_the_line() -> None:
 
 # It goes above what the board derives, because a state cannot say it.
 def test_the_bulletin_is_the_first_thing_on_the_board() -> None:
-    data = json.load(open("/home/ubuntu/.claude/jobs/e7d81c08/tmp/live.json"))
+    data = json.load(open(FIXTURES / "status.json"))
     data["bulletin"] = _bulletin()
     body = "\n".join(
         getattr(c, "content", "") or "" for c in StatusLayout(_cog(), data).walk_children()
@@ -89,7 +93,7 @@ def test_the_bulletin_is_the_first_thing_on_the_board() -> None:
 
 
 def test_a_board_with_no_bulletin_is_unchanged() -> None:
-    data = json.load(open("/home/ubuntu/.claude/jobs/e7d81c08/tmp/live.json"))
+    data = json.load(open(FIXTURES / "status.json"))
     body = "\n".join(
         getattr(c, "content", "") or "" for c in StatusLayout(_cog(), data).walk_children()
     )
