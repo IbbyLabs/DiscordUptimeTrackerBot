@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.7](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.6...v0.8.7) (2026-08-22)
+
+
+### Bug Fixes
+
+* **board:** mark a floored outage start as approximate ([6ba4dc6](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/6ba4dc64e6de39127e05397aaf4b2776f40ee1e5))
+
 ## [0.8.6](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.5...v0.8.6) (2026-08-22)
 
 
