@@ -115,3 +115,37 @@ def test_a_down_group_is_still_drawn_as_down() -> None:
     members = [s for s in DATA["services"] if s["group"] == "Tools"]
     line = _cog().group_summary_line("Tools", cast(Any, members), "🟢", "DOWN")
     assert line.startswith("🔴"), line
+
+
+# A verdict of UP with services down is still UP. The page stopped calling that
+# an all-clear, and a board that still does contradicts it.
+def test_an_up_verdict_with_services_down_is_not_an_all_clear() -> None:
+    data = {
+        **DATA,
+        "overall": {
+            "state": "UP",
+            "reason": "2 services not responding",
+            "headline": "Mostly Operational",
+        },
+    }
+    text = _cog().get_status_text(cast(Any, data["services"]), "🟢", cast(Any, data))
+    assert "All Systems Operational" not in text, text
+    assert "Mostly Operational" in text
+    assert "2 services not responding" in text
+
+
+def test_a_clean_estate_still_reads_as_the_all_clear() -> None:
+    data = {
+        **DATA,
+        "overall": {
+            "state": "UP",
+            "reason": "all services are responding",
+            "headline": "All Systems Operational",
+        },
+    }
+    assert _cog().get_status_text(cast(Any, data["services"]), "🟢", cast(Any, data)) == "🟢 All Systems Operational"
+
+
+def test_a_payload_without_a_headline_keeps_the_old_wording() -> None:
+    data = {**DATA, "overall": {"state": "UP", "reason": "all services are responding"}}
+    assert _cog().get_status_text(cast(Any, data["services"]), "🟢", cast(Any, data)) == "🟢 All Systems Operational"

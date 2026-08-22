@@ -34,6 +34,8 @@ from ui.status_layout import (
 log = logging.getLogger("uptimebot.cogs.uptime")
 
 PANEL_KEYS = ("outages", "known_issues", "history")
+# The words the page prints when nothing is impacted.
+ALL_CLEAR = "All Systems Operational"
 # Pinned panels sit at the top of the channel rather than scrolling away.
 PINNED_PANELS = PANEL_KEYS
 
@@ -489,7 +491,14 @@ class UptimeCog(commands.Cog):
             if verdict["state"] == "DEGRADED":
                 return f"🟡 {sentence}" if sentence else "🟡 Services Degraded"
             if verdict["state"] == "UP":
-                return f"{self.get_state_emoji('UP', healthy)} All Systems Operational"
+                # A verdict of UP with services down is still UP, and the page
+                # stopped calling that an all-clear. Saying it here anyway would
+                # put the two boards back into disagreement.
+                headline = verdict.get("headline") or ALL_CLEAR
+                emoji = self.get_state_emoji("UP", healthy)
+                if headline != ALL_CLEAR and sentence:
+                    return f"{emoji} {headline} · {sentence}"
+                return f"{emoji} {headline}"
 
         # Counted the same way as the headline numbers, so the sentence and the
         # figures beneath it cannot disagree about how many are down.

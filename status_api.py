@@ -84,7 +84,13 @@ def overall(data: dict[str, Any]) -> dict[str, Any] | None:
     if not isinstance(value, dict):
         return None
     state = str(value.get("state") or "").upper()
-    return {"state": state, "reason": str(value.get("reason") or "")} if state else None
+    if not state:
+        return None
+    return {
+        "state": state,
+        "reason": str(value.get("reason") or ""),
+        "headline": str(value.get("headline") or ""),
+    }
 
 
 def published_groups(data: dict[str, Any]) -> list[dict[str, Any]]:
