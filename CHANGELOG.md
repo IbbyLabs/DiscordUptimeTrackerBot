@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.0...v0.8.1) (2026-08-22)
+
+
+### Bug Fixes
+
+* **tracker:** pin a panel that already exists ([464bc40](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/464bc4005c70f88cb9cd811d13f016bc9dd7dc33))
+
 ## [0.8.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.7.1...v0.8.0) (2026-08-22)
 
 
