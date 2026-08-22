@@ -102,6 +102,8 @@ def test_the_history_panel_applies_the_rule() -> None:
         known_issues=lambda _d: [],
         outage_line=lambda _s: "",
         known_issue_line=lambda _s: "",
+        bulletin=lambda _d: None,
+        bulletin_lines=lambda _b: [],
     )
     # Few enough rows that the display cap cannot stand in for the filter.
     rows = [_row("short", -200, -190), _row("brief", -100, -95), _row("long", -300, -240)]

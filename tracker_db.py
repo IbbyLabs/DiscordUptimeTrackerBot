@@ -248,6 +248,14 @@ class TrackerDatabase:
             )
             await db.commit()
 
+    async def delete_panel_message(self, guild_id: str, panel: str) -> None:
+        async with aiosqlite.connect(self.path) as db:
+            await db.execute(
+                "DELETE FROM panel_messages WHERE guild_id = ? AND panel = ?",
+                (guild_id, panel),
+            )
+            await db.commit()
+
     async def delete_panel_messages(self, guild_id: str) -> None:
         async with aiosqlite.connect(self.path) as db:
             await db.execute("DELETE FROM panel_messages WHERE guild_id = ?", (guild_id,))

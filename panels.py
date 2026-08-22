@@ -26,7 +26,8 @@ def build_panel_specs(
 
     outages = cog.active_outages(data)
     issues = cog.known_issues(data)
-    return [
+    bulletin = cog.bulletin(data)
+    specs: list[PanelSpec] = [
         (
             "outages",
             f"## 🔴 Active outages\n{len(outages)} not responding"
@@ -34,18 +35,23 @@ def build_panel_specs(
             [cog.outage_line(service) for service in outages] or ["Everything is responding."],
             OUTAGE_RED if outages else HEALTHY_GREEN,
         ),
-        (
-            "known_issues",
-            f"## 🛠️ Known issues\n{len(issues)} with a stated reason"
-            if issues else "## 🛠️ Known issues",
-            [cog.known_issue_line(service) for service in issues]
-            or ["Nothing is in maintenance."],
-            MAINTENANCE_AMBER,
-        ),
+    ]
+    # Only when it has something to say. A panel reading "nothing is in
+    # maintenance" is one nobody reads on the day it matters.
+    if issues or bulletin:
+        lines = list(cog.bulletin_lines(bulletin)) if bulletin else []
+        if lines and issues:
+            lines.append("")
+        lines.extend(cog.known_issue_line(service) for service in issues)
+        heading = f"## 🛠️ Known issues\n{len(issues)} with a stated reason" if issues \
+            else "## 🛠️ Known issues"
+        specs.append(("known_issues", heading, lines, MAINTENANCE_AMBER))
+    specs.append(
         (
             "history",
             "## 📡 Incident history",
             format_page_incidents(major_incidents(incidents, int(time.time() * 1000))),
             HISTORY_BLURPLE,
-        ),
-    ]
+        )
+    )
+    return specs

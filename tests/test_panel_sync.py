@@ -11,8 +11,14 @@ from tracker_db import TrackerDatabase
 
 
 class FakeMessage:
-    def __init__(self, mid): self.id = mid; self.edited = 0
+    def __init__(self, mid):
+        self.id = mid
+        self.edited = 0
+        self.pinned = 0
+        self.unpinned = 0
     async def edit(self, **_): self.edited += 1
+    async def pin(self, **_): self.pinned += 1
+    async def unpin(self, **_): self.unpinned += 1
 
 
 class FakeChannel(discord.TextChannel):
@@ -33,7 +39,12 @@ class FakeChannel(discord.TextChannel):
     async def send(self, **_):
         self.sent += 1
         self.next_id += 1
-        return FakeMessage(self.next_id)
+        self.last_sent = FakeMessage(self.next_id)
+        return self.last_sent
+
+
+async def _ready(value):
+    return value
 
 
 async def _db():
@@ -44,7 +55,12 @@ async def _db():
 
 def _cog(db):
     cog = UptimeCog.__new__(UptimeCog)
-    cast(Any, cog).bot = SimpleNamespace(db=db)
+    # No channel by default: a test that cares about the old message hands one back.
+    cast(Any, cog).bot = SimpleNamespace(
+        db=db,
+        get_channel=lambda _id: None,
+        fetch_channel=lambda _id: _ready(None),
+    )
     return cog
 
 
@@ -159,10 +175,6 @@ def test_stopping_alerts_removes_the_panels_and_their_records() -> None:
     asyncio.run(run())
 
 
-async def _ready(value):
-    return value
-
-
 # A panel someone already deleted should not stop the rest being cleaned up.
 def test_a_missing_panel_message_does_not_block_the_cleanup() -> None:
     async def run():
@@ -174,6 +186,78 @@ def test_a_missing_panel_message_does_not_block_the_cleanup() -> None:
             await db.upsert_panel_message("g", "outages", "1", "999")
             assert await cog.delete_panels("g") == 1
             assert await db.get_panel_message("g", "outages") is None
+        finally:
+            os.unlink(path)
+    asyncio.run(run())
+
+
+# A panel people are meant to find without scrolling has to be pinned, and the
+# pin has to follow the message it belongs to.
+def test_a_new_panel_is_pinned() -> None:
+    async def run():
+        db, path = await _db()
+        try:
+            ch = FakeChannel()
+            await _cog(db).sync_panel("g", "outages", cast(Any, ch), cast(Any, object()))
+            assert ch.last_sent.pinned == 1
+        finally:
+            os.unlink(path)
+    asyncio.run(run())
+
+
+def test_editing_in_place_does_not_pin_again() -> None:
+    async def run():
+        db, path = await _db()
+        try:
+            cog = _cog(db)
+            ch = FakeChannel()
+            await cog.sync_panel("g", "outages", cast(Any, ch), cast(Any, object()))
+            first = ch.last_sent
+            ch._existing = first
+            await cog.sync_panel("g", "outages", cast(Any, ch), cast(Any, object()))
+            assert first.edited == 1
+            assert first.pinned == 1, "an edit re-pinned a message that was already pinned"
+        finally:
+            os.unlink(path)
+    asyncio.run(run())
+
+
+# Without this the pin list only ever grows, and stops describing what is current.
+def test_a_panel_that_moves_channel_unpins_the_one_it_leaves() -> None:
+    async def run():
+        db, path = await _db()
+        try:
+            cog = _cog(db)
+            first = FakeChannel(cid=1)
+            await cog.sync_panel("g", "outages", cast(Any, first), cast(Any, object()))
+            old = first.last_sent
+            first._existing = old
+            cast(Any, cog).bot.get_channel = lambda cid: first if cid == 1 else None
+            second = FakeChannel(cid=2)
+            await cog.sync_panel("g", "outages", cast(Any, second), cast(Any, object()))
+            assert old.unpinned == 1, "the panel left behind kept its pin"
+            assert second.last_sent.pinned == 1
+        finally:
+            os.unlink(path)
+    asyncio.run(run())
+
+
+# The conditional panel has to leave when its condition does, taking its pin.
+def test_removing_a_panel_deletes_the_message_and_the_record() -> None:
+    async def run():
+        db, path = await _db()
+        try:
+            cog = _cog(db)
+            msg = DeletableMessage(501)
+            ch = FakeChannel(existing=msg)
+            cast(Any, cog).bot.get_channel = lambda _id: ch
+            await db.upsert_panel_message("g", "known_issues", "1", "501")
+
+            assert await cog.remove_panel("g", "known_issues") is True
+            assert msg.deleted is True
+            assert await db.get_panel_message("g", "known_issues") is None
+            # The other panels are untouched by one going away.
+            assert await cog.remove_panel("g", "outages") is False
         finally:
             os.unlink(path)
     asyncio.run(run())

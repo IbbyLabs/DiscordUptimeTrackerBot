@@ -15,6 +15,10 @@ if TYPE_CHECKING:
 
 import status_api
 from panels import build_panel_specs
+
+PANEL_KEYS = ("outages", "known_issues", "history")
+# Pinned panels sit at the top of the channel rather than scrolling away.
+PINNED_PANELS = PANEL_KEYS
 from incidents import (
     alertable_rows,
     build_page_incident_messages,
@@ -222,13 +226,20 @@ class UptimeCog(commands.Cog):
             if channel is None:
                 continue
             settings = await self.guild_render_settings(guild_id)
-            for panel, heading, lines, accent in build_panel_specs(self, data, incidents):
+            specs = build_panel_specs(self, data, incidents)
+            for panel, heading, lines, accent in specs:
                 await self.sync_panel(
                     guild_id,
                     panel,
                     channel,
                     PanelLayout(self, heading, lines, accent, **settings),
                 )
+            # A conditional panel goes when its condition does, rather than
+            # sitting pinned with nothing in it.
+            rendered = {panel for panel, _heading, _lines, _accent in specs}
+            for panel in PANEL_KEYS:
+                if panel not in rendered:
+                    await self.remove_panel(guild_id, panel)
 
     async def fetch_status(self) -> StatusData | None:
         return await status_api.fetch_status(self.status_api_url)
@@ -639,22 +650,36 @@ class UptimeCog(commands.Cog):
         if self.bot.db is None:
             return 0
         removed = 0
-        for panel in ("outages", "known_issues", "history"):
-            stored = await self.bot.db.get_panel_message(guild_id, panel)
-            if not stored:
-                continue
-            channel = await self.resolve_tracker_channel(int(stored["channel_id"]))
-            if channel is not None:
-                try:
-                    message = await channel.fetch_message(int(stored["message_id"]))
-                    await message.delete()
-                except discord.NotFound:
-                    pass
-                except discord.HTTPException as exc:
-                    log.warning("Could not delete the %s panel: %s", panel, exc)
-            removed += 1
+        for panel in PANEL_KEYS:
+            if await self.remove_panel(guild_id, panel, forget=False):
+                removed += 1
         await self.bot.db.delete_panel_messages(guild_id)
         return removed
+
+    async def remove_panel(self, guild_id: str, panel: str, *, forget: bool = True) -> bool:
+        """Delete one panel's message, and its record unless the caller clears them.
+
+        Deleting the message takes its pin with it, so a panel that stops
+        applying leaves nothing behind.
+        """
+
+        if self.bot.db is None:
+            return False
+        stored = await self.bot.db.get_panel_message(guild_id, panel)
+        if not stored:
+            return False
+        channel = await self.resolve_tracker_channel(int(stored["channel_id"]))
+        if channel is not None:
+            try:
+                message = await channel.fetch_message(int(stored["message_id"]))
+                await message.delete()
+            except discord.NotFound:
+                pass
+            except discord.HTTPException as exc:
+                log.warning("Could not delete the %s panel: %s", panel, exc)
+        if forget:
+            await self.bot.db.delete_panel_message(guild_id, panel)
+        return True
 
     async def sync_panel(
         self,
@@ -684,14 +709,45 @@ class UptimeCog(commands.Cog):
             except discord.HTTPException as exc:
                 log.error("Failed to edit the %s panel in %s: %s", panel, channel_id, exc)
                 return
+        if stored:
+            await self.unpin_panel_message(panel, stored)
         try:
             message = await channel.send(view=layout)
         except discord.HTTPException as exc:
             log.error("Failed to post the %s panel in %s: %s", panel, channel_id, exc)
             return
+        if panel in PINNED_PANELS:
+            await self.pin_panel_message(panel, message)
         await self.bot.db.upsert_panel_message(
             guild_id, panel, str(channel_id), str(message.id)
         )
+
+    async def pin_panel_message(self, panel: str, message: discord.Message) -> None:
+        """Pin a panel so it stays reachable without scrolling."""
+
+        try:
+            await message.pin()
+        except discord.NotFound:
+            pass
+        except discord.HTTPException as exc:
+            log.warning("Could not pin the %s panel: %s", panel, exc)
+
+    async def unpin_panel_message(self, panel: str, stored: Any) -> None:
+        """Drop the pin from a panel message being replaced.
+
+        A pin list that only ever grows stops being a list of what is current.
+        """
+
+        channel = await self.resolve_tracker_channel(int(stored["channel_id"]))
+        if channel is None:
+            return
+        try:
+            message = await channel.fetch_message(int(stored["message_id"]))
+            await message.unpin()
+        except discord.NotFound:
+            pass
+        except discord.HTTPException as exc:
+            log.warning("Could not unpin the %s panel: %s", panel, exc)
 
     async def _replace_tracker_message(
         self,
