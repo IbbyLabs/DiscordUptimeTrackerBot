@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.5](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.4...v0.8.5) (2026-08-22)
+
+
+### Bug Fixes
+
+* **board:** follow the page's headline rather than assuming an all-clear ([1338d44](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/1338d44cb7f4b7a439a80e868006445716dc5eb8))
+* **board:** follow the page's wording and tone for an impacted estate ([e653ff5](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/e653ff5db327fc9c81b0b3b17850d9621ec47a21))
+
 ## [0.8.4](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.3...v0.8.4) (2026-08-22)
 
 
