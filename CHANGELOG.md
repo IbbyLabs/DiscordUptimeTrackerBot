@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.3](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.2...v0.8.3) (2026-08-22)
+
+
+### Bug Fixes
+
+* **tracker:** make the board heading count recovering separately ([493a05d](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/493a05d3015ec50fd4405d8737f05c0c9e70157a))
+
 ## [0.8.2](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.1...v0.8.2) (2026-08-22)
 
 
