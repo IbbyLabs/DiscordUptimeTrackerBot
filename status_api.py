@@ -18,6 +18,12 @@ TIMEOUT_SECONDS = 10
 _NETWORK_ERRORS = (aiohttp.ClientError, asyncio.TimeoutError, ValueError)
 
 
+# The largest page the endpoint serves.
+INCIDENT_PAGE_SIZE = 100
+# Bounds the loop if total never agrees with what comes back.
+INCIDENT_PAGE_CAP = 20
+
+
 async def _get_json(url: str, what: str) -> Any:
     try:
         async with aiohttp.ClientSession() as session:
@@ -49,7 +55,32 @@ async def fetch_incidents(url: str) -> list[dict[str, Any]]:
     command failing in front of someone.
     """
 
-    # The largest page the API serves. A wider window matters because an
-    # outage older than the page falls out of the history entirely.
     separator = "&" if "?" in url else "?"
-    return normalise_page_incidents(await _get_json(f"{url}{separator}limit=100", "incidents"))
+    collected: list[dict[str, Any]] = []
+    offset = 0
+
+    # One page of 100 reaches back about ten days. The window the panel claims
+    # is 30, so it takes every page the endpoint reports.
+    for _ in range(INCIDENT_PAGE_CAP):
+        payload = await _get_json(
+            f"{url}{separator}limit={INCIDENT_PAGE_SIZE}&offset={offset}", "incidents"
+        )
+        rows = normalise_page_incidents(payload)
+        if not rows:
+            if payload is None and collected:
+                log.warning(
+                    "Incident history stops at %s records: a page did not answer",
+                    len(collected),
+                )
+            break
+
+        collected.extend(rows)
+        offset += len(rows)
+
+        total = payload.get("total") if isinstance(payload, dict) else None
+        if not isinstance(total, int) or offset >= total:
+            break
+    else:
+        log.warning("Incident history stopped at the %s page cap", INCIDENT_PAGE_CAP)
+
+    return collected
