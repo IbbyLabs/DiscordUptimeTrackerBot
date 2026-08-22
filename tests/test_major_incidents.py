@@ -2,7 +2,6 @@ import json
 from pathlib import Path
 
 from incidents import (
-    MAJOR_INCIDENT_MINUTES,
     format_page_incidents,
     major_incidents,
     normalise_page_incidents,
@@ -82,10 +81,10 @@ def test_the_live_payload_loses_the_short_ones() -> None:
     assert any(k["merged_count"] > 1 for k in kept), "nothing merged in real data"
 
 
-def test_the_panel_says_why_its_list_differs_from_the_page() -> None:
+def test_the_panel_names_the_same_scope_as_the_page() -> None:
     lines = format_page_incidents(major_incidents(
         normalise_page_incidents(json.load(open(LIVE))), NOW))
-    assert f"under {MAJOR_INCIDENT_MINUTES} minutes are not listed" in lines[-1]
+    assert lines[-1].endswith("major outages in the last 30 days.")
 
 
 # The filter has to be reached by the panel, not merely available beside it.
@@ -111,4 +110,24 @@ def test_the_history_panel_applies_the_rule() -> None:
     named = [line for line in history[2] if "**" in line]
     assert len(named) == 1, f"expected only the long one, got {named}"
     assert "long" in named[0]
-    assert any("not listed" in line for line in history[2])
+    assert any("last 30 days" in line for line in history[2])
+
+
+# 107 major outages over the window and a panel that shows ten: naming only the
+# window would read as the whole list.
+def test_the_note_says_how_many_the_cap_leaves_out() -> None:
+    rows = [
+        _row(f"s{n}", opened_min=-(n + 1) * 200, closed_min=-(n + 1) * 200 + 60)
+        for n in range(14)
+    ]
+    lines = format_page_incidents(major_incidents(rows, NOW))
+    assert lines[-1] == "-# 10 most recent of 14 major outages in the last 30 days."
+
+
+def test_the_note_claims_no_cap_when_there_is_none() -> None:
+    rows = [
+        _row(f"s{n}", opened_min=-(n + 1) * 200, closed_min=-(n + 1) * 200 + 60)
+        for n in range(3)
+    ]
+    lines = format_page_incidents(major_incidents(rows, NOW))
+    assert lines[-1] == "-# Major outages from the last 30 days."

@@ -214,12 +214,15 @@ def format_page_incidents(rows: list[dict[str, Any]], limit: int = 10) -> list[s
         if chain:
             line += f"\n-# {chain}"
         lines.append(line)
-    # A reader comparing this with the status page would otherwise see two
-    # different lists with nothing saying why.
-    lines.append(
-        f"-# Outages under {MAJOR_INCIDENT_MINUTES} minutes are not listed;"
-        " nearby ones count as one."
-    )
+    # Scope named as the status page names it, plus what the cap leaves out:
+    # the page scrolls, this panel shows ten.
+    total = len(ongoing) + len(closed)
+    if total > limit:
+        lines.append(
+            f"-# {limit} most recent of {total} major outages in the last 30 days."
+        )
+    else:
+        lines.append("-# Major outages from the last 30 days.")
     return lines
 
 
