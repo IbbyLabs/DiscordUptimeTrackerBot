@@ -33,6 +33,24 @@ def service_state(service: dict[str, Any]) -> str:
     return label or "UNKNOWN"
 
 
+def freshness(data: dict[str, Any]) -> dict[str, Any] | None:
+    """The page's own verdict on whether its data is current.
+
+    It decides at 360 seconds and publishes the answer. Working it out here
+    would be a second copy of that rule; ignoring it means a board that stopped
+    updating still reads as current.
+    """
+
+    value = data.get("freshness") if isinstance(data, dict) else None
+    if not isinstance(value, dict):
+        return None
+    return {
+        "stale": value.get("stale") is True,
+        "age_seconds": value.get("ageSeconds"),
+        "stale_after_seconds": value.get("staleAfterSeconds"),
+    }
+
+
 def display_state(service: dict[str, Any]) -> str:
     """The label the page shows a reader, RECOVERING included.
 

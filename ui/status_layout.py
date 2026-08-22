@@ -177,7 +177,16 @@ class StatusLayout(ui.LayoutView):
             )
 
         chunks, dropped = _body_chunks(lines)
-        updated = f"-# Last updated <t:{cog.last_updated_unix(data)}:R>"
+        generated = cog.last_updated_unix(data)
+        updated = (
+            f"-# Last updated <t:{generated}:R>" if generated is not None
+            else "-# The status page did not say when this was generated"
+        )
+        # Above the credit rather than buried: a board that stopped updating
+        # reads as current, which is the failure this exists to prevent.
+        stale = cog.staleness_line(data)
+        if stale:
+            updated = f"{stale}\n{updated}"
         if dropped:
             updated = f"-# {dropped} more not shown here\n{updated}"
         # Credit only. A board sits in a channel permanently, so anything that

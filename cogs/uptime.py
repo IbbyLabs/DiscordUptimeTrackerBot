@@ -544,15 +544,36 @@ class UptimeCog(commands.Cog):
         return 0x2A9D8F
 
 
-    def last_updated_unix(self, data: StatusData) -> int:
+    def last_updated_unix(self, data: StatusData) -> int | None:
+        """When the page generated this payload, or None when it does not say.
+
+        Never our own clock: stamping the board with now turns a payload that
+        stopped arriving into one that looks freshly delivered.
+        """
+
         generated_at = str(data.get("generatedAt") or "").strip()
         if generated_at:
             try:
                 parsed_time = datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
                 return int(parsed_time.timestamp())
             except ValueError:
-                pass
-        return int(discord.utils.utcnow().timestamp())
+                log.warning("The status payload carried an unparseable generatedAt: %r", generated_at)
+        return None
+
+    def staleness_line(self, data: StatusData) -> str | None:
+        """A line saying the data is old, when the page says it is."""
+
+        verdict = status_api.freshness(data)
+        if not verdict or not verdict["stale"]:
+            return None
+        age = verdict.get("age_seconds")
+        after = verdict.get("stale_after_seconds")
+        if isinstance(age, (int, float)) and isinstance(after, (int, float)):
+            return (
+                f"-# ⚠️ The status page has not updated for {int(age // 60)}m."
+                f" It is checked every {int(after // 60)}m, so this board may be out of date."
+            )
+        return "-# ⚠️ The status page has not updated recently, so this board may be out of date."
 
     def _summary_counts(self, data: StatusData) -> tuple[int, int, int]:
         summary = data.get("summary", {})
