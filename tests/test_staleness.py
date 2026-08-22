@@ -69,3 +69,19 @@ def test_a_missing_timestamp_is_not_replaced_with_now() -> None:
 
 def test_a_real_timestamp_is_read_from_the_payload() -> None:
     assert _cog().last_updated_unix(cast(Any, FRESH)) == 1787424496
+
+
+# staleAfterSeconds is the threshold for calling data old. The payload publishes
+# no check interval, and naming 360s as one told the reader two checks had been
+# missed where six had.
+def test_the_line_names_the_threshold_and_not_a_check_interval() -> None:
+    line = _cog().staleness_line(cast(Any, STALE))
+    assert line is not None
+    assert "treated as out of date" in line
+    assert "checked every" not in line, "360s is not the interval between checks"
+
+
+def test_both_numbers_still_reach_the_reader() -> None:
+    line = _cog().staleness_line(cast(Any, STALE))
+    assert "60m" in line, "how long it has been"
+    assert "6m" in line, "the threshold it passed"

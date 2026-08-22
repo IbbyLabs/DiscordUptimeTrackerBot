@@ -580,9 +580,12 @@ class UptimeCog(commands.Cog):
         age = verdict.get("age_seconds")
         after = verdict.get("stale_after_seconds")
         if isinstance(age, (int, float)) and isinstance(after, (int, float)):
+            # staleAfterSeconds is the threshold for calling data old, not the
+            # interval between checks. The payload publishes no interval.
             return (
                 f"-# ⚠️ The status page has not updated for {int(age // 60)}m."
-                f" It is checked every {int(after // 60)}m, so this board may be out of date."
+                f" Anything over {int(after // 60)}m is treated as out of date,"
+                f" so this board may be behind."
             )
         return "-# ⚠️ The status page has not updated recently, so this board may be out of date."
 
