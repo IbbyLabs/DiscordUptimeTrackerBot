@@ -111,3 +111,33 @@ def test_nothing_wrong_still_reads_green() -> None:
     assert heading == "## 🟢 Active outages"
     assert lines == ["Everything is responding."]
     assert accent == 0x2A9D8F
+
+
+# The board carries its own copy of the outage heading. Fixing the panel alone
+# left the two surfaces disagreeing in the same message.
+def test_the_board_heading_makes_the_same_split_as_the_panel() -> None:
+    from ui.status_layout import _with_outages
+
+    cog = _cog()
+    services = [DOWN, RECOVERING]
+    stub = SimpleNamespace(
+        active_outages=lambda _d: services,
+        recovering_services=lambda _d: [s for s in services if status_api.service_recovering(s)],
+        outage_line=cog.outage_line,
+    )
+    head = _with_outages(cast(Any, stub), {}, ["rest"])[0]
+    assert "1 service not responding" in head, head
+    assert "1 recovering" in head, head
+    assert "2 services not responding" not in head
+
+
+def test_the_board_heading_is_unchanged_when_nothing_is_recovering() -> None:
+    from ui.status_layout import _with_outages
+
+    cog = _cog()
+    stub = SimpleNamespace(
+        active_outages=lambda _d: [DOWN],
+        recovering_services=lambda _d: [],
+        outage_line=cog.outage_line,
+    )
+    assert _with_outages(cast(Any, stub), {}, [])[0] == "**Active outages** — 1 service not responding"

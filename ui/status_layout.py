@@ -96,9 +96,18 @@ def _with_outages(cog: "UptimeCog", data: dict[str, Any], lines: list[str]) -> l
     outages = cog.active_outages(data)
     if not outages:
         return lines
-    noun = "service" if len(outages) == 1 else "services"
+    # The same split the panel makes: a service in the recovery hold is
+    # answering, so it is not counted among things that are not responding.
+    recovering = len(cog.recovering_services(data))
+    not_responding = len(outages) - recovering
+    parts = []
+    if not_responding:
+        noun = "service" if not_responding == 1 else "services"
+        parts.append(f"{not_responding} {noun} not responding")
+    if recovering:
+        parts.append(f"{recovering} recovering")
     return [
-        f"**Active outages** — {len(outages)} {noun} not responding",
+        f"**Active outages** — {' · '.join(parts)}",
         *(cog.outage_line(service) for service in outages),
         "",
         *lines,
