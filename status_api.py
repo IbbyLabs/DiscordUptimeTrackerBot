@@ -33,6 +33,28 @@ def service_state(service: dict[str, Any]) -> str:
     return label or "UNKNOWN"
 
 
+def display_state(service: dict[str, Any]) -> str:
+    """The label the page shows a reader, RECOVERING included.
+
+    Pair with service_state, which collapses RECOVERING onto DOWN. That one is
+    for counting and selecting; this one is for anything that becomes words or
+    a colour. The page keeps the two apart on purpose.
+    """
+
+    return str(service.get("displayState") or "").upper() or "UNKNOWN"
+
+
+def service_recovering(service: dict[str, Any]) -> bool:
+    """True while the page shows RECOVERING: answering again, held until stable.
+
+    Counted with the outages, because the page holds it out of recovered too.
+    Described differently, because the page describes it differently — calling a
+    service that returns 200 "not responding" is the disagreement this avoids.
+    """
+
+    return str(service.get("displayState") or "").upper() == "RECOVERING"
+
+
 def overall(data: dict[str, Any]) -> dict[str, Any] | None:
     """The page's own verdict on the estate, or None on a payload without one.
 

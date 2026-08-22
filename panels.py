@@ -17,21 +17,42 @@ HISTORY_BLURPLE = 0x5865F2
 PanelSpec = tuple[str, str, list[str], int]
 
 
+def _outage_heading(not_responding: int, recovering: int) -> str:
+    """Say what is true of each, rather than counting them all as one thing."""
+
+    parts = []
+    if not_responding:
+        parts.append(f"{not_responding} not responding")
+    if recovering:
+        parts.append(f"{recovering} recovering")
+    if not parts:
+        return "## 🟢 Active outages"
+    icon = "🔴" if not_responding else "🟡"
+    return f"## {icon} Active outages\n" + " · ".join(parts)
+
+
+def _outage_accent(not_responding: int, recovering: int) -> int:
+    if not_responding:
+        return OUTAGE_RED
+    return MAINTENANCE_AMBER if recovering else HEALTHY_GREEN
+
+
 def build_panel_specs(
     cog: Any, data: dict[str, Any], incidents: list[dict[str, Any]]
 ) -> list[PanelSpec]:
     """One spec per panel: its key, heading, body lines and accent."""
 
     outages = cog.active_outages(data)
+    recovering = cog.recovering_services(data)
+    not_responding = len(outages) - len(recovering)
     issues = cog.known_issues(data)
     bulletin = cog.bulletin(data)
     specs: list[PanelSpec] = [
         (
             "outages",
-            f"## 🔴 Active outages\n{len(outages)} not responding"
-            if outages else "## 🟢 Active outages",
+            _outage_heading(not_responding, len(recovering)),
             [cog.outage_line(service) for service in outages] or ["Everything is responding."],
-            OUTAGE_RED if outages else HEALTHY_GREEN,
+            _outage_accent(not_responding, len(recovering)),
         ),
     ]
     # Only when it has something to say. A panel reading "nothing is in

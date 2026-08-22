@@ -17,6 +17,7 @@ from panels import build_panel_specs
 def _cog(issues=(), bulletin=None):
     return SimpleNamespace(
         active_outages=lambda _d: [],
+        recovering_services=lambda _d: [],
         known_issues=lambda _d: list(issues),
         outage_line=lambda _s: "",
         known_issue_line=lambda s: f"**{s['name']}** {s['maintenance']['reason']}",

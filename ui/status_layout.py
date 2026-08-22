@@ -416,7 +416,7 @@ class HostLayout(ui.LayoutView):
         self.cog = cog
         page_url = page_url or cog.bot.config.STATUS_PAGE_URL
         last = service.get("last") or {}
-        state = status_api.service_state(service)
+        state = status_api.display_state(service)
         name = str(service.get("name") or "Unknown service")
         if service.get("requiresAuth"):
             name = f"{name} 🔒"

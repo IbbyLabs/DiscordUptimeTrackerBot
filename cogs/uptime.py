@@ -416,7 +416,13 @@ class UptimeCog(commands.Cog):
         group = str(service.get("group") or "Other")
         since = str(service.get("downSince") or "")
         when = f" since {_discord_relative(since)}" if since else ""
+        if status_api.service_recovering(service):
+            held = f" · down since {_discord_relative(since)}" if since else ""
+            return f"🟡 **{name}** ({group}) · responding again, held until stable{held}"
         return f"🔴 **{name}** ({group}){when}"
+
+    def recovering_services(self, data: StatusData) -> list[StatusData]:
+        return [s for s in self.active_outages(data) if status_api.service_recovering(s)]
 
     def visible_services(self, data: StatusData) -> list[StatusData]:
         services = data.get("services", [])
@@ -456,7 +462,8 @@ class UptimeCog(commands.Cog):
             healthy = f"<:emoji:{healthy}>"
         if state == "DOWN":
             return "🔴"
-        if state == "DEGRADED":
+        # utils.js:651 renders a recovering service as degraded. It is answering.
+        if state in ("DEGRADED", "RECOVERING"):
             return "🟡"
         if state == "MAINTENANCE":
             return "🛠️"
@@ -611,7 +618,7 @@ class UptimeCog(commands.Cog):
             lines.append("Some services are behind authentication and marked with a lock.")
         for service in services:
             last = service.get("last", {})
-            state = status_api.service_state(service)
+            state = status_api.display_state(service)
             latency = int(last.get("latency") or 0)
             uptime_percent = float(service.get("uptimePercent") or 0)
             url = str(service.get("url") or page_url or self.bot.config.STATUS_PAGE_URL)
