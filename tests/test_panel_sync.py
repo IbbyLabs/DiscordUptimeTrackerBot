@@ -11,14 +11,21 @@ from tracker_db import TrackerDatabase
 
 
 class FakeMessage:
-    def __init__(self, mid):
+    def __init__(self, mid, pinned=False):
         self.id = mid
         self.edited = 0
-        self.pinned = 0
+        # discord.Message.pinned is a bool on the fetched message; the counters
+        # sit beside it so a test can tell "is pinned" from "was pinned again".
+        self.pinned = pinned
+        self.pin_calls = 0
         self.unpinned = 0
     async def edit(self, **_): self.edited += 1
-    async def pin(self, **_): self.pinned += 1
-    async def unpin(self, **_): self.unpinned += 1
+    async def pin(self, **_):
+        self.pin_calls += 1
+        self.pinned = True
+    async def unpin(self, **_):
+        self.unpinned += 1
+        self.pinned = False
 
 
 class FakeChannel(discord.TextChannel):
@@ -199,13 +206,13 @@ def test_a_new_panel_is_pinned() -> None:
         try:
             ch = FakeChannel()
             await _cog(db).sync_panel("g", "outages", cast(Any, ch), cast(Any, object()))
-            assert ch.last_sent.pinned == 1
+            assert ch.last_sent.pin_calls == 1
         finally:
             os.unlink(path)
     asyncio.run(run())
 
 
-def test_editing_in_place_does_not_pin_again() -> None:
+def test_editing_a_pinned_panel_does_not_pin_it_again() -> None:
     async def run():
         db, path = await _db()
         try:
@@ -216,7 +223,29 @@ def test_editing_in_place_does_not_pin_again() -> None:
             ch._existing = first
             await cog.sync_panel("g", "outages", cast(Any, ch), cast(Any, object()))
             assert first.edited == 1
-            assert first.pinned == 1, "an edit re-pinned a message that was already pinned"
+            assert first.pin_calls == 1, "an edit re-pinned a message that was already pinned"
+        finally:
+            os.unlink(path)
+    asyncio.run(run())
+
+
+# Every panel that already exists takes the edit path, so pinning only on
+# create reaches none of them. This is the case a running install is in.
+def test_a_panel_that_already_exists_gets_pinned_on_the_next_cycle() -> None:
+    async def run():
+        db, path = await _db()
+        try:
+            cog = _cog(db)
+            existing = FakeMessage(501, pinned=False)
+            ch = FakeChannel(existing=existing)
+            await db.upsert_panel_message("g", "outages", "1", "501")
+
+            await cog.sync_panel("g", "outages", cast(Any, ch), cast(Any, object()))
+
+            assert ch.sent == 0, "it reposted rather than editing what was there"
+            assert existing.edited == 1
+            assert existing.pin_calls == 1, "an unpinned panel was left unpinned"
+            assert existing.pinned is True
         finally:
             os.unlink(path)
     asyncio.run(run())
@@ -236,7 +265,7 @@ def test_a_panel_that_moves_channel_unpins_the_one_it_leaves() -> None:
             second = FakeChannel(cid=2)
             await cog.sync_panel("g", "outages", cast(Any, second), cast(Any, object()))
             assert old.unpinned == 1, "the panel left behind kept its pin"
-            assert second.last_sent.pinned == 1
+            assert second.last_sent.pin_calls == 1
         finally:
             os.unlink(path)
     asyncio.run(run())

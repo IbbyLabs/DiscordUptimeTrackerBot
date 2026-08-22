@@ -770,6 +770,12 @@ class UptimeCog(commands.Cog):
             try:
                 message = await channel.fetch_message(int(stored["message_id"]))
                 await message.edit(view=layout)
+                # A panel that already exists takes this path every cycle, so
+                # pinning only on create would never reach one. Checked rather
+                # than called each time, since the message says whether it is
+                # pinned already.
+                if panel in PINNED_PANELS and not getattr(message, "pinned", False):
+                    await self.pin_panel_message(panel, message)
                 return
             except discord.NotFound:
                 pass
