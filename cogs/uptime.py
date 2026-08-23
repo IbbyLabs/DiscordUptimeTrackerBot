@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 import status_api
 from panels import build_panel_specs
+from i18n import translator_for
 from incidents import (
     alertable_rows,
     build_page_incident_messages,
@@ -731,19 +732,22 @@ class UptimeCog(commands.Cog):
         )
         if plan["silent"]:
             await self.bot.db.mark_incidents_seen(plan["silent"], closed=True)
-        messages = build_page_incident_messages(plan)
-        if not messages:
+        if not plan["open"] and not plan["close"]:
             return 0
 
-        sent = await self.send_alerts(messages)
+        sent = await self.send_alerts(plan)
         await self.bot.db.mark_incidents_announced(
             [row["id"] for row in plan["open"]],
             [row["id"] for row in plan["close"]],
         )
         return sent
 
-    async def send_alerts(self, messages: list[tuple[str, list[str]]]) -> int:
-        """One message per announcement, to every configured alert channel."""
+    async def send_alerts(self, plan: dict[str, Any]) -> int:
+        """One message per announcement, to every configured alert channel.
+
+        Built inside the loop rather than once: each guild reads its own
+        language, so the same plan renders differently per channel.
+        """
 
         if self.bot.db is None:
             return 0
@@ -756,8 +760,9 @@ class UptimeCog(commands.Cog):
             guild_id = str(item.get("guild_id"))
             settings = await self.guild_render_settings(guild_id)
             live_url = await self.panel_jump_url(guild_id, "outages")
-            for heading, lines in messages:
-                accent = 0xD90429 if "Outage started" in heading else 0x2A9D8F
+            translate = translator_for(await self.guild_locale(guild_id))
+            for kind, heading, lines in build_page_incident_messages(plan, translate):
+                accent = 0xD90429 if kind == "open" else 0x2A9D8F
                 try:
                     await channel.send(
                         view=PanelLayout(self, heading, lines, accent, live_url=live_url, **settings)

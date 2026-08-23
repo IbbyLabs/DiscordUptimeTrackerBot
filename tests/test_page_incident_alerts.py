@@ -115,3 +115,39 @@ def test_and_all_fifteen_recoveries_are_announced() -> None:
         "the original bug: fifteen outages announced, none retracted"
     )
     assert p["all_clear"] is True
+
+
+class _Shouty:
+    """A translator that changes every string, standing in for any language."""
+
+    def __call__(self, message: str) -> str:
+        return f"<{message}>"
+
+    def ngettext(self, singular: str, plural: str, n: int) -> str:
+        return f"<{singular if n == 1 else plural}>"
+
+
+# The accent colour used to be chosen by looking for "Outage started" in the
+# rendered heading. Translated, that match fails and an outage is drawn in the
+# recovery colour, in every language but English.
+def test_the_kind_survives_translation() -> None:
+    from incidents import build_page_incident_messages
+
+    built = build_page_incident_messages(
+        {"open": [_row("a")], "close": [], "silent": [], "all_clear": False},
+        _Shouty(),
+    )
+    kinds = [kind for kind, _heading, _lines in built]
+    assert kinds == ["open"]
+    assert "<Outage started>" in built[0][1], "the heading went untranslated"
+
+
+def test_a_plural_message_asks_the_translator_for_the_plural() -> None:
+    from incidents import build_page_incident_messages
+
+    built = build_page_incident_messages(
+        {"open": [_row("a"), _row("b")], "close": [], "silent": [], "all_clear": False},
+        _Shouty(),
+    )
+    # The count is filled after the translator chooses the form.
+    assert "<2 services are not responding.>" in built[0][1]

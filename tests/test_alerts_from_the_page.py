@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from typing import Any, cast
 
 from cogs.uptime import UptimeCog
+from incidents import build_page_incident_messages
 from tracker_db import TrackerDatabase
 
 
@@ -31,9 +32,11 @@ def _cog(db, rows, recorder):
         recorder.asked_major_only = major_only
         return list(rows)
 
-    async def send_alerts(messages):
-        recorder.sent.extend(messages)
-        return len(messages)
+    async def send_alerts(plan):
+        # The cog builds per guild now, so the stub does what it would.
+        built = build_page_incident_messages(plan)
+        recorder.sent.extend(built)
+        return len(built)
 
     def active_outages(_data):
         # The status payload agrees with the incident list in these tests: a
@@ -47,7 +50,7 @@ def _cog(db, rows, recorder):
 
 
 def _headings(rec):
-    return [h.splitlines()[0] for h, _ in rec.sent]
+    return [h.splitlines()[0] for _kind, h, _lines in rec.sent]
 
 
 # Silent intake: the page is truth on the first cycle, the channel carries what

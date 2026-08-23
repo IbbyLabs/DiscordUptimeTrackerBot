@@ -9,6 +9,8 @@ it instead.
 from datetime import datetime
 from typing import Any
 
+from i18n import Translator, translator_for
+
 AlertChange = dict[str, Any]
 
 
@@ -235,34 +237,66 @@ def plan_page_incident_alerts(
     }
 
 
-def build_page_incident_messages(plan: dict[str, Any]) -> list[tuple[str, list[str]]]:
-    """The announcements for one cycle, as heading and body lines."""
+def build_page_incident_messages(
+    plan: dict[str, Any], translate: Translator | None = None
+) -> list[tuple[str, str, list[str]]]:
+    """The announcements for one cycle, as kind, heading and body lines.
 
-    messages: list[tuple[str, list[str]]] = []
+    The kind travels with the message because the heading is translated, and a
+    caller that recovered it by matching English would pick the wrong colour in
+    every other language.
+    """
+
+    _ = translate or translator_for(None)
+    messages: list[tuple[str, str, list[str]]] = []
 
     opened = plan["open"]
     if opened:
-        verb = "service is" if len(opened) == 1 else "services are"
+        count = len(opened)
+        # One ngettext rather than a verb chosen in English: agreement is the
+        # translator's to make, and Polish needs three forms where English has two.
+        body = _.ngettext(
+            "{count} service is not responding.",
+            "{count} services are not responding.",
+            count,
+        ).format(count=count)
         messages.append((
-            f"## 🔴 Outage started\n{len(opened)} {verb} not responding.",
-            [_incident_line(row, "🔴") for row in opened],
+            "open",
+            f"## 🔴 {_('Outage started')}\n{body}",
+            [_incident_line(row, "🔴", _) for row in opened],
         ))
 
     closed = plan["close"]
     if closed:
         if plan["all_clear"]:
-            heading = "## 🟢 All clear\nEvery service is responding again."
+            heading = (
+                f"## 🟢 {_('All clear')}\n{_('Every service is responding again.')}"
+            )
         else:
-            verb = "service is" if len(closed) == 1 else "services are"
-            heading = f"## 🟢 Back up\n{len(closed)} {verb} responding again."
-        messages.append((heading, [_incident_line(row, "🟢") for row in closed]))
+            count = len(closed)
+            body = _.ngettext(
+                "{count} service is responding again.",
+                "{count} services are responding again.",
+                count,
+            ).format(count=count)
+            heading = f"## 🟢 {_('Back up')}\n{body}"
+        messages.append(
+            ("close", heading, [_incident_line(row, "🟢", _) for row in closed])
+        )
 
     return messages
 
 
-def _incident_line(row: dict[str, Any], marker: str) -> str:
+def _incident_line(
+    row: dict[str, Any], marker: str, translate: Translator | None = None
+) -> str:
+    _ = translate or translator_for(None)
     where = f" ({row['group']})" if row.get("group") else ""
     started = _iso_stamp(row["opened_at"])
     if row.get("closed_at"):
-        return f"{marker} **{row['name']}**{where}\n-# down from {started} to {_iso_stamp(row['closed_at'])}"
-    return f"{marker} **{row['name']}**{where}\n-# since {started}"
+        when = _("down from {start} to {end}").format(
+            start=started, end=_iso_stamp(row["closed_at"])
+        )
+    else:
+        when = _("since {start}").format(start=started)
+    return f"{marker} **{row['name']}**{where}\n-# {when}"
