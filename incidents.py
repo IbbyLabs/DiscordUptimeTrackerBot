@@ -279,6 +279,7 @@ def build_page_incident_messages(
                 "{count} services are responding again.",
                 count,
             ).format(count=count)
+            # TRANSLATORS: Alert heading meaning a service has recovered. Not a data backup.
             heading = f"## 🟢 {_('Back up')}\n{body}"
         messages.append(
             ("close", heading, [_incident_line(row, "🟢", _) for row in closed])

@@ -1,0 +1,615 @@
+# Polish translations for DiscordUptimeTrackerBot.
+# Copyright (C) 2026 IbbyLabs
+# This file is distributed under the same license as the DiscordUptimeTrackerBot project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: DiscordUptimeTrackerBot 0.8.8\n"
+"Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
+"POT-Creation-Date: 2026-08-23 17:33+0100\n"
+"Last-Translator: machine draft, not yet reviewed by a Polish speaker\n"
+"Language: pl\n"
+"Language-Team: Polish\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: incidents.py:259
+#, python-brace-format
+msgid "{count} service is not responding."
+msgid_plural "{count} services are not responding."
+msgstr[0] "{count} usługa nie odpowiada."
+msgstr[1] "{count} usługi nie odpowiadają."
+msgstr[2] "{count} usług nie odpowiada."
+
+#: incidents.py:265
+msgid "Outage started"
+msgstr "Rozpoczęła się awaria"
+
+#: incidents.py:273
+msgid "All clear"
+msgstr "Wszystko działa"
+
+#: incidents.py:273
+msgid "Every service is responding again."
+msgstr "Wszystkie usługi znów odpowiadają."
+
+#: incidents.py:278
+#, python-brace-format
+msgid "{count} service is responding again."
+msgid_plural "{count} services are responding again."
+msgstr[0] "{count} usługa znów odpowiada."
+msgstr[1] "{count} usługi znów odpowiadają."
+msgstr[2] "{count} usług znów odpowiada."
+
+#. TRANSLATORS: Alert heading meaning a service has recovered. Not a data
+#. backup.
+#: incidents.py:283
+msgid "Back up"
+msgstr "Znów działa"
+
+#: incidents.py:298
+#, python-brace-format
+msgid "down from {start} to {end}"
+msgstr "niedostępna od {start} do {end}"
+
+#: incidents.py:302
+#, python-brace-format
+msgid "since {start}"
+msgstr "od {start}"
+
+#: cogs/uptime.py:59 cogs/uptime.py:1331
+msgid "Status emoji"
+msgstr "Emoji statusu"
+
+#: cogs/uptime.py:60 cogs/uptime.py:1332
+msgid "Status page URL"
+msgstr "Adres strony statusu"
+
+#: cogs/uptime.py:61
+msgid "Language"
+msgstr "Język"
+
+#. TRANSLATORS: The group a service falls into when the status page names none.
+#: cogs/uptime.py:67
+msgid "Other"
+msgstr "Inne"
+
+#: cogs/uptime.py:80
+msgid "That is not a valid URL. It needs to start with http:// or https://."
+msgstr "To nie jest prawidłowy adres URL. Musi zaczynać się od http:// lub https://."
+
+#: cogs/uptime.py:83
+msgid "That URL is too long."
+msgstr "Ten adres URL jest za długi."
+
+#: cogs/uptime.py:87
+msgid "That emoji is too long."
+msgstr "To emoji jest za długie."
+
+#: cogs/uptime.py:96
+#, python-brace-format
+msgid "{value} is not a language Discord supports."
+msgstr "{value} nie jest językiem obsługiwanym przez Discord."
+
+#: cogs/uptime.py:100
+#, python-brace-format
+msgid "Unknown setting: {field}"
+msgstr "Nieznane ustawienie: {field}"
+
+#: cogs/uptime.py:166
+msgid "Manage uptime tracker messages"
+msgstr "Zarządzaj wiadomościami monitora dostępności"
+
+#. TRANSLATORS: Heading of an operator's announcement that carries no title of
+#. its own.
+#: cogs/uptime.py:390
+msgid "Notice"
+msgstr "Ogłoszenie"
+
+#: cogs/uptime.py:404
+#, python-brace-format
+msgid "Affects {names} and {n} more"
+msgid_plural "Affects {names} and {n} more"
+msgstr[0] "Dotyczy {names} i jeszcze {n}"
+msgstr[1] "Dotyczy {names} i jeszcze {n}"
+msgstr[2] "Dotyczy {names} i jeszcze {n}"
+
+#: cogs/uptime.py:409
+#, python-brace-format
+msgid "Affects {names}"
+msgstr "Dotyczy {names}"
+
+#: cogs/uptime.py:415
+#, python-brace-format
+msgid "Updated {when}"
+msgstr "Zaktualizowano {when}"
+
+#: cogs/uptime.py:436 cogs/uptime.py:495 cogs/uptime.py:784
+msgid "Unknown Service"
+msgstr "Nieznana usługa"
+
+#: cogs/uptime.py:442
+msgid "No reason given"
+msgstr "Nie podano powodu"
+
+#: cogs/uptime.py:446 cogs/uptime.py:499
+#, python-brace-format
+msgid "since {when}"
+msgstr "od {when}"
+
+#: cogs/uptime.py:505
+#, python-brace-format
+msgid "down since {when}"
+msgstr "niedostępna od {when}"
+
+#: cogs/uptime.py:511
+msgid "responding again, held until stable"
+msgstr "znów odpowiada, wstrzymane do czasu stabilizacji"
+
+#: cogs/uptime.py:590
+msgid "Services Down"
+msgstr "Usługi niedostępne"
+
+#: cogs/uptime.py:592 cogs/uptime.py:630
+msgid "Services Degraded"
+msgstr "Usługi działają z zakłóceniami"
+
+#: cogs/uptime.py:601 cogs/uptime.py:633
+msgid "All Systems Operational"
+msgstr "Wszystkie systemy działają"
+
+#: cogs/uptime.py:623
+#, python-brace-format
+msgid "{n} Service Down"
+msgid_plural "{n} Services Down"
+msgstr[0] "{n} usługa niedostępna"
+msgstr[1] "{n} usługi niedostępne"
+msgstr[2] "{n} usług niedostępnych"
+
+#: cogs/uptime.py:627
+#, python-brace-format
+msgid "{n} Service Unstable"
+msgid_plural "{n} Services Unstable"
+msgstr[0] "{n} usługa niestabilna"
+msgstr[1] "{n} usługi niestabilne"
+msgstr[2] "{n} usług niestabilnych"
+
+#: cogs/uptime.py:632
+msgid "Under Maintenance"
+msgstr "Prace serwisowe"
+
+#: cogs/uptime.py:696
+#, python-brace-format
+msgid "The status page has not updated for {age}m. Anything over {threshold}m is treated as out of date, so this board may be behind."
+msgstr "Strona statusu nie była aktualizowana od {age} min. Wszystko powyżej {threshold} min jest traktowane jako nieaktualne, więc ta tablica może być opóźniona."
+
+#: cogs/uptime.py:701
+msgid "The status page has not updated recently, so this board may be out of date."
+msgstr "Strona statusu nie była ostatnio aktualizowana, więc ta tablica może być nieaktualna."
+
+#. TRANSLATORS: Follows a count in a group's summary line: "3/3, operational".
+#: cogs/uptime.py:755
+msgid "operational"
+msgstr "działa"
+
+#: cogs/uptime.py:758
+#, python-brace-format
+msgid "{n} service affected"
+msgid_plural "{n} services affected"
+msgstr[0] "problem z {n} usługą"
+msgstr[1] "problem z {n} usługami"
+msgstr[2] "problem z {n} usługami"
+
+#: cogs/uptime.py:776
+msgid "Some services are behind authentication and marked with a lock."
+msgstr "Niektóre usługi wymagają uwierzytelnienia i są oznaczone kłódką."
+
+#: cogs/uptime.py:1077
+#, python-brace-format
+msgid "Refreshed {count} uptime tracker message."
+msgid_plural "Refreshed {count} uptime tracker messages."
+msgstr[0] "Odświeżono {count} wiadomość monitora."
+msgstr[1] "Odświeżono {count} wiadomości monitora."
+msgstr[2] "Odświeżono {count} wiadomości monitora."
+
+#: cogs/uptime.py:1084
+#, python-brace-format
+msgid "Sent {count} alert."
+msgid_plural "Sent {count} alerts."
+msgstr[0] "Wysłano {count} powiadomienie."
+msgstr[1] "Wysłano {count} powiadomienia."
+msgstr[2] "Wysłano {count} powiadomień."
+
+#: cogs/uptime.py:1104 cogs/uptime.py:1131 cogs/uptime.py:1260
+#: ui/status_layout.py:90
+msgid "I could not fetch status data right now."
+msgstr "Nie udało się teraz pobrać danych o statusie."
+
+#: cogs/uptime.py:1107
+msgid "No services were found."
+msgstr "Nie znaleziono żadnych usług."
+
+#: cogs/uptime.py:1114
+msgid "Create a live uptime tracker message"
+msgstr "Utwórz aktualizowaną na żywo wiadomość monitora dostępności"
+
+#: cogs/uptime.py:1123 cogs/uptime.py:1165 cogs/uptime.py:1172
+#: cogs/uptime.py:1179 cogs/uptime.py:1300 cogs/uptime.py:1345
+#: cogs/uptime.py:1381 cogs/uptime.py:1405
+msgid "Cannot use this command here."
+msgstr "Nie można użyć tej komendy w tym miejscu."
+
+#: cogs/uptime.py:1144
+msgid "Uptime tracker message created. It will refresh automatically."
+msgstr "Utworzono wiadomość monitora dostępności. Będzie odświeżana automatycznie."
+
+#: cogs/uptime.py:1148
+msgid "Refresh all live uptime tracker messages"
+msgstr "Odśwież wszystkie wiadomości monitora dostępności"
+
+#: cogs/uptime.py:1159
+msgid "Send status alerts to this channel"
+msgstr "Wysyłaj powiadomienia o statusie na ten kanał"
+
+#: cogs/uptime.py:1188
+msgid "Status alerts will be sent to this channel."
+msgstr "Powiadomienia o statusie będą wysyłane na ten kanał."
+
+#: cogs/uptime.py:1233
+msgid "Service status, by group or by host"
+msgstr "Status usług, według grupy lub hosta"
+
+#: cogs/uptime.py:1235
+msgid "Show one group's services"
+msgstr "Pokaż usługi jednej grupy"
+
+#: cogs/uptime.py:1236
+msgid "Show one service in detail, with its uptime history"
+msgstr "Pokaż szczegóły jednej usługi wraz z historią dostępności"
+
+#: cogs/uptime.py:1237
+msgid "List every service currently in this state"
+msgstr "Wypisz wszystkie usługi obecnie w tym stanie"
+
+#. TRANSLATORS: Choice in a command that filters services by their state.
+#: cogs/uptime.py:1242 ui/status_layout.py:480
+msgid "Down"
+msgstr "Niedostępna"
+
+#: cogs/uptime.py:1243 ui/status_layout.py:481
+msgid "Degraded"
+msgstr "Zakłócenia"
+
+#: cogs/uptime.py:1244
+msgid "Down or degraded"
+msgstr "Niedostępna lub z zakłóceniami"
+
+#: cogs/uptime.py:1269
+#, python-brace-format
+msgid "I could not find a service called {name}."
+msgstr "Nie znaleziono usługi o nazwie {name}."
+
+#: cogs/uptime.py:1279
+#, python-brace-format
+msgid "I could not find a group called {name}."
+msgstr "Nie znaleziono grupy o nazwie {name}."
+
+#: cogs/uptime.py:1294
+msgid "Show this server's tracker settings"
+msgstr "Pokaż ustawienia monitora na tym serwerze"
+
+#: cogs/uptime.py:1313
+#, python-brace-format
+msgid "{value} (default)"
+msgstr "{value} (domyślnie)"
+
+#: cogs/uptime.py:1320
+msgid "Change one with `/tracker set`."
+msgstr "Zmień je komendą `/tracker set`."
+
+#: cogs/uptime.py:1324
+msgid "Change a tracker setting for this server"
+msgstr "Zmień ustawienie monitora na tym serwerze"
+
+#: cogs/uptime.py:1326
+msgid "Which setting to change"
+msgstr "Które ustawienie zmienić"
+
+#: cogs/uptime.py:1327
+msgid "The new value. Leave this empty to go back to the default."
+msgstr "Nowa wartość. Zostaw puste, aby wrócić do domyślnej."
+
+#: cogs/uptime.py:1356
+#, python-brace-format
+msgid "{setting} is back to the default: {value}"
+msgstr "{setting} wróciło do wartości domyślnej: {value}"
+
+#: cogs/uptime.py:1369
+#, python-brace-format
+msgid "{setting} is now {value}. It applies from the next refresh."
+msgstr "{setting} to teraz {value}. Zadziała od następnego odświeżenia."
+
+#: cogs/uptime.py:1375
+msgid "Stop sending status alerts in this guild"
+msgstr "Przestań wysyłać powiadomienia o statusie na tym serwerze"
+
+#: cogs/uptime.py:1389
+msgid "Status alerts are now disabled for this guild."
+msgstr "Powiadomienia o statusie są teraz wyłączone na tym serwerze."
+
+#: cogs/uptime.py:1392
+#, python-brace-format
+msgid "{n} panel removed."
+msgid_plural "{n} panels removed."
+msgstr[0] "Usunięto {n} panel."
+msgstr[1] "Usunięto {n} panele."
+msgstr[2] "Usunięto {n} paneli."
+
+#: cogs/uptime.py:1398
+msgid "Stop tracking the live uptime message for this guild"
+msgstr "Przestań śledzić wiadomość dostępności na tym serwerze"
+
+#: cogs/uptime.py:1427
+msgid "Removed the tracked uptime message for this guild."
+msgstr "Usunięto śledzoną wiadomość dostępności na tym serwerze."
+
+#: cogs/uptime.py:1430
+msgid "The board itself could not be deleted and is now stale."
+msgstr "Nie udało się usunąć samej tablicy i jest teraz nieaktualna."
+
+#: cogs/uptime.py:1438
+msgid "Who made this bot, and how to run your own"
+msgstr "Kto stworzył tego bota i jak uruchomić własnego"
+
+#: cogs/uptime.py:1448
+msgid "Recent outages and who they affected"
+msgstr "Ostatnie awarie i kogo dotyczyły"
+
+#: cogs/uptime.py:1461
+msgid "View live service uptime"
+msgstr "Zobacz dostępność usług na żywo"
+
+#: ui/status_layout.py:78
+msgid "Pick a group for the detail view"
+msgstr "Wybierz grupę, aby zobaczyć szczegóły"
+
+#: ui/status_layout.py:120
+#, python-brace-format
+msgid "{count} service not responding"
+msgid_plural "{count} services not responding"
+msgstr[0] "{count} usługa nie odpowiada"
+msgstr[1] "{count} usługi nie odpowiadają"
+msgstr[2] "{count} usług nie odpowiada"
+
+#: ui/status_layout.py:126
+#, python-brace-format
+msgid "{count} recovering"
+msgstr "{count} w trakcie powrotu"
+
+#: ui/status_layout.py:128
+#, python-brace-format
+msgid "**Active outages** — {summary}"
+msgstr "**Trwające awarie** — {summary}"
+
+#: ui/status_layout.py:162
+#, python-brace-format
+msgid "Filtered to {states}"
+msgstr "Filtr: {states}"
+
+#: ui/status_layout.py:169
+#, python-brace-format
+msgid "**Up:** {up} | **Down:** {down} | **Degraded:** {degraded} | **Unstable:** {unstable}"
+msgstr "**Działa:** {up} | **Niedostępne:** {down} | **Zakłócenia:** {degraded} | **Niestabilne:** {unstable}"
+
+#: ui/status_layout.py:193
+msgid "Nothing in that state right now."
+msgstr "Nic nie jest teraz w tym stanie."
+
+#: ui/status_layout.py:221
+#, python-brace-format
+msgid "Last updated {when}"
+msgstr "Ostatnia aktualizacja {when}"
+
+#: ui/status_layout.py:223
+msgid "The status page did not say when this was generated"
+msgstr "Strona statusu nie podała, kiedy to wygenerowano"
+
+#: ui/status_layout.py:232 ui/status_layout.py:293
+#, python-brace-format
+msgid "{count} more not shown here"
+msgid_plural "{count} more not shown here"
+msgstr[0] "{count} więcej nie pokazano tutaj"
+msgstr[1] "{count} więcej nie pokazano tutaj"
+msgstr[2] "{count} więcej nie pokazano tutaj"
+
+#: ui/status_layout.py:240 ui/status_layout.py:306
+#, python-brace-format
+msgid "Developed by {brand}"
+msgstr "Stworzone przez {brand}"
+
+#: ui/status_layout.py:258 ui/status_layout.py:310 ui/status_layout.py:409
+#: ui/status_layout.py:620
+msgid "Full Status Page"
+msgstr "Pełna strona statusu"
+
+#: ui/status_layout.py:303
+#, python-brace-format
+msgid "Live status: [pinned panels]({url})"
+msgstr "Status na żywo: [przypięte panele]({url})"
+
+#. TRANSLATORS: The bot's own name, as the heading of its about card.
+#: ui/status_layout.py:339
+msgid "Uptime Tracker"
+msgstr "Monitor dostępności"
+
+#: ui/status_layout.py:341
+#, python-brace-format
+msgid "A live status board for Stremio addons, developed by {brand}."
+msgstr "Tablica statusu na żywo dla dodatków Stremio, stworzona przez {brand}."
+
+#: ui/status_layout.py:346
+#, python-brace-format
+msgid ""
+"**Version**\n"
+"`v{version}`"
+msgstr ""
+"**Wersja**\n"
+"`v{version}`"
+
+#: ui/status_layout.py:349
+#, python-brace-format
+msgid ""
+"**Source**\n"
+"Open source under the MIT licence — run your own instance from [GitHub]({url})."
+msgstr ""
+"**Źródło**\n"
+"Otwarte oprogramowanie na licencji MIT — uruchom własną instancję z [GitHuba]({url})."
+
+#. TRANSLATORS: Link button labels on the about card.
+#: ui/status_layout.py:360
+msgid "Status Page"
+msgstr "Strona statusu"
+
+#: ui/status_layout.py:362
+msgid "Support"
+msgstr "Wsparcie"
+
+#: ui/status_layout.py:363
+msgid "Community"
+msgstr "Społeczność"
+
+#: ui/status_layout.py:364
+msgid "Message Ibby"
+msgstr "Napisz do Ibby"
+
+#: ui/status_layout.py:392
+msgid "Recent incidents"
+msgstr "Ostatnie incydenty"
+
+#: ui/status_layout.py:401
+#, python-brace-format
+msgid "{count} older not shown here"
+msgid_plural "{count} older not shown here"
+msgstr[0] "{count} starszy nie pokazano tutaj"
+msgstr[1] "{count} starsze nie pokazano tutaj"
+msgstr[2] "{count} starszych nie pokazano tutaj"
+
+#. TRANSLATORS: A service's state, shown as a single word beside it.
+#: ui/status_layout.py:479
+msgid "Up"
+msgstr "Działa"
+
+#: ui/status_layout.py:482 ui/status_layout.py:580
+msgid "Recovering"
+msgstr "Wraca do sprawności"
+
+#: ui/status_layout.py:483
+msgid "Maintenance"
+msgstr "Prace serwisowe"
+
+#: ui/status_layout.py:484
+msgid "Unknown"
+msgstr "Nieznany"
+
+#: ui/status_layout.py:511
+msgid "I could not fetch that service right now."
+msgstr "Nie udało się teraz pobrać tej usługi."
+
+#: ui/status_layout.py:542
+msgid "Unknown service"
+msgstr "Nieznana usługa"
+
+#: ui/status_layout.py:553
+#, python-brace-format
+msgid "**State** · {state}"
+msgstr "**Stan** · {state}"
+
+#: ui/status_layout.py:559
+#, python-brace-format
+msgid "**HTTP** · {status}"
+msgstr "**HTTP** · {status}"
+
+#: ui/status_layout.py:563
+#, python-brace-format
+msgid "**Latency** · {ms}ms"
+msgstr "**Opóźnienie** · {ms} ms"
+
+#: ui/status_layout.py:568
+#, python-brace-format
+msgid "**Since** · {when}"
+msgstr "**Od** · {when}"
+
+#: ui/status_layout.py:578
+msgid "⚠️ Flapping between states"
+msgstr "⚠️ Stan się waha"
+
+#: ui/status_layout.py:582
+msgid "🔧 Under maintenance"
+msgstr "🔧 Prace serwisowe"
+
+#. TRANSLATORS: Buttons choosing how far back a service's history chart
+#. reaches.
+#: ui/status_layout.py:612 ui/status_layout.py:643
+msgid "7 days"
+msgstr "7 dni"
+
+#: ui/status_layout.py:613 ui/status_layout.py:643
+msgid "30 days"
+msgstr "30 dni"
+
+#: ui/status_layout.py:615
+msgid "Recent checks"
+msgstr "Ostatnie sprawdzenia"
+
+#: ui/status_layout.py:635
+#, python-brace-format
+msgid "Last {n} check"
+msgid_plural "Last {n} checks"
+msgstr[0] "Ostatnie {n} sprawdzenie"
+msgstr[1] "Ostatnie {n} sprawdzenia"
+msgstr[2] "Ostatnich {n} sprawdzeń"
+
+#: ui/status_layout.py:648
+#, python-brace-format
+msgid "{n} period"
+msgid_plural "{n} periods"
+msgstr[0] "{n} okres"
+msgstr[1] "{n} okresy"
+msgstr[2] "{n} okresów"
+
+#: ui/status_layout.py:653
+#, python-brace-format
+msgid "{n} with an outage"
+msgid_plural "{n} with an outage"
+msgstr[0] "{n} z awarią"
+msgstr[1] "{n} z awarią"
+msgstr[2] "{n} z awarią"
+
+#. TRANSLATORS: One item in a comma-separated caption: "168 periods, no
+#. outages".
+#: ui/status_layout.py:657
+msgid "no outages"
+msgstr "bez awarii"
+
+#: ui/status_layout.py:662
+#, python-brace-format
+msgid "{n} with slow or failed checks"
+msgid_plural "{n} with slow or failed checks"
+msgstr[0] "{n} z wolnymi lub nieudanymi sprawdzeniami"
+msgstr[1] "{n} z wolnymi lub nieudanymi sprawdzeniami"
+msgstr[2] "{n} z wolnymi lub nieudanymi sprawdzeniami"
+
+#. TRANSLATORS: One item in a comma-separated caption, meaning the window is
+#. not fully covered.
+#: ui/status_layout.py:669
+msgid "partial history"
+msgstr "niepełna historia"
+
+#: ui/status_layout.py:670
+#, python-brace-format
+msgid "Last {span}"
+msgstr "Ostatnie {span}"
+

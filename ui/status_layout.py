@@ -335,6 +335,7 @@ class AboutLayout(ui.LayoutView):
         self.add_item(
             ui.Container(
                 ui.TextDisplay(
+                    # TRANSLATORS: The bot's own name, as the heading of its about card.
                     f"## {marker} " + self._("Uptime Tracker") + "\n"
                     + self._(
                         "A live status board for Stremio addons, developed by {brand}."
@@ -355,6 +356,7 @@ class AboutLayout(ui.LayoutView):
         self.add_item(
             ui.ActionRow(
                 # IbbyLabs is a name and stays as it is. The rest are words.
+                # TRANSLATORS: Link button labels on the about card.
                 ui.Button(label=self._("Status Page"), url=page_url),
                 ui.Button(label="IbbyLabs", url=BRAND_SITE_URL),
                 ui.Button(label=self._("Support"), url=KOFI_URL),
@@ -473,6 +475,7 @@ def _state_word(state: str, translate: Translator) -> str:
     """The display state as a reader sees it. An unlisted state passes through."""
     _ = translate
     return {
+        # TRANSLATORS: A service's state, shown as a single word beside it.
         "UP": _("Up"),
         "DOWN": _("Down"),
         "DEGRADED": _("Degraded"),
@@ -605,6 +608,7 @@ class HostLayout(ui.LayoutView):
         if service_id:
             self.add_item(
                 ui.ActionRow(
+                    # TRANSLATORS: Buttons choosing how far back a service's history chart reaches.
                     WindowButton(self._("7 days"), "d7", window, service_id),
                     WindowButton(self._("30 days"), "d30", window, service_id),
                     WindowButton(
@@ -649,6 +653,7 @@ class HostLayout(ui.LayoutView):
                 "{n} with an outage", "{n} with an outage", down
             ).format(n=down)
             if down
+            # TRANSLATORS: One item in a comma-separated caption: "168 periods, no outages".
             else self._("no outages")
         )
         if degraded:
@@ -660,6 +665,7 @@ class HostLayout(ui.LayoutView):
                 ).format(n=degraded)
             )
         if _coverage_is_short(timeline):
+            # TRANSLATORS: One item in a comma-separated caption, meaning the window is not fully covered.
             parts.append(self._("partial history"))
         caption = self._("Last {span}").format(span=span)
         return bar, f"**{caption}** · " + ", ".join(parts)

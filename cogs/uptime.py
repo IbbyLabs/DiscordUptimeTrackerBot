@@ -63,6 +63,7 @@ _SETTING_LABELS = {
 
 # The group a service falls into when the page publishes none. This value is a
 # dict key as well as a heading, so it is translated where it is shown.
+# TRANSLATORS: The group a service falls into when the status page names none.
 DEFAULT_GROUP = N_("Other")
 
 
@@ -385,6 +386,7 @@ class UptimeCog(commands.Cog):
         _ = translate or translator_for(None)
         title = str(bulletin.get("title") or "").strip()
         message = str(bulletin.get("message") or "").strip()
+        # TRANSLATORS: Heading of an operator's announcement that carries no title of its own.
         head = f"📢 **{title}**" if title else f"📢 **{_('Notice')}**"
         lines = [head, message]
 
@@ -749,6 +751,7 @@ class UptimeCog(commands.Cog):
         else:
             group_emoji = self.get_state_emoji("UP", healthy) if affected == 0 else "🔴"
         if affected == 0:
+            # TRANSLATORS: Follows a count in a group's summary line: "3/3, operational".
             status_text = _("operational")
         else:
             status_text = _.ngettext(
@@ -1235,6 +1238,7 @@ class UptimeCog(commands.Cog):
     )
     @app_commands.choices(
         state=[
+            # TRANSLATORS: Choice in a command that filters services by their state.
             app_commands.Choice(name=_L("Down"), value="DOWN"),
             app_commands.Choice(name=_L("Degraded"), value="DEGRADED"),
             app_commands.Choice(name=_L("Down or degraded"), value="DOWN,DEGRADED"),
