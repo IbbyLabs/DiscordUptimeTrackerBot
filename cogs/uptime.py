@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from urllib.parse import urlparse
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Awaitable, Callable
 
 import aiohttp
@@ -697,6 +697,7 @@ class UptimeCog(commands.Cog):
             announced=announced,
             rows=rows,
             anything_still_down=bool(self.active_outages(data)),
+            now=datetime.now(timezone.utc),
         )
         if plan["silent"]:
             await self.bot.db.mark_incidents_seen(plan["silent"], closed=True)
