@@ -7,7 +7,8 @@ msgstr ""
 "Project-Id-Version: DiscordUptimeTrackerBot 0.8.8\n"
 "Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
 "POT-Creation-Date: 2026-08-23 17:33+0100\n"
-"Last-Translator: machine draft, not yet reviewed by a Polish speaker\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: machine draft, reviewed by a Polish speaker\n"
 "Language: pl\n"
 "Language-Team: Polish\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
@@ -53,7 +54,7 @@ msgstr "Znów działa"
 #: incidents.py:298
 #, python-brace-format
 msgid "down from {start} to {end}"
-msgstr "niedostępna od {start} do {end}"
+msgstr "niedostępne od {start} do {end}"
 
 #: incidents.py:302
 #, python-brace-format
@@ -113,9 +114,9 @@ msgstr "Ogłoszenie"
 #, python-brace-format
 msgid "Affects {names} and {n} more"
 msgid_plural "Affects {names} and {n} more"
-msgstr[0] "Dotyczy {names} i jeszcze {n}"
-msgstr[1] "Dotyczy {names} i jeszcze {n}"
-msgstr[2] "Dotyczy {names} i jeszcze {n}"
+msgstr[0] "Dotyczy {names} i {n} więcej"
+msgstr[1] "Dotyczy {names} i {n} więcej"
+msgstr[2] "Dotyczy {names} i {n} więcej"
 
 #: cogs/uptime.py:409
 #, python-brace-format
@@ -143,7 +144,7 @@ msgstr "od {when}"
 #: cogs/uptime.py:505
 #, python-brace-format
 msgid "down since {when}"
-msgstr "niedostępna od {when}"
+msgstr "niedostępne od {when}"
 
 #: cogs/uptime.py:511
 msgid "responding again, held until stable"
@@ -272,20 +273,20 @@ msgstr "Pokaż szczegóły jednej usługi wraz z historią dostępności"
 
 #: cogs/uptime.py:1237
 msgid "List every service currently in this state"
-msgstr "Wypisz wszystkie usługi obecnie w tym stanie"
+msgstr "Wypisz wszystkie usługi obecnie o tym statusie"
 
 #. TRANSLATORS: Choice in a command that filters services by their state.
 #: cogs/uptime.py:1242 ui/status_layout.py:480
 msgid "Down"
-msgstr "Niedostępna"
+msgstr "Niedostępne"
 
 #: cogs/uptime.py:1243 ui/status_layout.py:481
 msgid "Degraded"
-msgstr "Zakłócenia"
+msgstr "Zakłócone"
 
 #: cogs/uptime.py:1244
 msgid "Down or degraded"
-msgstr "Niedostępna lub z zakłóceniami"
+msgstr "Niedostępne lub z zakłóceniami"
 
 #: cogs/uptime.py:1269
 #, python-brace-format
@@ -330,7 +331,7 @@ msgstr "{setting} wróciło do wartości domyślnej: {value}"
 #: cogs/uptime.py:1369
 #, python-brace-format
 msgid "{setting} is now {value}. It applies from the next refresh."
-msgstr "{setting} to teraz {value}. Zadziała od następnego odświeżenia."
+msgstr "{setting} zmieniono na {value}. Zadziała od następnego odświeżenia."
 
 #: cogs/uptime.py:1375
 msgid "Stop sending status alerts in this guild"
@@ -354,7 +355,7 @@ msgstr "Przestań śledzić wiadomość dostępności na tym serwerze"
 
 #: cogs/uptime.py:1427
 msgid "Removed the tracked uptime message for this guild."
-msgstr "Usunięto śledzoną wiadomość dostępności na tym serwerze."
+msgstr "Usunięto wiadomość dostępności na tym serwerze."
 
 #: cogs/uptime.py:1430
 msgid "The board itself could not be deleted and is now stale."
@@ -387,7 +388,7 @@ msgstr[2] "{count} usług nie odpowiada"
 #: ui/status_layout.py:126
 #, python-brace-format
 msgid "{count} recovering"
-msgstr "{count} w trakcie powrotu"
+msgstr "{count} w trakcie przywracania"
 
 #: ui/status_layout.py:128
 #, python-brace-format
@@ -402,11 +403,11 @@ msgstr "Filtr: {states}"
 #: ui/status_layout.py:169
 #, python-brace-format
 msgid "**Up:** {up} | **Down:** {down} | **Degraded:** {degraded} | **Unstable:** {unstable}"
-msgstr "**Działa:** {up} | **Niedostępne:** {down} | **Zakłócenia:** {degraded} | **Niestabilne:** {unstable}"
+msgstr "**Działa:** {up} | **Niedostępne:** {down} | **Zakłócone:** {degraded} | **Niestabilne:** {unstable}"
 
 #: ui/status_layout.py:193
 msgid "Nothing in that state right now."
-msgstr "Nic nie jest teraz w tym stanie."
+msgstr "Nic nie jest teraz o tym statusie."
 
 #: ui/status_layout.py:221
 #, python-brace-format
@@ -421,9 +422,9 @@ msgstr "Strona statusu nie podała, kiedy to wygenerowano"
 #, python-brace-format
 msgid "{count} more not shown here"
 msgid_plural "{count} more not shown here"
-msgstr[0] "{count} więcej nie pokazano tutaj"
-msgstr[1] "{count} więcej nie pokazano tutaj"
-msgstr[2] "{count} więcej nie pokazano tutaj"
+msgstr[0] "{count} więcej nie pokazano"
+msgstr[1] "{count} więcej nie pokazano"
+msgstr[2] "{count} więcej nie pokazano"
 
 #: ui/status_layout.py:240 ui/status_layout.py:306
 #, python-brace-format
@@ -443,7 +444,7 @@ msgstr "Status na żywo: [przypięte panele]({url})"
 #. TRANSLATORS: The bot's own name, as the heading of its about card.
 #: ui/status_layout.py:339
 msgid "Uptime Tracker"
-msgstr "Monitor dostępności"
+msgstr "Monitor statusu"
 
 #: ui/status_layout.py:341
 #, python-brace-format
@@ -483,7 +484,7 @@ msgstr "Społeczność"
 
 #: ui/status_layout.py:364
 msgid "Message Ibby"
-msgstr "Napisz do Ibby"
+msgstr "Napisz do Ibby'ego"
 
 #: ui/status_layout.py:392
 msgid "Recent incidents"
@@ -493,9 +494,9 @@ msgstr "Ostatnie incydenty"
 #, python-brace-format
 msgid "{count} older not shown here"
 msgid_plural "{count} older not shown here"
-msgstr[0] "{count} starszy nie pokazano tutaj"
-msgstr[1] "{count} starsze nie pokazano tutaj"
-msgstr[2] "{count} starszych nie pokazano tutaj"
+msgstr[0] "{count} starszy nie pokazano"
+msgstr[1] "{count} starsze nie pokazano"
+msgstr[2] "{count} starszych nie pokazano"
 
 #. TRANSLATORS: A service's state, shown as a single word beside it.
 #: ui/status_layout.py:479
@@ -504,7 +505,7 @@ msgstr "Działa"
 
 #: ui/status_layout.py:482 ui/status_layout.py:580
 msgid "Recovering"
-msgstr "Wraca do sprawności"
+msgstr "Przywracane"
 
 #: ui/status_layout.py:483
 msgid "Maintenance"
@@ -562,15 +563,15 @@ msgstr "30 dni"
 
 #: ui/status_layout.py:615
 msgid "Recent checks"
-msgstr "Ostatnie sprawdzenia"
+msgstr "Ostatnie kontrole"
 
 #: ui/status_layout.py:635
 #, python-brace-format
 msgid "Last {n} check"
 msgid_plural "Last {n} checks"
-msgstr[0] "Ostatnie {n} sprawdzenie"
-msgstr[1] "Ostatnie {n} sprawdzenia"
-msgstr[2] "Ostatnich {n} sprawdzeń"
+msgstr[0] "Ostatnie {n} kontrola"
+msgstr[1] "Ostatnie {n} kontroli"
+msgstr[2] "Ostatnich {n} kontroli"
 
 #: ui/status_layout.py:648
 #, python-brace-format
@@ -592,15 +593,15 @@ msgstr[2] "{n} z awarią"
 #. outages".
 #: ui/status_layout.py:657
 msgid "no outages"
-msgstr "bez awarii"
+msgstr "brak awarii"
 
 #: ui/status_layout.py:662
 #, python-brace-format
 msgid "{n} with slow or failed checks"
 msgid_plural "{n} with slow or failed checks"
-msgstr[0] "{n} z wolnymi lub nieudanymi sprawdzeniami"
-msgstr[1] "{n} z wolnymi lub nieudanymi sprawdzeniami"
-msgstr[2] "{n} z wolnymi lub nieudanymi sprawdzeniami"
+msgstr[0] "{n} z wolnymi lub nieudanymi kontrolami"
+msgstr[1] "{n} z wolnymi lub nieudanymi kontrolami"
+msgstr[2] "{n} z wolnymi lub nieudanymi kontrolami"
 
 #. TRANSLATORS: One item in a comma-separated caption, meaning the window is
 #. not fully covered.
