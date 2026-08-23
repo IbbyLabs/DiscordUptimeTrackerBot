@@ -36,6 +36,8 @@ class Translator:
         return self._t.ngettext(singular, plural, n)
 
 
+# Cached for the life of the process. A recompiled catalogue needs a restart to
+# take effect; call translator_for.cache_clear() if a reload command is ever added.
 @lru_cache(maxsize=64)
 def translator_for(locale: str | None) -> Translator:
     """The translator for a Discord locale, English when there is no catalogue."""

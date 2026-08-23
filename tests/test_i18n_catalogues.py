@@ -1,0 +1,82 @@
+"""The two things that can be checked about a translation without reading it.
+
+Neither says a line means the right thing — only a speaker can. They say the
+catalogue answers the same questions the source asks, and that answering cannot
+crash.
+"""
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from scripts.i18n_check import (
+    catalogue_entries,
+    catalogues,
+    placeholders,
+    source_msgids,
+)
+
+PO_HEADER = 'msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=UTF-8\\n"\n\n'
+
+
+def _fixture(tmp_path: Path, source: str, po_body: str) -> Path:
+    (tmp_path / "app.py").write_text(source)
+    messages = tmp_path / "locales" / "xx" / "LC_MESSAGES"
+    messages.mkdir(parents=True)
+    (messages / "messages.po").write_text(PO_HEADER + po_body)
+    return tmp_path
+
+
+def test_every_shipped_catalogue_answers_every_message_the_source_asks() -> None:
+    ids = source_msgids()
+    for locale in catalogues():
+        entries = catalogue_entries(locale)
+        missing = ids - set(entries)
+        stale = set(entries) - ids
+        assert not missing, f"{locale} has no translation for {sorted(missing)[:5]}"
+        assert not stale, (
+            f"{locale} still translates {sorted(stale)[:5]}, which the source "
+            f"no longer says"
+        )
+
+
+def test_a_translation_never_invents_a_placeholder() -> None:
+    for locale in catalogues():
+        for msgid, strings in catalogue_entries(locale).items():
+            allowed = placeholders(msgid)
+            for translated in strings:
+                extra = placeholders(translated) - allowed
+                assert not extra, (
+                    f"{locale}: {translated!r} uses {sorted(extra)}, which "
+                    f"{msgid!r} does not supply — a KeyError at format time"
+                )
+                translated.format(**{name: "x" for name in allowed})
+
+
+# The two above pass on an empty tree, so here is the proof they bite.
+def test_the_drift_guard_catches_a_message_with_no_translation(tmp_path) -> None:
+    root = _fixture(tmp_path, '_("hello there")\n', '')
+    ids = source_msgids(root)
+    entries = catalogue_entries("xx", root / "locales")
+    assert "hello there" in ids
+    assert "hello there" not in entries
+
+
+def test_the_drift_guard_catches_a_translation_the_source_dropped(tmp_path) -> None:
+    root = _fixture(
+        tmp_path, "x = 1\n", 'msgid "gone"\nmsgstr "zniknelo"\n'
+    )
+    stale = set(catalogue_entries("xx", root / "locales")) - source_msgids(root)
+    assert stale == {"gone"}
+
+
+def test_the_placeholder_guard_catches_a_renamed_field(tmp_path) -> None:
+    root = _fixture(
+        tmp_path,
+        '_("{count} down")\n',
+        'msgid "{count} down"\nmsgstr "{cont} niedostepne"\n',
+    )
+    entries = catalogue_entries("xx", root / "locales")
+    extra = placeholders(entries["{count} down"][0]) - placeholders("{count} down")
+    assert extra == {"cont"}
