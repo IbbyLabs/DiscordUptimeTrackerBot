@@ -11,8 +11,9 @@ from tracker_db import TrackerDatabase
 
 
 class FakeMessage:
-    def __init__(self, mid, pinned=False):
+    def __init__(self, mid, pinned=False, channel=None):
         self.id = mid
+        self.channel = channel
         self.edited = 0
         # discord.Message.pinned is a bool on the fetched message; the counters
         # sit beside it so a test can tell "is pinned" from "was pinned again".
@@ -35,6 +36,11 @@ class FakeChannel(discord.TextChannel):
         self._raise = raise_on_fetch
         self.sent = 0
         self.next_id = 500
+        self.recent = []
+        # A real Message always knows its channel, so a double handed to this one
+        # as its existing message has to as well.
+        if existing is not None and getattr(existing, "channel", None) is None:
+            existing.channel = self
 
     async def fetch_message(self, mid):
         if self._raise:
@@ -46,8 +52,17 @@ class FakeChannel(discord.TextChannel):
     async def send(self, **_):
         self.sent += 1
         self.next_id += 1
-        self.last_sent = FakeMessage(self.next_id)
+        self.last_sent = FakeMessage(self.next_id, channel=self)
         return self.last_sent
+
+    def history(self, limit=None):
+        """Newest first, as discord.py yields it."""
+
+        async def walk():
+            for entry in list(self.recent)[:limit]:
+                yield entry
+
+        return walk()
 
 
 async def _ready(value):
@@ -290,3 +305,64 @@ def test_removing_a_panel_deletes_the_message_and_the_record() -> None:
         finally:
             os.unlink(path)
     asyncio.run(run())
+
+
+class FakeSystemMessage:
+    """Discord's own "pinned a message" notice."""
+
+    def __init__(self, mid, kind, reference_id=None):
+        self.id = mid
+        self.type = kind
+        self.reference = (
+            SimpleNamespace(message_id=reference_id) if reference_id is not None else None
+        )
+        self.deleted = 0
+
+    async def delete(self):
+        self.deleted += 1
+
+
+# Pinning posts a system message, so a tracker that pins its panels fills the
+# channel with notices about its own housekeeping.
+def test_pinning_a_panel_removes_the_notice_discord_posts() -> None:
+  async def run():
+    cog = _cog(None)
+    channel = FakeChannel()
+    message = FakeMessage(900, channel=channel)
+    notice = FakeSystemMessage(901, discord.MessageType.pins_add, reference_id=900)
+    channel.recent = [notice]
+
+    await cog.pin_panel_message("outages", message)
+
+    assert message.pin_calls == 1
+    assert notice.deleted == 1
+  asyncio.run(run())
+
+
+def test_it_leaves_an_ordinary_message_alone() -> None:
+  async def run():
+    cog = _cog(None)
+    channel = FakeChannel()
+    message = FakeMessage(900, channel=channel)
+    chatter = FakeSystemMessage(901, discord.MessageType.default)
+    channel.recent = [chatter]
+
+    await cog.pin_panel_message("outages", message)
+
+    assert chatter.deleted == 0
+  asyncio.run(run())
+
+
+# Two panels pinned in a row: the notice for the other one is not ours to delete.
+def test_it_leaves_another_messages_pin_notice_alone() -> None:
+  async def run():
+    cog = _cog(None)
+    channel = FakeChannel()
+    message = FakeMessage(900, channel=channel)
+    other = FakeSystemMessage(901, discord.MessageType.pins_add, reference_id=42)
+    channel.recent = [other]
+
+    await cog.pin_panel_message("outages", message)
+
+    assert other.deleted == 0
+  asyncio.run(run())

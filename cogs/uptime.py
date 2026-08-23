@@ -37,6 +37,9 @@ from ui.status_layout import (
 
 log = logging.getLogger("uptimebot.cogs.uptime")
 
+# How far back to look for the pin notice. Discord posts it immediately after
+# the pin, so anything beyond the newest few messages is a different pin.
+PIN_NOTICE_SEARCH_LIMIT = 5
 PANEL_KEYS = ("outages", "known_issues", "history")
 # The words the page prints when nothing is impacted.
 ALL_CLEAR = "All Systems Operational"
@@ -1001,9 +1004,32 @@ class UptimeCog(commands.Cog):
         try:
             await message.pin()
         except discord.NotFound:
-            pass
+            return
         except discord.HTTPException as exc:
             log.warning("Could not pin the %s panel: %s", panel, exc)
+            return
+        await self.remove_pin_notice(message)
+
+    async def remove_pin_notice(self, message: discord.Message) -> None:
+        """Delete the "pinned a message" notice Discord posts for our own pin.
+
+        A tracker that pins its panels on every refresh otherwise fills the
+        channel with notices about its own housekeeping.
+        """
+
+        try:
+            async for entry in message.channel.history(limit=PIN_NOTICE_SEARCH_LIMIT):
+                if entry.type is not discord.MessageType.pins_add:
+                    continue
+                reference = entry.reference
+                if reference is not None and reference.message_id != message.id:
+                    continue
+                await entry.delete()
+                return
+        except discord.Forbidden:
+            log.warning("Cannot delete the pin notice without Manage Messages")
+        except discord.HTTPException as exc:
+            log.warning("Could not delete the pin notice: %s", exc)
 
     async def unpin_panel_message(self, panel: str, stored: Any) -> None:
         """Drop the pin from a panel message being replaced.
