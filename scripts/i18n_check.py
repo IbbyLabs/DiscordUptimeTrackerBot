@@ -19,6 +19,7 @@ from babel.messages.extract import DEFAULT_KEYWORDS, extract_from_dir
 # _L wraps command metadata, which Discord localises rather than gettext. The
 # strings still belong in the catalogue, so extraction has to know the name.
 KEYWORDS = {**DEFAULT_KEYWORDS, "_L": None}
+from babel.messages.mofile import read_mo
 from babel.messages.pofile import read_po
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,6 +65,28 @@ def catalogue_entries(locale: str, locale_dir: Path = LOCALE_DIR) -> dict[str, l
 
     with catalogue_path(locale, locale_dir).open("rb") as handle:
         catalog = read_po(handle)
+    out: dict[str, list[str]] = {}
+    for message in catalog:
+        if not message.id:
+            continue
+        ids = message.id if isinstance(message.id, tuple) else (message.id,)
+        strings = message.string if isinstance(message.string, tuple) else (message.string,)
+        out[ids[0]] = [s for s in strings if s]
+    return out
+
+
+def compiled_path(locale: str, locale_dir: Path = LOCALE_DIR) -> Path:
+    return locale_dir / locale / "LC_MESSAGES" / f"{DOMAIN}.mo"
+
+
+def compiled_entries(locale: str, locale_dir: Path = LOCALE_DIR) -> dict[str, list[str]]:
+    """The same mapping as catalogue_entries, read from what the bot loads."""
+
+    path = compiled_path(locale, locale_dir)
+    if not path.is_file():
+        return {}
+    with path.open("rb") as handle:
+        catalog = read_mo(handle)
     out: dict[str, list[str]] = {}
     for message in catalog:
         if not message.id:

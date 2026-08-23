@@ -13,9 +13,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.i18n_check import (
     catalogue_entries,
     catalogues,
+    compiled_entries,
     placeholders,
     source_msgids,
 )
+
+from babel.messages.catalog import Catalog
+from babel.messages.mofile import write_mo
 
 PO_HEADER = 'msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=UTF-8\\n"\n\n'
 
@@ -97,3 +101,35 @@ def test_the_placeholder_guard_catches_a_dropped_field(tmp_path) -> None:
     )
     entries = catalogue_entries("xx", root / "locales")
     assert placeholders(entries["{count} down"][0]) != placeholders("{count} down")
+
+
+# The bot loads messages.mo and the two guards above read messages.po, so a
+# catalogue edited and not recompiled passes them while serving the old wording.
+def test_the_compiled_catalogue_matches_the_po_it_came_from() -> None:
+    for locale in catalogues():
+        assert compiled_entries(locale) == catalogue_entries(locale), (
+            f"{locale}: messages.mo does not match messages.po, so the bot "
+            f"serves something the checks above never saw. Recompile it."
+        )
+
+
+def test_the_compile_guard_catches_a_po_nobody_recompiled(tmp_path) -> None:
+    root = _fixture(tmp_path, '_("hello there")\n', 'msgid "hello there"\nmsgstr "bonjour"\n')
+    messages = root / "locales" / "xx" / "LC_MESSAGES"
+    stale = Catalog(locale="xx")
+    stale.add("hello there", "an older wording")
+    with (messages / "messages.mo").open("wb") as handle:
+        write_mo(handle, stale)
+    locales = root / "locales"
+    assert compiled_entries("xx", locales) != catalogue_entries("xx", locales)
+
+
+def test_the_compile_guard_passes_when_they_agree(tmp_path) -> None:
+    root = _fixture(tmp_path, '_("hello there")\n', 'msgid "hello there"\nmsgstr "bonjour"\n')
+    messages = root / "locales" / "xx" / "LC_MESSAGES"
+    fresh = Catalog(locale="xx")
+    fresh.add("hello there", "bonjour")
+    with (messages / "messages.mo").open("wb") as handle:
+        write_mo(handle, fresh)
+    locales = root / "locales"
+    assert compiled_entries("xx", locales) == catalogue_entries("xx", locales)
