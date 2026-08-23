@@ -51,6 +51,9 @@ class Config:
         self.BRAND_NAME: str = os.getenv("BRAND_NAME", _unmask(_HIDDEN_BRAND_NAME))
         self.BRAND_NAME_OVERRIDE: str | None = (os.getenv("BRAND_NAME") or "").strip() or None
         self.REFRESH_MINUTES: float = float(os.getenv("REFRESH_MINUTES", "2"))
+        # Empty means follow each guild's own Discord language. A value here
+        # answers for every guild that has not set one of its own.
+        self.LOCALE: str = os.getenv("LOCALE", "")
 
     def _require(self, key: str) -> str:
         value = os.getenv(key)

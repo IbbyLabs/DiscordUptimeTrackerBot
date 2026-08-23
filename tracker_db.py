@@ -4,7 +4,7 @@ import aiosqlite
 
 # The per-guild columns. Whitelisted rather than interpolated, since a column
 # name cannot be bound as a parameter.
-GUILD_SETTING_FIELDS = ("status_emoji", "status_page_url")
+GUILD_SETTING_FIELDS = ("status_emoji", "status_page_url", "locale")
 _GUILD_SETTING_COLUMNS = ", ".join(GUILD_SETTING_FIELDS)
 
 
@@ -63,12 +63,29 @@ class TrackerDatabase:
                     guild_id TEXT PRIMARY KEY,
                     status_emoji TEXT,
                     status_page_url TEXT,
+                    locale TEXT,
                     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
                 """
             )
+            # CREATE TABLE IF NOT EXISTS leaves an existing table alone, so a
+            # column added after a database was first written has to be asked
+            # for separately.
+            await self._add_missing_columns(
+                db, "guild_settings", {"locale": "TEXT"}
+            )
             await db.commit()
+
+    @staticmethod
+    async def _add_missing_columns(
+        db: Any, table: str, columns: dict[str, str]
+    ) -> None:
+        async with db.execute(f"PRAGMA table_info({table})") as cursor:
+            existing = {row[1] for row in await cursor.fetchall()}
+        for name, kind in columns.items():
+            if name not in existing:
+                await db.execute(f"ALTER TABLE {table} ADD COLUMN {name} {kind}")
 
     async def get_tracked_message(self, guild_id: str) -> dict[str, Any] | None:
         async with aiosqlite.connect(self.path) as db:

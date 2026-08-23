@@ -43,11 +43,13 @@ PINNED_PANELS = PANEL_KEYS
 _SETTING_DEFAULTS = {
     "status_emoji": "STATUS_EMOJI",
     "status_page_url": "STATUS_PAGE_URL",
+    "locale": "LOCALE",
 }
 
 _SETTING_LABELS = {
     "status_emoji": "Status emoji",
     "status_page_url": "Status page URL",
+    "locale": "Language",
 }
 
 
@@ -64,6 +66,15 @@ def validate_guild_setting(field: str, value: str) -> tuple[str | None, str | No
     if field == "status_emoji":
         if len(value) > 64:
             return None, "That emoji is too long."
+        return value, None
+    if field == "locale":
+        # Checked against Discord's own list rather than accepted as any string:
+        # an unrecognised tag has no catalogue and would silently render English.
+        if not value:
+            return "", None
+        known = {str(locale.value) for locale in discord.Locale}
+        if value not in known:
+            return None, f"{value} is not a language Discord supports."
         return value, None
     return None, f"Unknown setting: {field}"
 
@@ -171,6 +182,22 @@ class UptimeCog(commands.Cog):
             "healthy": await self.guild_setting(guild_id, "status_emoji"),
             "page_url": await self.guild_setting(guild_id, "status_page_url"),
         }
+
+    async def guild_locale(self, guild_id: int | str | None) -> str | None:
+        """The language to render a guild's messages in.
+
+        An explicit setting wins, then the guild's own Discord language. None
+        means the English in the source.
+        """
+
+        chosen = await self.guild_setting(guild_id, "locale")
+        if chosen:
+            return str(chosen)
+        if guild_id is None:
+            return None
+        guild = self.bot.get_guild(int(guild_id))
+        preferred = getattr(guild, "preferred_locale", None)
+        return str(preferred) if preferred else None
 
     def invalidate_guild_settings(self, guild_id: int | str) -> None:
         self._settings_cache.pop(str(guild_id), None)
