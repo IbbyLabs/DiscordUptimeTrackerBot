@@ -86,3 +86,32 @@ def test_the_live_fixture_still_normalises() -> None:
     rows = normalise_page_incidents(json.loads(LIVE.read_text()))
     assert rows, "the recorded response no longer parses"
     assert all(row["opened_at"] for row in rows)
+
+
+# The 30-minute rule is the panel's, not the alerter's. Applying it to alerting
+# announced outages the same filter then hid, so the recovery could never post.
+def test_alerting_asks_for_the_unfiltered_list() -> None:
+    import status_api
+
+    seen: dict[str, str] = {}
+
+    async def fake_get_json(url: str, _what: str):
+        seen["url"] = url
+        return {"incidents": []}
+
+    original = status_api._get_json
+    status_api._get_json = fake_get_json
+    try:
+        asyncio.run(
+            status_api.fetch_incidents(
+                "https://example.test/v1/incidents", major_only=False
+            )
+        )
+    finally:
+        status_api._get_json = original
+
+    assert "majorOnly" not in seen["url"], (
+        "a short outage would be announced and then dropped from the feed, "
+        "leaving the recovery unpostable"
+    )
+    assert "limit=" in seen["url"]

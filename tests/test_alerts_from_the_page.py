@@ -27,7 +27,8 @@ def _cog(db, rows, recorder):
     cog = UptimeCog.__new__(UptimeCog)
     cast(Any, cog).bot = SimpleNamespace(db=db)
 
-    async def fetch_incidents():
+    async def fetch_incidents(*, major_only: bool = True):
+        recorder.asked_major_only = major_only
         return list(rows)
 
     async def send_alerts(messages):
@@ -163,4 +164,23 @@ def test_a_suppressed_service_never_reaches_the_channel() -> None:
             assert _headings(rec) == ["## 🔴 Outage started"], "the real one should still fire"
         finally:
             os.unlink(path)
+    asyncio.run(run())
+
+
+# The page's 30-minute rule keeps a short incident while it is open and drops it
+# once closed, so alerting through that filter announced outages it could never
+# retract. Alerting asks for the unfiltered list; the history panel keeps it.
+def test_alerting_asks_the_page_for_everything_not_just_major_outages() -> None:
+    async def run():
+        db, path = await _fresh()
+        try:
+            rec = Recorder()
+            cog = _cog(db, [_row("a")], rec)
+            await cog.process_status_alerts({})
+            assert rec.asked_major_only is False, (
+                "alerting through majorOnly announces outages the same filter hides"
+            )
+        finally:
+            os.unlink(path)
+
     asyncio.run(run())

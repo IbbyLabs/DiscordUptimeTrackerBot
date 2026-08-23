@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from urllib.parse import urlparse
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Awaitable, Callable
 
 import aiohttp
@@ -245,8 +245,10 @@ class UptimeCog(commands.Cog):
     async def fetch_status(self) -> StatusData | None:
         return await status_api.fetch_status(self.status_api_url)
 
-    async def fetch_incidents(self) -> list[dict[str, Any]]:
-        return await status_api.fetch_incidents(self.bot.config.INCIDENTS_API_URL)
+    async def fetch_incidents(self, *, major_only: bool = True) -> list[dict[str, Any]]:
+        return await status_api.fetch_incidents(
+            self.bot.config.INCIDENTS_API_URL, major_only=major_only
+        )
     async def fetch_service_detail(
         self,
         service_id: str,
@@ -679,7 +681,9 @@ class UptimeCog(commands.Cog):
 
         if self.bot.db is None:
             return 0
-        rows = alertable_rows(await self.fetch_incidents())
+        # Alerting sees every incident the page holds. The 30-minute rule is the
+        # history panel's, and applying it here announced outages it then hid.
+        rows = alertable_rows(await self.fetch_incidents(major_only=False))
         if not rows:
             return 0
         announced = await self.bot.db.get_announced_incidents()
@@ -697,7 +701,6 @@ class UptimeCog(commands.Cog):
             announced=announced,
             rows=rows,
             anything_still_down=bool(self.active_outages(data)),
-            now=datetime.now(timezone.utc),
         )
         if plan["silent"]:
             await self.bot.db.mark_incidents_seen(plan["silent"], closed=True)

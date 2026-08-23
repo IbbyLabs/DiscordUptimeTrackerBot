@@ -132,7 +132,7 @@ async def fetch_status(url: str) -> dict[str, Any] | None:
     return payload
 
 
-async def fetch_incidents(url: str) -> list[dict[str, Any]]:
+async def fetch_incidents(url: str, *, major_only: bool = True) -> list[dict[str, Any]]:
     """The status page's incident records, newest first.
 
     Empty on failure, so the panel says it has no history rather than the
@@ -141,12 +141,19 @@ async def fetch_incidents(url: str) -> list[dict[str, Any]]:
 
     # One request. 100 is the largest page the endpoint serves and costs the
     # same as asking for fewer, so it buys the widest window available for it.
-    # majorOnly applies the status page's own 30-minute rule and merges
-    # neighbouring outages, so the panel renders the page's list rather than a
-    # second copy of the rule.
+    #
+    # major_only applies the status page's 30-minute rule and merges neighbouring
+    # outages. It belongs to the history panel, which is a list of notable
+    # outages, and not to alerting: it keeps a short incident while it is open
+    # and drops it once closed, so an outage under 30 minutes was announced and
+    # could never be retracted. The page debounces both edges on its own —
+    # three consecutive failed checks open an incident, and a recovery is held
+    # until the service has been clean for 15 minutes or more.
+    #
+    # Unfiltered costs a shorter window: the 100 rows fill faster, so a
+    # long-running incident can fall off the page before it closes.
     separator = "&" if "?" in url else "?"
-    return normalise_page_incidents(
-        await _get_json(
-            f"{url}{separator}limit={INCIDENT_PAGE_SIZE}&majorOnly=true", "incidents"
-        )
-    )
+    query = f"limit={INCIDENT_PAGE_SIZE}"
+    if major_only:
+        query += "&majorOnly=true"
+    return normalise_page_incidents(await _get_json(f"{url}{separator}{query}", "incidents"))

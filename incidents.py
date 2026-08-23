@@ -6,7 +6,7 @@ has already named stays out of the channel when it flaps, and the panel carries
 it instead.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from typing import Any
 
 AlertChange = dict[str, Any]
@@ -186,48 +186,17 @@ def alertable_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
-# The page keeps a closed incident only once it has run for MAJOR_INCIDENT_MINUTES,
-# while an ongoing one stays whatever its age. Announcing sooner than that means
-# announcing something that leaves the feed the moment it ends, and a recovery
-# that can never be posted.
-MIN_OPEN_MINUTES = 30
-
-
-def _open_long_enough(row: dict[str, Any], now: datetime, minimum: int) -> bool:
-    """Whether an ongoing incident has run long enough to be worth announcing.
-
-    opened_at is a floor when the oldest reading held was already down, so the
-    real age is this or more. An unparseable timestamp announces: a page format
-    change should be visible, not silence about a live outage.
-    """
-
-    raw = str(row.get("opened_at") or "")
-    try:
-        started = datetime.fromisoformat(raw.replace("Z", "+00:00"))
-    except ValueError:
-        return True
-    if started.tzinfo is None:
-        started = started.replace(tzinfo=timezone.utc)
-    return now - started >= timedelta(minutes=minimum)
-
-
 def plan_page_incident_alerts(
     *,
     announced: dict[str, dict[str, bool]],
     rows: list[dict[str, Any]],
     anything_still_down: bool,
-    now: datetime,
-    min_open_minutes: int = MIN_OPEN_MINUTES,
 ) -> dict[str, Any]:
     """What to announce, given the page's incidents and what we have said.
 
     The page owns which incidents exist; this owns which have been spoken about.
     An incident we have never seen and which is already closed is history rather
     than news, so it is recorded silently.
-
-    An ongoing incident younger than min_open_minutes is left alone entirely —
-    neither announced nor recorded — so a later cycle can still announce it once
-    it qualifies.
     """
 
     to_open: list[dict[str, Any]] = []
@@ -243,8 +212,7 @@ def plan_page_incident_alerts(
 
         if state is None:
             if ongoing:
-                if _open_long_enough(row, now, min_open_minutes):
-                    to_open.append(row)
+                to_open.append(row)
             else:
                 # Opened and closed between two cycles, or before we ever
                 # looked. Announcing both ends at once says nothing useful.
@@ -252,8 +220,7 @@ def plan_page_incident_alerts(
             continue
 
         if ongoing and not state["opened"]:
-            if _open_long_enough(row, now, min_open_minutes):
-                to_open.append(row)
+            to_open.append(row)
         elif not ongoing and not state["closed"]:
             to_close.append(row)
 
