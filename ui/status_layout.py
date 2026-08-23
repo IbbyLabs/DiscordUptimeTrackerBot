@@ -88,7 +88,9 @@ class GroupSelect(ui.Select["StatusLayout"]):
         await interaction.response.send_message(view=layout, ephemeral=True)
 
 
-def _with_outages(cog: "UptimeCog", data: dict[str, Any], lines: list[str]) -> list[str]:
+def _with_outages(
+    cog: "UptimeCog", data: dict[str, Any], lines: list[str], translate: Translator
+) -> list[str]:
     """Put what is broken above the group summary.
 
     A reader opening the board during an outage is looking for the broken
@@ -102,14 +104,20 @@ def _with_outages(cog: "UptimeCog", data: dict[str, Any], lines: list[str]) -> l
     # answering, so it is not counted among things that are not responding.
     recovering = len(cog.recovering_services(data))
     not_responding = len(outages) - recovering
+    _ = translate
     parts = []
     if not_responding:
-        noun = "service" if not_responding == 1 else "services"
-        parts.append(f"{not_responding} {noun} not responding")
+        parts.append(
+            _.ngettext(
+                "{count} service not responding",
+                "{count} services not responding",
+                not_responding,
+            ).format(count=not_responding)
+        )
     if recovering:
-        parts.append(f"{recovering} recovering")
+        parts.append(_("{count} recovering").format(count=recovering))
     return [
-        f"**Active outages** — {' · '.join(parts)}",
+        _("**Active outages** — {summary}").format(summary=" · ".join(parts)),
         *(cog.outage_line(service) for service in outages),
         "",
         *lines,
@@ -143,12 +151,19 @@ class StatusLayout(ui.LayoutView):
 
         header = f"## {cog.tracker_name(data)}"
         if states:
-            header += f"\n-# Filtered to {', '.join(st.lower() for st in states)}"
+            header += "\n-# " + self._("Filtered to {states}").format(
+                states=", ".join(st.lower() for st in states)
+            )
         up, down, degraded, unstable = cog.headline_counts(data)
+        # One sentence rather than four fragments: the separator and the order
+        # of label and number are the translator's to choose.
+        counts = self._(
+            "**Up:** {up} | **Down:** {down} | **Degraded:** {degraded}"
+            " | **Unstable:** {unstable}"
+        ).format(up=up, down=down, degraded=degraded, unstable=unstable)
         headline = (
             f"### {cog.get_status_text(cog.visible_services(data), healthy, data)}\n"
-            f"**Up:** {up} | **Down:** {down} | **Degraded:** {degraded}"
-            f" | **Unstable:** {unstable}"
+            f"{counts}"
         )
 
         if states:
@@ -161,13 +176,13 @@ class StatusLayout(ui.LayoutView):
             if matched:
                 lines = cog._detail_lines(matched, False, healthy, page_url)
             else:
-                lines = ["Nothing in that state right now."]
+                lines = [self._("Nothing in that state right now.")]
         elif group_name is None:
             lines = [
                 cog.group_summary_line(name, items, healthy, cog.published_group_state(data, name))
                 for name, items in groups.items()
             ]
-            lines = _with_outages(cog, data, lines)
+            lines = _with_outages(cog, data, lines, self._)
             # Above everything the board derives: the operator wrote it because
             # a state cannot say it.
             bulletin = cog.bulletin(data)
@@ -183,8 +198,9 @@ class StatusLayout(ui.LayoutView):
         chunks, dropped = _body_chunks(lines)
         generated = cog.last_updated_unix(data)
         updated = (
-            f"-# Last updated <t:{generated}:R>" if generated is not None
-            else "-# The status page did not say when this was generated"
+            "-# " + self._("Last updated {when}").format(when=f"<t:{generated}:R>")
+            if generated is not None
+            else "-# " + self._("The status page did not say when this was generated")
         )
         # Above the credit rather than buried: a board that stopped updating
         # reads as current, which is the failure this exists to prevent.
@@ -192,10 +208,17 @@ class StatusLayout(ui.LayoutView):
         if stale:
             updated = f"{stale}\n{updated}"
         if dropped:
-            updated = f"-# {dropped} more not shown here\n{updated}"
+            more = self._.ngettext(
+                "{count} more not shown here",
+                "{count} more not shown here",
+                dropped,
+            ).format(count=dropped)
+            updated = f"-# {more}\n{updated}"
         # Credit only. A board sits in a channel permanently, so anything that
         # does not change does not belong on it; the links live in /about.
-        updated = f"{updated}\n-# Developed by IbbyLabs • v{cog.bot.version}"
+        # The name is a brand and stays put; only the words around it move.
+        credit = self._("Developed by {brand}").format(brand="IbbyLabs")
+        updated = f"{updated}\n-# {credit} • v{cog.bot.version}"
 
         container = ui.Container(
             ui.TextDisplay(header),
@@ -244,14 +267,26 @@ class PanelLayout(ui.LayoutView):
             *(ui.TextDisplay(chunk) for chunk in chunks),
         ]
         if dropped:
-            children.append(ui.TextDisplay(f"-# {dropped} more not shown here"))
+            more = self._.ngettext(
+                "{count} more not shown here",
+                "{count} more not shown here",
+                dropped,
+            ).format(count=dropped)
+            children.append(ui.TextDisplay(f"-# {more}"))
         # An alert is one moment; the panels are the current picture. Omitted
         # when there is no panel to point at rather than rendering a dead link.
         if live_url:
-            children.append(ui.TextDisplay(f"-# Live status: [pinned panels]({live_url})"))
-        children.append(ui.TextDisplay(f"-# Developed by IbbyLabs • v{cog.bot.version}"))
+            children.append(
+                ui.TextDisplay(
+                    "-# " + self._("Live status: [pinned panels]({url})").format(url=live_url)
+                )
+            )
+        credit = self._("Developed by {brand}").format(brand="IbbyLabs")
+        children.append(ui.TextDisplay(f"-# {credit} • v{cog.bot.version}"))
         self.add_item(ui.Container(*children, accent_colour=accent))
-        self.add_item(ui.ActionRow(ui.Button(label="Full Status Page", url=page_url)))
+        self.add_item(
+            ui.ActionRow(ui.Button(label=self._("Full Status Page"), url=page_url))
+        )
 
 
 class AboutLayout(ui.LayoutView):
@@ -279,24 +314,30 @@ class AboutLayout(ui.LayoutView):
             ui.Container(
                 ui.TextDisplay(
                     f"## {marker} Uptime Tracker\n"
-                    "A live status board for Stremio addons, developed by IbbyLabs."
+                    + self._(
+                        "A live status board for Stremio addons, developed by {brand}."
+                    ).format(brand="IbbyLabs")
                 ),
                 ui.Separator(),
                 ui.TextDisplay(
-                    f"**Version**\n`v{version}`\n\n"
-                    "**Source**\nOpen source under the MIT licence — run your own instance "
-                    f"from [GitHub]({SOURCE_URL})."
+                    self._("**Version**\n`v{version}`").format(version=version)
+                    + "\n\n"
+                    + self._(
+                        "**Source**\nOpen source under the MIT licence — run your own"
+                        " instance from [GitHub]({url})."
+                    ).format(url=SOURCE_URL)
                 ),
                 accent_colour=0x5865F2,
             )
         )
         self.add_item(
             ui.ActionRow(
-                ui.Button(label="Status Page", url=page_url),
+                # IbbyLabs is a name and stays as it is. The rest are words.
+                ui.Button(label=self._("Status Page"), url=page_url),
                 ui.Button(label="IbbyLabs", url=BRAND_SITE_URL),
-                ui.Button(label="Support", url=KOFI_URL),
-                ui.Button(label="Community", url=COMMUNITY_URL),
-                ui.Button(label="Message Ibby", url=DM_URL),
+                ui.Button(label=self._("Support"), url=KOFI_URL),
+                ui.Button(label=self._("Community"), url=COMMUNITY_URL),
+                ui.Button(label=self._("Message Ibby"), url=DM_URL),
             )
         )
 
@@ -331,7 +372,9 @@ class IncidentHistoryLayout(ui.LayoutView):
         if dropped:
             children.append(ui.TextDisplay(f"-# {dropped} older not shown here"))
         self.add_item(ui.Container(*children, accent_colour=0x5865F2))
-        self.add_item(ui.ActionRow(ui.Button(label="Full Status Page", url=page_url)))
+        self.add_item(
+            ui.ActionRow(ui.Button(label=self._("Full Status Page"), url=page_url))
+        )
 
 
 TIMELINE_WIDTH = {"d7": 28, "d30": 30}
@@ -511,7 +554,9 @@ class HostLayout(ui.LayoutView):
                     WindowButton("Recent checks", "recent", window, service_id),
                 )
             )
-        self.add_item(ui.ActionRow(ui.Button(label="Full Status Page", url=page_url)))
+        self.add_item(
+            ui.ActionRow(ui.Button(label=self._("Full Status Page"), url=page_url))
+        )
 
     def _window_body(self, service: dict[str, Any], window: str) -> tuple[str, str]:
         if window == "recent":
