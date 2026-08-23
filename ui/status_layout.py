@@ -68,7 +68,7 @@ class GroupSelect(ui.Select["StatusLayout"]):
         groups = list(cog.group_services(data).keys())
         options = [
             discord.SelectOption(
-                label=_truncate(name, 100),
+                label=_truncate(cog.display_group(name, _), 100),
                 value=name[:100],
                 default=name == current,
             )
@@ -193,7 +193,13 @@ class StatusLayout(ui.LayoutView):
                 lines = [self._("Nothing in that state right now.")]
         elif group_name is None:
             lines = [
-                cog.group_summary_line(name, items, healthy, cog.published_group_state(data, name))
+                cog.group_summary_line(
+                    cog.display_group(name, self._),
+                    items,
+                    healthy,
+                    cog.published_group_state(data, name),
+                    self._,
+                )
                 for name, items in groups.items()
             ]
             lines = _with_outages(cog, data, lines, self._)
@@ -201,11 +207,11 @@ class StatusLayout(ui.LayoutView):
             # a state cannot say it.
             bulletin = cog.bulletin(data)
             if bulletin:
-                lines = [*cog.bulletin_lines(bulletin), "", *lines]
+                lines = [*cog.bulletin_lines(bulletin, self._), "", *lines]
         else:
             items = groups.get(group_name, [])
             has_auth = any(item.get("requiresAuth") for item in items)
-            lines = [f"**{group_name}**"] + cog._detail_lines(
+            lines = [f"**{cog.display_group(group_name, self._)}**"] + cog._detail_lines(
                 items, has_auth, healthy, page_url, self._
             )
 
@@ -218,7 +224,7 @@ class StatusLayout(ui.LayoutView):
         )
         # Above the credit rather than buried: a board that stopped updating
         # reads as current, which is the failure this exists to prevent.
-        stale = cog.staleness_line(data)
+        stale = cog.staleness_line(data, self._)
         if stale:
             updated = f"{stale}\n{updated}"
         if dropped:
@@ -621,23 +627,42 @@ class HostLayout(ui.LayoutView):
                 f"{int(c.get('latency') or 0)}ms"
                 for c in reversed(checks)
             ]
-            return "\n".join(lines), f"**Last {len(lines)} checks**"
+            return "\n".join(lines), "**" + self._.ngettext(
+                "Last {n} check", "Last {n} checks", len(lines)
+            ).format(n=len(lines)) + "**"
         timeline = (service.get("historyTimeline") or {}).get(window) or {}
         buckets = timeline.get("buckets") or []
         if not buckets:
             return "", ""
         bar = collapse_timeline(buckets, TIMELINE_WIDTH.get(window, 30))
         down, degraded = _period_counts(buckets)
-        span = "7 days" if window == "d7" else "30 days"
+        span = self._("7 days") if window == "d7" else self._("30 days")
         # Counts are of source periods, not of blocks drawn: each block merges
         # several, so the two numbers do not match and the wording says which.
-        parts = [f"{len(buckets)} periods"]
-        parts.append(f"{down} with an outage" if down else "no outages")
+        parts = [
+            self._.ngettext(
+                "{n} period", "{n} periods", len(buckets)
+            ).format(n=len(buckets))
+        ]
+        parts.append(
+            self._.ngettext(
+                "{n} with an outage", "{n} with an outage", down
+            ).format(n=down)
+            if down
+            else self._("no outages")
+        )
         if degraded:
-            parts.append(f"{degraded} with slow or failed checks")
+            parts.append(
+                self._.ngettext(
+                    "{n} with slow or failed checks",
+                    "{n} with slow or failed checks",
+                    degraded,
+                ).format(n=degraded)
+            )
         if _coverage_is_short(timeline):
-            parts.append("partial history")
-        return bar, f"**Last {span}** · " + ", ".join(parts)
+            parts.append(self._("partial history"))
+        caption = self._("Last {span}").format(span=span)
+        return bar, f"**{caption}** · " + ", ".join(parts)
 
 
 def _discord_time(value: Any) -> str:

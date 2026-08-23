@@ -61,6 +61,10 @@ _SETTING_LABELS = {
     "locale": N_("Language"),
 }
 
+# The group a service falls into when the page publishes none. This value is a
+# dict key as well as a heading, so it is translated where it is shown.
+DEFAULT_GROUP = N_("Other")
+
 
 def validate_guild_setting(
     field: str, value: str, translate: "Translator | None" = None
@@ -375,10 +379,13 @@ class UptimeCog(commands.Cog):
             return None
         return bulletin
 
-    def bulletin_lines(self, bulletin: dict[str, Any]) -> list[str]:
+    def bulletin_lines(
+        self, bulletin: dict[str, Any], translate: "Translator | None" = None
+    ) -> list[str]:
+        _ = translate or translator_for(None)
         title = str(bulletin.get("title") or "").strip()
         message = str(bulletin.get("message") or "").strip()
-        head = f"📢 **{title}**" if title else "📢 **Notice**"
+        head = f"📢 **{title}**" if title else f"📢 **{_('Notice')}**"
         lines = [head, message]
 
         affected = bulletin.get("affectedServices")
@@ -389,13 +396,22 @@ class UptimeCog(commands.Cog):
         names = [name for name in names if name]
         if names:
             shown = ", ".join(names[:5])
-            if len(names) > 5:
-                shown += f" and {len(names) - 5} more"
-            lines.append(f"-# Affects {shown}")
+            extra = len(names) - 5
+            if extra > 0:
+                line = _.ngettext(
+                    "Affects {names} and {n} more",
+                    "Affects {names} and {n} more",
+                    extra,
+                ).format(names=shown, n=extra)
+            else:
+                line = _("Affects {names}").format(names=shown)
+            lines.append("-# " + line)
 
         updated = str(bulletin.get("updatedAt") or "")
         if updated:
-            lines.append(f"-# Updated {_discord_relative(updated)}")
+            lines.append(
+                "-# " + _("Updated {when}").format(when=_discord_relative(updated))
+            )
         return lines
 
     def known_issues(self, data: StatusData) -> list[StatusData]:
@@ -475,7 +491,7 @@ class UptimeCog(commands.Cog):
     ) -> str:
         _ = translate or translator_for(None)
         name = str(service.get("name") or _("Unknown Service"))
-        group = str(service.get("group") or "Other")
+        group = self.display_group(str(service.get("group") or DEFAULT_GROUP), _)
         since = str(service.get("downSince") or "")
         when = (
             " " + _("since {when}").format(when=_discord_relative(since))
@@ -483,8 +499,16 @@ class UptimeCog(commands.Cog):
             else ""
         )
         if status_api.service_recovering(service):
-            held = f" · down since {_discord_relative(since)}" if since else ""
-            return f"🟡 **{name}** ({group}) · responding again, held until stable{held}"
+            held = (
+                " · " + _("down since {when}").format(when=_discord_relative(since))
+                if since
+                else ""
+            )
+            return (
+                f"🟡 **{name}** ({group}) · "
+                + _("responding again, held until stable")
+                + held
+            )
         return f"🔴 **{name}** ({group}){when}"
 
     def recovering_services(self, data: StatusData) -> list[StatusData]:
@@ -494,10 +518,18 @@ class UptimeCog(commands.Cog):
         services = data.get("services", [])
         return [service for service in services if not service.get("hideFromStatusPage")]
 
+    def display_group(
+        self, name: str, translate: "Translator | None" = None
+    ) -> str:
+        """A group name as a reader sees it. The key it is grouped under stays English."""
+
+        _ = translate or translator_for(None)
+        return _(DEFAULT_GROUP) if name == DEFAULT_GROUP else name
+
     def group_services(self, data: StatusData) -> dict[str, list[StatusData]]:
         groups: dict[str, list[StatusData]] = {}
         for service in self.visible_services(data):
-            group_name = str(service.get("group") or "Other")
+            group_name = str(service.get("group") or DEFAULT_GROUP)
             groups.setdefault(group_name, []).append(service)
         # The page publishes the order sections appear in. Without it the board
         # shows them in whatever order the services arrived.
@@ -553,9 +585,9 @@ class UptimeCog(commands.Cog):
             reason = verdict["reason"]
             sentence = reason[:1].upper() + reason[1:] if reason else ""
             if verdict["state"] == "DOWN":
-                return f"🔴 {sentence}" if sentence else "🔴 Services Down"
+                return f"🔴 {sentence}" if sentence else "🔴 " + _("Services Down")
             if verdict["state"] == "DEGRADED":
-                return f"🟡 {sentence}" if sentence else "🟡 Services Degraded"
+                return f"🟡 {sentence}" if sentence else "🟡 " + _("Services Degraded")
             if verdict["state"] == "UP":
                 # A verdict of UP with services down is still UP, and the page
                 # stopped calling that an all-clear. Saying it here anyway would
@@ -585,23 +617,25 @@ class UptimeCog(commands.Cog):
         maintenance_count = count("MAINTENANCE")
         unstable_count = sum(1 for service in services if self.is_unstable(service))
         if down_count > 0:
-            noun = "Service" if down_count == 1 else "Services"
-            return f"🔴 {down_count} {noun} Down"
+            return "🔴 " + _.ngettext(
+                "{n} Service Down", "{n} Services Down", down_count
+            ).format(n=down_count)
         if unstable_count > 0:
-            noun = "Service" if unstable_count == 1 else "Services"
-            return f"{UNSTABLE_EMOJI} {unstable_count} {noun} Unstable"
+            return f"{UNSTABLE_EMOJI} " + _.ngettext(
+                "{n} Service Unstable", "{n} Services Unstable", unstable_count
+            ).format(n=unstable_count)
         if degraded_count > 0:
-            return "🟡 Services Degraded"
+            return "🟡 " + _("Services Degraded")
         if maintenance_count > 0:
-            return "🛠️ Under Maintenance"
-        return f"{self.get_state_emoji('UP', healthy)} All Systems Operational"
+            return "🛠️ " + _("Under Maintenance")
+        return f"{self.get_state_emoji('UP', healthy)} " + _("All Systems Operational")
 
     def get_uptime_bar(self, percent: float) -> str:
         filled = max(0, min(10, round(percent / 10)))
         return "█" * filled + "░" * (10 - filled)
 
     def service_key(self, service: StatusData) -> str:
-        group_name = str(service.get("group") or "Other").strip()
+        group_name = str(service.get("group") or DEFAULT_GROUP).strip()
         # A dedup key, not display text. Translating it would key the same
         # nameless service differently per guild.
         service_name = str(service.get("name") or "Unknown Service").strip()
@@ -642,9 +676,12 @@ class UptimeCog(commands.Cog):
                 log.warning("The status payload carried an unparseable generatedAt: %r", generated_at)
         return None
 
-    def staleness_line(self, data: StatusData) -> str | None:
+    def staleness_line(
+        self, data: StatusData, translate: "Translator | None" = None
+    ) -> str | None:
         """A line saying the data is old, when the page says it is."""
 
+        _ = translate or translator_for(None)
         verdict = status_api.freshness(data)
         if not verdict or not verdict["stale"]:
             return None
@@ -653,12 +690,15 @@ class UptimeCog(commands.Cog):
         if isinstance(age, (int, float)) and isinstance(after, (int, float)):
             # staleAfterSeconds is the threshold for calling data old, not the
             # interval between checks. The payload publishes no interval.
-            return (
-                f"-# ⚠️ The status page has not updated for {int(age // 60)}m."
-                f" Anything over {int(after // 60)}m is treated as out of date,"
-                f" so this board may be behind."
-            )
-        return "-# ⚠️ The status page has not updated recently, so this board may be out of date."
+            return "-# ⚠️ " + _(
+                "The status page has not updated for {age}m."
+                " Anything over {threshold}m is treated as out of date,"
+                " so this board may be behind."
+            ).format(age=int(age // 60), threshold=int(after // 60))
+        return "-# ⚠️ " + _(
+            "The status page has not updated recently,"
+            " so this board may be out of date."
+        )
 
     def _summary_counts(self, data: StatusData) -> tuple[int, int, int]:
         summary = data.get("summary", {})
@@ -688,7 +728,9 @@ class UptimeCog(commands.Cog):
         services: list[StatusData],
         healthy: str | None = None,
         published_state: str | None = None,
+        translate: "Translator | None" = None,
     ) -> str:
+        _ = translate or translator_for(None)
         group_up = sum(
             1 for item in services
             if status_api.service_state(item) == "UP"
@@ -706,8 +748,12 @@ class UptimeCog(commands.Cog):
             )
         else:
             group_emoji = self.get_state_emoji("UP", healthy) if affected == 0 else "🔴"
-        noun = "service" if affected == 1 else "services"
-        status_text = "operational" if affected == 0 else f"{affected} {noun} affected"
+        if affected == 0:
+            status_text = _("operational")
+        else:
+            status_text = _.ngettext(
+                "{n} service affected", "{n} services affected", affected
+            ).format(n=affected)
         if any(item.get("requiresAuth") for item in services):
             name = f"{name} 🔒"
         return f"{group_emoji} **{name}** · {group_up}/{group_total}, {status_text}"
@@ -1216,7 +1262,7 @@ class UptimeCog(commands.Cog):
             service = self.find_service(data, host)
             if service is None:
                 await interaction.followup.send(
-                    f"I could not find a service called {host}.",
+                    _("I could not find a service called {name}.").format(name=host),
                     ephemeral=True,
                 )
                 return
@@ -1226,7 +1272,7 @@ class UptimeCog(commands.Cog):
             return
         if group and group not in self.group_services(data):
             await interaction.followup.send(
-                f"I could not find a group called {group}.",
+                _("I could not find a group called {name}.").format(name=group),
                 ephemeral=True,
             )
             return
@@ -1258,11 +1304,16 @@ class UptimeCog(commands.Cog):
             override = row.get(field)
             default = getattr(self.bot.config, _SETTING_DEFAULTS[field])
             if override is None:
-                lines.append(f"**{label}**: {default} (default)")
+                lines.append(
+                    f"**{label}**: "
+                    + _("{value} (default)").format(value=default)
+                )
             else:
                 lines.append(f"**{label}**: {override}")
         await interaction.response.send_message(
-            "\n".join(lines) + "\n\nChange one with `/tracker set`.",
+            "\n".join(lines)
+            + "\n\n"
+            + _("Change one with `/tracker set`."),
             ephemeral=True,
         )
 
@@ -1298,7 +1349,9 @@ class UptimeCog(commands.Cog):
             self.invalidate_guild_settings(guild_id)
             default = getattr(self.bot.config, _SETTING_DEFAULTS[field.value])
             await interaction.response.send_message(
-                f"{label} is back to the default: {default}",
+                _("{setting} is back to the default: {value}").format(
+                    setting=label, value=default
+                ),
                 ephemeral=True,
             )
             return
@@ -1309,7 +1362,9 @@ class UptimeCog(commands.Cog):
         await self.bot.db.set_guild_setting(guild_id, field.value, cleaned)
         self.invalidate_guild_settings(guild_id)
         await interaction.response.send_message(
-            f"{label} is now {cleaned}. It applies from the next refresh.",
+            _("{setting} is now {value}. It applies from the next refresh.").format(
+                setting=label, value=cleaned
+            ),
             ephemeral=True,
         )
 
@@ -1329,8 +1384,9 @@ class UptimeCog(commands.Cog):
         removed = await self.delete_panels(guild_id)
         detail = _("Status alerts are now disabled for this guild.")
         if removed:
-            noun = "panel" if removed == 1 else "panels"
-            detail += f" {removed} {noun} removed."
+            detail += " " + _.ngettext(
+                "{n} panel removed.", "{n} panels removed.", removed
+            ).format(n=removed)
         await interaction.followup.send(detail, ephemeral=True)
 
     @tracker.command(
@@ -1366,7 +1422,9 @@ class UptimeCog(commands.Cog):
                     log.warning("Could not delete the board for %s: %s", guild_id, exc)
         detail = _("Removed the tracked uptime message for this guild.")
         if stored and not deleted:
-            detail += " The board itself could not be deleted and is now stale."
+            detail += " " + _(
+                "The board itself could not be deleted and is now stale."
+            )
         await interaction.followup.send(detail, ephemeral=True)
 
     # Read-only and ephemeral, so it sits beside /uptime rather than inside the
