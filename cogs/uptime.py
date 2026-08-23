@@ -16,6 +16,8 @@ if TYPE_CHECKING:
 import status_api
 from panels import build_panel_specs
 from i18n import Translator, translator_for
+
+_L = app_commands.locale_str
 from incidents import (
     alertable_rows,
     build_page_incident_messages,
@@ -155,7 +157,7 @@ class UptimeCog(commands.Cog):
     # holds the line when they do.
     tracker = app_commands.Group(
         name="tracker",
-        description="Manage uptime tracker messages",
+        description=_L("Manage uptime tracker messages"),
         default_permissions=discord.Permissions(manage_guild=True),
         guild_only=True,
     )
@@ -1059,7 +1061,7 @@ class UptimeCog(commands.Cog):
         )
         await send_view(layout)
 
-    @tracker.command(name="setup", description="Create a live uptime tracker message")
+    @tracker.command(name="setup", description=_L("Create a live uptime tracker message"))
     @can_manage_guild()
     async def setup_tracker(self, interaction: discord.Interaction) -> None:
         _ = await self.guild_translator(interaction.guild_id)
@@ -1093,7 +1095,7 @@ class UptimeCog(commands.Cog):
             ephemeral=True,
         )
 
-    @tracker.command(name="refresh", description="Refresh all live uptime tracker messages")
+    @tracker.command(name="refresh", description=_L("Refresh all live uptime tracker messages"))
     @app_commands.checks.cooldown(1, 60.0, key=lambda i: i.guild_id)
     @can_manage_guild()
     async def refresh_tracker(self, interaction: discord.Interaction) -> None:
@@ -1104,7 +1106,7 @@ class UptimeCog(commands.Cog):
             ephemeral=True,
         )
 
-    @tracker.command(name="alerts", description="Send status alerts to this channel")
+    @tracker.command(name="alerts", description=_L("Send status alerts to this channel"))
     @can_manage_guild()
     async def setup_alerts(self, interaction: discord.Interaction) -> None:
         _ = await self.guild_translator(interaction.guild_id)
@@ -1178,17 +1180,17 @@ class UptimeCog(commands.Cog):
             if needle in str(service.get("name") or "").casefold()
         ][:25]
 
-    @app_commands.command(name="status", description="Service status, by group or by host")
+    @app_commands.command(name="status", description=_L("Service status, by group or by host"))
     @app_commands.describe(
-        group="Show one group's services",
-        host="Show one service in detail, with its uptime history",
-        state="List every service currently in this state",
+        group=_L("Show one group's services"),
+        host=_L("Show one service in detail, with its uptime history"),
+        state=_L("List every service currently in this state"),
     )
     @app_commands.choices(
         state=[
-            app_commands.Choice(name="Down", value="DOWN"),
-            app_commands.Choice(name="Degraded", value="DEGRADED"),
-            app_commands.Choice(name="Down or degraded", value="DOWN,DEGRADED"),
+            app_commands.Choice(name=_L("Down"), value="DOWN"),
+            app_commands.Choice(name=_L("Degraded"), value="DEGRADED"),
+            app_commands.Choice(name=_L("Down or degraded"), value="DOWN,DEGRADED"),
         ]
     )
     @app_commands.autocomplete(group=group_autocomplete, host=host_autocomplete)
@@ -1238,7 +1240,7 @@ class UptimeCog(commands.Cog):
             ephemeral=True,
         )
 
-    @tracker.command(name="settings", description="Show this server's tracker settings")
+    @tracker.command(name="settings", description=_L("Show this server's tracker settings"))
     @can_manage_guild()
     async def show_settings(self, interaction: discord.Interaction) -> None:
         _ = await self.guild_translator(interaction.guild_id)
@@ -1263,15 +1265,15 @@ class UptimeCog(commands.Cog):
             ephemeral=True,
         )
 
-    @tracker.command(name="set", description="Change a tracker setting for this server")
+    @tracker.command(name="set", description=_L("Change a tracker setting for this server"))
     @app_commands.describe(
-        field="Which setting to change",
-        value="The new value. Leave this empty to go back to the default.",
+        field=_L("Which setting to change"),
+        value=_L("The new value. Leave this empty to go back to the default."),
     )
     @app_commands.choices(
         field=[
-            app_commands.Choice(name="Status emoji", value="status_emoji"),
-            app_commands.Choice(name="Status page URL", value="status_page_url"),
+            app_commands.Choice(name=_L("Status emoji"), value="status_emoji"),
+            app_commands.Choice(name=_L("Status page URL"), value="status_page_url"),
         ]
     )
     @can_manage_guild()
@@ -1310,7 +1312,7 @@ class UptimeCog(commands.Cog):
             ephemeral=True,
         )
 
-    @tracker.command(name="stopalerts", description="Stop sending status alerts in this guild")
+    @tracker.command(name="stopalerts", description=_L("Stop sending status alerts in this guild"))
     @can_manage_guild()
     async def remove_alerts(self, interaction: discord.Interaction) -> None:
         _ = await self.guild_translator(interaction.guild_id)
@@ -1332,7 +1334,7 @@ class UptimeCog(commands.Cog):
 
     @tracker.command(
         name="remove",
-        description="Stop tracking the live uptime message for this guild",
+        description=_L("Stop tracking the live uptime message for this guild"),
     )
     @can_manage_guild()
     async def remove_tracker(self, interaction: discord.Interaction) -> None:
@@ -1370,7 +1372,7 @@ class UptimeCog(commands.Cog):
     # manager-gated group: an outage is what an ordinary member wants to look up.
     # Top-level and open to anyone, like /incidents: a member wanting to know
     # who made this, or how to run their own, is not a server manager.
-    @app_commands.command(name="about", description="Who made this bot, and how to run your own")
+    @app_commands.command(name="about", description=_L("Who made this bot, and how to run your own"))
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.guild_id)
     async def about_slash(self, interaction: discord.Interaction) -> None:
         settings = await self.guild_render_settings(
@@ -1380,7 +1382,7 @@ class UptimeCog(commands.Cog):
             view=AboutLayout(self, **settings), ephemeral=True
         )
 
-    @app_commands.command(name="incidents", description="Recent outages and who they affected")
+    @app_commands.command(name="incidents", description=_L("Recent outages and who they affected"))
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.guild_id)
     async def incidents_slash(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
@@ -1393,7 +1395,7 @@ class UptimeCog(commands.Cog):
         )
         await interaction.followup.send(view=layout, ephemeral=True)
 
-    @app_commands.command(name="uptime", description="View live service uptime")
+    @app_commands.command(name="uptime", description=_L("View live service uptime"))
     async def uptime_slash(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
         await self.send_uptime_response(

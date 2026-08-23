@@ -14,7 +14,11 @@ import re
 import sys
 from pathlib import Path
 
-from babel.messages.extract import extract_from_dir
+from babel.messages.extract import DEFAULT_KEYWORDS, extract_from_dir
+
+# _L wraps command metadata, which Discord localises rather than gettext. The
+# strings still belong in the catalogue, so extraction has to know the name.
+KEYWORDS = {**DEFAULT_KEYWORDS, "_L": None}
 from babel.messages.pofile import read_po
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,6 +38,7 @@ def source_msgids(root: Path = ROOT) -> set[str]:
         str(root),
         method_map=[("**.py", "python")],
         options_map={"**.py": {}},
+        keywords=KEYWORDS,
     ):
         if any(part in Path(filename).parts for part in EXCLUDE):
             continue

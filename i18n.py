@@ -10,6 +10,8 @@ import gettext
 from functools import lru_cache
 from pathlib import Path
 
+import discord
+
 DOMAIN = "messages"
 LOCALE_DIR = Path(__file__).resolve().parent / "locales"
 
@@ -63,3 +65,21 @@ def available_locales() -> list[str]:
         for d in LOCALE_DIR.iterdir()
         if (d / "LC_MESSAGES" / f"{DOMAIN}.mo").is_file()
     )
+
+
+class AppCommandTranslator(discord.app_commands.Translator):
+    """Command names and descriptions, which Discord localises rather than us.
+
+    These are uploaded at sync time and shown in the viewer's own Discord
+    language. The guild `locale` setting does not reach them; it governs what
+    the bot writes in a message.
+    """
+
+    async def translate(
+        self,
+        string: discord.app_commands.locale_str,
+        locale: discord.Locale,
+        context: discord.app_commands.TranslationContextTypes,
+    ) -> str | None:
+        translated = translator_for(str(locale))(string.message)
+        return translated if translated != string.message else None

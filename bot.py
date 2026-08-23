@@ -7,6 +7,7 @@ import discord
 from discord.ext import commands
 
 from config import Config
+from i18n import AppCommandTranslator
 from tracker_db import TrackerDatabase
 
 logging.basicConfig(
@@ -170,6 +171,7 @@ class DiscordUptimeTrackerBot(commands.Bot):
         self.db = TrackerDatabase(self.config.DATABASE_PATH)
         await self.db.init()
         await self.load_extension("cogs.uptime")
+        await self.tree.set_translator(AppCommandTranslator())
         await sync_app_commands(self.tree, self.config.GUILD_ID)
 
     async def on_ready(self) -> None:
