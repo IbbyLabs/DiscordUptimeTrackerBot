@@ -97,8 +97,51 @@ def compiled_entries(locale: str, locale_dir: Path = LOCALE_DIR) -> dict[str, li
     return out
 
 
+def catalogue_forms(
+    locale: str, locale_dir: Path = LOCALE_DIR
+) -> dict[str, list[tuple[int, bool, str]]]:
+    """msgid -> (form index, whether the entry is plural, the translation).
+
+    The index is what separates a legitimate omission from a loss: a plural
+    entry's first form is the one a language uses for a count of one.
+    """
+
+    with catalogue_path(locale, locale_dir).open("rb") as handle:
+        catalog = read_po(handle)
+    out: dict[str, list[tuple[int, bool, str]]] = {}
+    for message in catalog:
+        if not message.id:
+            continue
+        plural = isinstance(message.id, tuple)
+        ids = message.id if plural else (message.id,)
+        strings = message.string if isinstance(message.string, tuple) else (message.string,)
+        out[ids[0]] = [(i, plural, s) for i, s in enumerate(strings) if s]
+    return out
+
+
 def placeholders(text: str) -> set[str]:
     return set(PLACEHOLDER.findall(text))
+
+
+def placeholder_faults(msgid: str, forms: list[tuple[int, bool, str]]) -> list[str]:
+    """Placeholder problems in one message's translations.
+
+    An invented name raises at render time, in whichever guild chose that
+    language, so it is a fault in every form. A dropped name costs the reader a
+    value and is accepted only in a plural entry's first form, where several
+    languages carry the count in the grammar instead.
+    """
+
+    expected = placeholders(msgid)
+    faults: list[str] = []
+    for index, plural, text in forms:
+        invented = placeholders(text) - expected
+        if invented:
+            faults.append(f"{text!r} uses {sorted(invented)}, which {msgid!r} cannot supply")
+        missing = expected - placeholders(text)
+        if missing and not (plural and index == 0):
+            faults.append(f"{text!r} drops {sorted(missing)} from {msgid!r}")
+    return faults
 
 
 def main() -> int:
