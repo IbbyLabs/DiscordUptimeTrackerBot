@@ -41,17 +41,24 @@ def test_every_shipped_catalogue_answers_every_message_the_source_asks() -> None
         )
 
 
-def test_a_translation_never_invents_a_placeholder() -> None:
+def test_a_translation_carries_exactly_the_placeholders_of_its_message() -> None:
+    """Both directions. Inventing one raises; dropping one loses the value.
+
+    `"{count} services down"` rendered as `"uslugi niedostepne"` formats without
+    complaint and quietly costs the reader the number, which is the half nobody
+    who needs the translation can see.
+    """
+
     for locale in catalogues():
         for msgid, strings in catalogue_entries(locale).items():
-            allowed = placeholders(msgid)
+            expected = placeholders(msgid)
             for translated in strings:
-                extra = placeholders(translated) - allowed
-                assert not extra, (
-                    f"{locale}: {translated!r} uses {sorted(extra)}, which "
-                    f"{msgid!r} does not supply — a KeyError at format time"
+                found = placeholders(translated)
+                assert found == expected, (
+                    f"{locale}: {translated!r} uses {sorted(found)} where "
+                    f"{msgid!r} supplies {sorted(expected)}"
                 )
-                translated.format(**{name: "x" for name in allowed})
+                translated.format(**{name: "x" for name in expected})
 
 
 # The two above pass on an empty tree, so here is the proof they bite.
@@ -80,3 +87,13 @@ def test_the_placeholder_guard_catches_a_renamed_field(tmp_path) -> None:
     entries = catalogue_entries("xx", root / "locales")
     extra = placeholders(entries["{count} down"][0]) - placeholders("{count} down")
     assert extra == {"cont"}
+
+
+def test_the_placeholder_guard_catches_a_dropped_field(tmp_path) -> None:
+    root = _fixture(
+        tmp_path,
+        '_("{count} down")\n',
+        'msgid "{count} down"\nmsgstr "niedostepne"\n',
+    )
+    entries = catalogue_entries("xx", root / "locales")
+    assert placeholders(entries["{count} down"][0]) != placeholders("{count} down")
