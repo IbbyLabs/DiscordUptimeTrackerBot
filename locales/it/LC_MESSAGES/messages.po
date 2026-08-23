@@ -1,19 +1,18 @@
-# Polish translations for DiscordUptimeTrackerBot.
+# Italian translations for DiscordUptimeTrackerBot.
 # Copyright (C) 2026 IbbyLabs
 # This file is distributed under the same license as the
 # DiscordUptimeTrackerBot project.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: DiscordUptimeTrackerBot 0.8.8\n"
+"Project-Id-Version: DiscordUptimeTrackerBot VERSION\n"
 "Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
 "POT-Creation-Date: 2026-08-23 21:55+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: machine draft, reviewed by a Polish speaker\n"
-"Language: pl\n"
-"Language-Team: Polish\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && "
-"(n%100<10 || n%100>=20) ? 1 : 2);\n"
+"PO-Revision-Date: 2026-08-23 21:46+0100\n"
+"Last-Translator: in-house translation\n"
+"Language: it\n"
+"Language-Team: Italian\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -23,37 +22,35 @@ msgstr ""
 #, python-brace-format
 msgid "{count} service is not responding."
 msgid_plural "{count} services are not responding."
-msgstr[0] "{count} usługa nie odpowiada."
-msgstr[1] "{count} usługi nie odpowiadają."
-msgstr[2] "{count} usług nie odpowiada."
+msgstr[0] "{count} servizio non risponde."
+msgstr[1] "{count} servizi non rispondono."
 
 #. TRANSLATORS: Alert heading. A service has just gone down.
 #: incidents.py:266
 msgid "Outage started"
-msgstr "Rozpoczęła się awaria"
+msgstr "Disservizio iniziato"
 
 #. TRANSLATORS: Alert heading. Everything is working again.
 #: incidents.py:275
 msgid "All clear"
-msgstr "Wszystko działa"
+msgstr "Tutto risolto"
 
 #: incidents.py:275
 msgid "Every service is responding again."
-msgstr "Wszystkie usługi znów odpowiadają."
+msgstr "Tutti i servizi rispondono di nuovo."
 
 #: incidents.py:280
 #, python-brace-format
 msgid "{count} service is responding again."
 msgid_plural "{count} services are responding again."
-msgstr[0] "{count} usługa znów odpowiada."
-msgstr[1] "{count} usługi znów odpowiadają."
-msgstr[2] "{count} usług znów odpowiada."
+msgstr[0] "{count} servizio risponde di nuovo."
+msgstr[1] "{count} servizi rispondono di nuovo."
 
 #. TRANSLATORS: Alert heading meaning a service has recovered. Not a data
 #. backup.
 #: incidents.py:285
 msgid "Back up"
-msgstr "Znów działa"
+msgstr "Di nuovo attivo"
 
 #. TRANSLATORS: A finished outage inside a list item: "Torbox — down from 14:02
 #. to
@@ -61,73 +58,71 @@ msgstr "Znów działa"
 #: incidents.py:302
 #, python-brace-format
 msgid "down from {start} to {end}"
-msgstr "niedostępne od {start} do {end}"
+msgstr "non raggiungibile dalle {start} alle {end}"
 
 #. TRANSLATORS: An outage still going, inside a list item: "Torbox — since
 #. 14:02".
 #: incidents.py:307
 #, python-brace-format
 msgid "since {start}"
-msgstr "od {start}"
+msgstr "dalle {start}"
 
 #. TRANSLATORS: Setting label. The emoji shown beside a healthy service.
 #: cogs/uptime.py:63 cogs/uptime.py:1391
 msgid "Status emoji"
-msgstr "Emoji statusu"
+msgstr "Emoji di stato"
 
 #. TRANSLATORS: Setting label. The web address of the status page this board
 #. reads.
 #: cogs/uptime.py:65 cogs/uptime.py:1392
 msgid "Status page URL"
-msgstr "Adres strony statusu"
+msgstr "URL della pagina di stato"
 
 #. TRANSLATORS: Setting label. Which language this server's board is written
 #. in.
 #: cogs/uptime.py:67
 msgid "Language"
-msgstr "Język"
+msgstr "Lingua"
 
 #. TRANSLATORS: The group a service falls into when the status page names none.
 #: cogs/uptime.py:73
 msgid "Other"
-msgstr "Inne"
+msgstr "Altri"
 
 #: cogs/uptime.py:86
 msgid "That is not a valid URL. It needs to start with http:// or https://."
-msgstr ""
-"To nie jest prawidłowy adres URL. Musi zaczynać się od http:// lub "
-"https://."
+msgstr "Questo URL non è valido. Deve iniziare con http:// o https://."
 
 #: cogs/uptime.py:89
 msgid "That URL is too long."
-msgstr "Ten adres URL jest za długi."
+msgstr "Questo URL è troppo lungo."
 
 #: cogs/uptime.py:93
 msgid "That emoji is too long."
-msgstr "To emoji jest za długie."
+msgstr "Questa emoji è troppo lunga."
 
 #. TRANSLATORS: Error reply. {value} is the tag someone typed.
 #: cogs/uptime.py:103
 #, python-brace-format
 msgid "{value} is not a language this bot can render."
-msgstr "{value} to nie jest język, w którym ten bot potrafi pisać."
+msgstr "{value} non è una lingua che questo bot può mostrare."
 
 #. TRANSLATORS: Error reply. {field} is the name someone typed, not a
 #. translated word.
 #: cogs/uptime.py:108
 #, python-brace-format
 msgid "Unknown setting: {field}"
-msgstr "Nieznane ustawienie: {field}"
+msgstr "Impostazione sconosciuta: {field}"
 
 #: cogs/uptime.py:174
 msgid "Manage uptime tracker messages"
-msgstr "Zarządzaj wiadomościami monitora dostępności"
+msgstr "Gestisci i messaggi del monitor di stato"
 
 #. TRANSLATORS: Heading of an operator's announcement that carries no title of
 #. its own.
 #: cogs/uptime.py:398
 msgid "Notice"
-msgstr "Ogłoszenie"
+msgstr "Avviso"
 
 #. TRANSLATORS: Line under an announcement. {names} is a comma-separated list
 #. of
@@ -136,34 +131,33 @@ msgstr "Ogłoszenie"
 #, python-brace-format
 msgid "Affects {names} and {n} more"
 msgid_plural "Affects {names} and {n} more"
-msgstr[0] "Dotyczy {names} i {n} więcej"
-msgstr[1] "Dotyczy {names} i {n} więcej"
-msgstr[2] "Dotyczy {names} i {n} więcej"
+msgstr[0] "Riguarda {names} e {n} altro"
+msgstr[1] "Riguarda {names} e altri {n}"
 
 #. TRANSLATORS: Line under an announcement listing the services it concerns.
 #: cogs/uptime.py:420
 #, python-brace-format
 msgid "Affects {names}"
-msgstr "Dotyczy {names}"
+msgstr "Riguarda {names}"
 
 #. TRANSLATORS: Small print under an announcement. {when} renders as "3 minutes
 #. ago".
 #: cogs/uptime.py:428
 #, python-brace-format
 msgid "Updated {when}"
-msgstr "Zaktualizowano {when}"
+msgstr "Aggiornato {when}"
 
 #. TRANSLATORS: Stands in for a service the status page gave no name for.
 #: cogs/uptime.py:450 cogs/uptime.py:513 cogs/uptime.py:816
 msgid "Unknown Service"
-msgstr "Nieznana usługa"
+msgstr "Servizio sconosciuto"
 
 #. TRANSLATORS: Stands in where the status page offered no explanation for
 #. planned
 #. work.
 #: cogs/uptime.py:458
 msgid "No reason given"
-msgstr "Nie podano powodu"
+msgstr "Nessun motivo indicato"
 
 #. TRANSLATORS: Tail of an outage line: "Torbox (Debrid) since 14:02". Not a
 #. sentence
@@ -171,40 +165,40 @@ msgstr "Nie podano powodu"
 #: cogs/uptime.py:464 cogs/uptime.py:517
 #, python-brace-format
 msgid "since {when}"
-msgstr "od {when}"
+msgstr "da {when}"
 
 #. TRANSLATORS: Tail of a recovering service's line, giving when it first went
 #. down.
 #: cogs/uptime.py:525
 #, python-brace-format
 msgid "down since {when}"
-msgstr "niedostępne od {when}"
+msgstr "non raggiungibile da {when}"
 
 #. TRANSLATORS: Middle of a line about a service that answered again and is
 #. being
 #. watched before it counts as up.
 #: cogs/uptime.py:533
 msgid "responding again, held until stable"
-msgstr "znów odpowiada, wstrzymane do czasu stabilizacji"
+msgstr "risponde di nuovo, in osservazione finché non è stabile"
 
 #. TRANSLATORS: Headline across the top of the board when the status page gave
 #. no
 #. wording of its own.
 #: cogs/uptime.py:614
 msgid "Services Down"
-msgstr "Usługi niedostępne"
+msgstr "Servizi non raggiungibili"
 
 #. TRANSLATORS: Headline across the top of the board. Working, but not
 #. properly.
 #: cogs/uptime.py:617 cogs/uptime.py:660
 msgid "Services Degraded"
-msgstr "Usługi działają z zakłóceniami"
+msgstr "Servizi degradati"
 
 #. TRANSLATORS: Headline across the top of the board when everything is
 #. working.
 #: cogs/uptime.py:628 cogs/uptime.py:664
 msgid "All Systems Operational"
-msgstr "Wszystkie systemy działają"
+msgstr "Tutti i sistemi funzionano"
 
 #. TRANSLATORS: Headline across the top of the board, counting the services
 #. that are
@@ -213,9 +207,8 @@ msgstr "Wszystkie systemy działają"
 #, python-brace-format
 msgid "{n} Service Down"
 msgid_plural "{n} Services Down"
-msgstr[0] "{n} usługa niedostępna"
-msgstr[1] "{n} usługi niedostępne"
-msgstr[2] "{n} usług niedostępnych"
+msgstr[0] "{n} servizio non raggiungibile"
+msgstr[1] "{n} servizi non raggiungibili"
 
 #. TRANSLATORS: Headline counting services that keep changing between up and
 #. down.
@@ -223,15 +216,14 @@ msgstr[2] "{n} usług niedostępnych"
 #, python-brace-format
 msgid "{n} Service Unstable"
 msgid_plural "{n} Services Unstable"
-msgstr[0] "{n} usługa niestabilna"
-msgstr[1] "{n} usługi niestabilne"
-msgstr[2] "{n} usług niestabilnych"
+msgstr[0] "{n} servizio instabile"
+msgstr[1] "{n} servizi instabili"
 
 #. TRANSLATORS: Headline across the top of the board. Planned work, not a
 #. fault.
 #: cogs/uptime.py:663
 msgid "Under Maintenance"
-msgstr "Prace serwisowe"
+msgstr "In manutenzione"
 
 #: cogs/uptime.py:727
 #, python-brace-format
@@ -239,102 +231,101 @@ msgid ""
 "The status page has not updated for {age}m. Anything over {threshold}m is"
 " treated as out of date, so this board may be behind."
 msgstr ""
-"Strona statusu nie była aktualizowana od {age} min. Wszystko powyżej "
-"{threshold} min jest traktowane jako nieaktualne, więc ta tablica może "
-"być opóźniona."
+"La pagina di stato non si aggiorna da {age} min. Oltre {threshold} min "
+"viene considerata non aggiornata, quindi questo pannello potrebbe essere "
+"indietro."
 
 #: cogs/uptime.py:732
 msgid ""
 "The status page has not updated recently, so this board may be out of "
 "date."
 msgstr ""
-"Strona statusu nie była ostatnio aktualizowana, więc ta tablica może być "
-"nieaktualna."
+"La pagina di stato non si aggiorna da un po', quindi questo pannello "
+"potrebbe non essere aggiornato."
 
 #. TRANSLATORS: Follows a count in a group's summary line: "3/3, operational".
 #: cogs/uptime.py:786
 msgid "operational"
-msgstr "działa"
+msgstr "operativo"
 
 #. TRANSLATORS: Tail of a group's summary line: "3/4, problem with 1 service".
 #: cogs/uptime.py:790
 #, python-brace-format
 msgid "{n} service affected"
 msgid_plural "{n} services affected"
-msgstr[0] "problem z {n} usługą"
-msgstr[1] "problem z {n} usługami"
-msgstr[2] "problem z {n} usługami"
+msgstr[0] "{n} servizio coinvolto"
+msgstr[1] "{n} servizi coinvolti"
 
 #: cogs/uptime.py:808
 msgid "Some services are behind authentication and marked with a lock."
-msgstr "Niektóre usługi wymagają uwierzytelnienia i są oznaczone kłódką."
+msgstr ""
+"Alcuni servizi richiedono l'autenticazione e sono contrassegnati con un "
+"lucchetto."
 
 #: cogs/uptime.py:1132
 #, python-brace-format
 msgid "Refreshed {count} uptime tracker message."
 msgid_plural "Refreshed {count} uptime tracker messages."
-msgstr[0] "Odświeżono {count} wiadomość monitora."
-msgstr[1] "Odświeżono {count} wiadomości monitora."
-msgstr[2] "Odświeżono {count} wiadomości monitora."
+msgstr[0] "Aggiornato {count} messaggio del monitor."
+msgstr[1] "Aggiornati {count} messaggi del monitor."
 
 #: cogs/uptime.py:1139
 #, python-brace-format
 msgid "Sent {count} alert."
 msgid_plural "Sent {count} alerts."
-msgstr[0] "Wysłano {count} powiadomienie."
-msgstr[1] "Wysłano {count} powiadomienia."
-msgstr[2] "Wysłano {count} powiadomień."
+msgstr[0] "Inviato {count} avviso."
+msgstr[1] "Inviati {count} avvisi."
 
 #: cogs/uptime.py:1159 cogs/uptime.py:1186 cogs/uptime.py:1318
 #: ui/status_layout.py:91
 msgid "I could not fetch status data right now."
-msgstr "Nie udało się teraz pobrać danych o statusie."
+msgstr "Non sono riuscito a recuperare i dati di stato in questo momento."
 
 #: cogs/uptime.py:1162
 msgid "No services were found."
-msgstr "Nie znaleziono żadnych usług."
+msgstr "Non è stato trovato nessun servizio."
 
 #: cogs/uptime.py:1169
 msgid "Create a live uptime tracker message"
-msgstr "Utwórz aktualizowaną na żywo wiadomość monitora dostępności"
+msgstr "Crea un messaggio di monitoraggio in tempo reale"
 
 #: cogs/uptime.py:1178 cogs/uptime.py:1220 cogs/uptime.py:1227
 #: cogs/uptime.py:1234 cogs/uptime.py:1358 cogs/uptime.py:1405
 #: cogs/uptime.py:1443 cogs/uptime.py:1467
 msgid "Cannot use this command here."
-msgstr "Nie można użyć tej komendy w tym miejscu."
+msgstr "Questo comando non si può usare qui."
 
 #: cogs/uptime.py:1199
 msgid "Uptime tracker message created. It will refresh automatically."
-msgstr "Utworzono wiadomość monitora dostępności. Będzie odświeżana automatycznie."
+msgstr "Messaggio di monitoraggio creato. Si aggiornerà da solo."
 
 #: cogs/uptime.py:1203
 msgid "Refresh all live uptime tracker messages"
-msgstr "Odśwież wszystkie wiadomości monitora dostępności"
+msgstr "Aggiorna tutti i messaggi di monitoraggio in tempo reale"
 
 #: cogs/uptime.py:1214
 msgid "Send status alerts to this channel"
-msgstr "Wysyłaj powiadomienia o statusie na ten kanał"
+msgstr "Invia gli avvisi di stato in questo canale"
 
 #: cogs/uptime.py:1243
 msgid "Status alerts will be sent to this channel."
-msgstr "Powiadomienia o statusie będą wysyłane na ten kanał."
+msgstr "Gli avvisi di stato verranno inviati in questo canale."
 
 #: cogs/uptime.py:1288
 msgid "Service status, by group or by host"
-msgstr "Status usług, według grupy lub hosta"
+msgstr "Stato dei servizi, per gruppo o per provider"
 
 #: cogs/uptime.py:1290
 msgid "Show one group's services"
-msgstr "Pokaż usługi jednej grupy"
+msgstr "Mostra i servizi di un gruppo"
 
 #: cogs/uptime.py:1291
 msgid "Show one service in detail, with its uptime history"
-msgstr "Pokaż szczegóły jednej usługi wraz z historią dostępności"
+msgstr "Mostra un servizio in dettaglio, con il suo storico di disponibilità"
 
 #: cogs/uptime.py:1292
 msgid "List every service currently in this state"
-msgstr "Wypisz wszystkie usługi obecnie o tym statusie"
+msgstr "Elenca tutti i servizi attualmente in questo stato"
 
 #. TRANSLATORS: Choice in a command that filters services by their state.
 #. TRANSLATORS: Choice in a command that filters services by state, and a
@@ -342,113 +333,112 @@ msgstr "Wypisz wszystkie usługi obecnie o tym statusie"
 #. elsewhere.
 #: cogs/uptime.py:1297 ui/status_layout.py:509
 msgid "Down"
-msgstr "Niedostępne"
+msgstr "Non raggiungibile"
 
 #. TRANSLATORS: Choice in that filter, and a service's state. Working, but not
 #. properly.
 #: cogs/uptime.py:1300 ui/status_layout.py:511
 msgid "Degraded"
-msgstr "Zakłócone"
+msgstr "Degradato"
 
 #. TRANSLATORS: Choice in that same filter, meaning either state.
 #: cogs/uptime.py:1302
 msgid "Down or degraded"
-msgstr "Niedostępne lub z zakłóceniami"
+msgstr "Non raggiungibile o degradato"
 
 #: cogs/uptime.py:1327
 #, python-brace-format
 msgid "I could not find a service called {name}."
-msgstr "Nie znaleziono usługi o nazwie {name}."
+msgstr "Non ho trovato nessun servizio chiamato {name}."
 
 #: cogs/uptime.py:1337
 #, python-brace-format
 msgid "I could not find a group called {name}."
-msgstr "Nie znaleziono grupy o nazwie {name}."
+msgstr "Non ho trovato nessun gruppo chiamato {name}."
 
 #: cogs/uptime.py:1352
 msgid "Show this server's tracker settings"
-msgstr "Pokaż ustawienia monitora na tym serwerze"
+msgstr "Mostra le impostazioni del monitor per questo server"
 
 #. TRANSLATORS: Shown beside a setting nobody has changed. {value} is the
 #. inherited value.
 #: cogs/uptime.py:1373
 #, python-brace-format
 msgid "{value} (default)"
-msgstr "{value} (domyślnie)"
+msgstr "{value} (predefinito)"
 
 #: cogs/uptime.py:1380
 msgid "Change one with `/tracker set`."
-msgstr "Zmień je komendą `/tracker set`."
+msgstr "Cambiale con `/tracker set`."
 
 #: cogs/uptime.py:1384
 msgid "Change a tracker setting for this server"
-msgstr "Zmień ustawienie monitora na tym serwerze"
+msgstr "Cambia un'impostazione del monitor per questo server"
 
 #: cogs/uptime.py:1386
 msgid "Which setting to change"
-msgstr "Które ustawienie zmienić"
+msgstr "Quale impostazione cambiare"
 
 #: cogs/uptime.py:1387
 msgid "The new value. Leave this empty to go back to the default."
-msgstr "Nowa wartość. Zostaw puste, aby wrócić do domyślnej."
+msgstr "Il nuovo valore. Lascialo vuoto per tornare al predefinito."
 
 #. TRANSLATORS: Reply after clearing a setting. {setting} is one of the setting
 #. labels.
 #: cogs/uptime.py:1418
 #, python-brace-format
 msgid "{setting} is back to the default: {value}"
-msgstr "{setting} wróciło do wartości domyślnej: {value}"
+msgstr "{setting} torna al valore predefinito: {value}"
 
 #: cogs/uptime.py:1431
 #, python-brace-format
 msgid "{setting} is now {value}. It applies from the next refresh."
-msgstr "{setting} zmieniono na {value}. Zadziała od następnego odświeżenia."
+msgstr "{setting} ora è {value}. Vale dal prossimo aggiornamento."
 
 #: cogs/uptime.py:1437
 msgid "Stop sending status alerts in this guild"
-msgstr "Przestań wysyłać powiadomienia o statusie na tym serwerze"
+msgstr "Smetti di inviare avvisi di stato in questo server"
 
 #: cogs/uptime.py:1451
 msgid "Status alerts are now disabled for this guild."
-msgstr "Powiadomienia o statusie są teraz wyłączone na tym serwerze."
+msgstr "Gli avvisi di stato sono ora disattivati in questo server."
 
 #: cogs/uptime.py:1454
 #, python-brace-format
 msgid "{n} panel removed."
 msgid_plural "{n} panels removed."
-msgstr[0] "Usunięto {n} panel."
-msgstr[1] "Usunięto {n} panele."
-msgstr[2] "Usunięto {n} paneli."
+msgstr[0] "{n} pannello rimosso."
+msgstr[1] "{n} pannelli rimossi."
 
 #: cogs/uptime.py:1460
 msgid "Stop tracking the live uptime message for this guild"
-msgstr "Przestań śledzić wiadomość dostępności na tym serwerze"
+msgstr "Smetti di seguire il messaggio di stato in tempo reale di questo server"
 
 #: cogs/uptime.py:1489
 msgid "Removed the tracked uptime message for this guild."
-msgstr "Usunięto wiadomość dostępności na tym serwerze."
+msgstr "Il messaggio di stato seguito per questo server è stato rimosso."
 
 #: cogs/uptime.py:1492
 msgid "The board itself could not be deleted and is now stale."
-msgstr "Nie udało się usunąć samej tablicy i jest teraz nieaktualna."
+msgstr "Il pannello stesso non è stato eliminato e ora non si aggiorna più."
 
 #: cogs/uptime.py:1500
 msgid "Who made this bot, and how to run your own"
-msgstr "Kto stworzył tego bota i jak uruchomić własnego"
+msgstr "Chi ha creato questo bot e come averne uno tuo"
 
 #. TRANSLATORS: An outage affects services, not people.
 #: cogs/uptime.py:1511
 msgid "Recent outages and the services they affected"
-msgstr "Ostatnie awarie i usługi, których dotyczyły"
+msgstr "Disservizi recenti e i servizi coinvolti"
 
 #: cogs/uptime.py:1524
 msgid "View live service uptime"
-msgstr "Zobacz dostępność usług na żywo"
+msgstr "Vedi lo stato dei servizi in tempo reale"
 
 #. TRANSLATORS: Placeholder text in a dropdown listing the service groups.
 #: ui/status_layout.py:79
 msgid "Pick a group for the detail view"
-msgstr "Wybierz grupę, aby zobaczyć szczegóły"
+msgstr "Scegli un gruppo per la vista dettagliata"
 
 #. TRANSLATORS: Part of a summary line above the board, joined to others by a
 #. comma.
@@ -456,9 +446,8 @@ msgstr "Wybierz grupę, aby zobaczyć szczegóły"
 #, python-brace-format
 msgid "{count} service not responding"
 msgid_plural "{count} services not responding"
-msgstr[0] "{count} usługa nie odpowiada"
-msgstr[1] "{count} usługi nie odpowiadają"
-msgstr[2] "{count} usług nie odpowiada"
+msgstr[0] "{count} servizio non risponde"
+msgstr[1] "{count} servizi non rispondono"
 
 #. TRANSLATORS: Part of that same summary line. The service answered again and
 #. is being
@@ -466,14 +455,14 @@ msgstr[2] "{count} usług nie odpowiada"
 #: ui/status_layout.py:130
 #, python-brace-format
 msgid "{count} recovering"
-msgstr "{count} w trakcie przywracania"
+msgstr "{count} in ripresa"
 
 #. TRANSLATORS: Heading above the list of what is down. {summary} is the counts
 #. line.
 #: ui/status_layout.py:133
 #, python-brace-format
 msgid "**Active outages** — {summary}"
-msgstr "**Trwające awarie** — {summary}"
+msgstr "**Disservizi in corso** — {summary}"
 
 #. TRANSLATORS: Says the board is showing only some services. {states} is a
 #. list of
@@ -481,7 +470,7 @@ msgstr "**Trwające awarie** — {summary}"
 #: ui/status_layout.py:169
 #, python-brace-format
 msgid "Filtered to {states}"
-msgstr "Filtr: {states}"
+msgstr "Filtrato su {states}"
 
 #. TRANSLATORS: The whole counts line as one string, so the labels, numbers and
 #. separators can be reordered.
@@ -491,12 +480,12 @@ msgid ""
 "**Up:** {up} | **Down:** {down} | **Degraded:** {degraded} | "
 "**Unstable:** {unstable}"
 msgstr ""
-"**Działa:** {up} | **Niedostępne:** {down} | **Zakłócone:** {degraded} | "
-"**Niestabilne:** {unstable}"
+"**Attivi:** {up} | **Non raggiungibili:** {down} | **Degradati:** "
+"{degraded} | **Instabili:** {unstable}"
 
 #: ui/status_layout.py:202
 msgid "Nothing in that state right now."
-msgstr "Nic nie jest teraz o tym statusie."
+msgstr "Al momento non c'è niente in questo stato."
 
 #. TRANSLATORS: Small print at the foot of the board. {when} renders as "3
 #. minutes
@@ -504,52 +493,53 @@ msgstr "Nic nie jest teraz o tym statusie."
 #: ui/status_layout.py:232
 #, python-brace-format
 msgid "Last updated {when}"
-msgstr "Ostatnia aktualizacja {when}"
+msgstr "Ultimo aggiornamento {when}"
 
 #. TRANSLATORS: Small print replacing the timestamp when the status page gave
 #. none.
 #: ui/status_layout.py:235
 msgid "The status page did not say when this was generated"
-msgstr "Strona statusu nie podała, kiedy to wygenerowano"
+msgstr "La pagina di stato non ha indicato quando è stata generata"
 
 #. TRANSLATORS: The board hit its size limit. Sits under a truncated list.
 #: ui/status_layout.py:245 ui/status_layout.py:309
 #, python-brace-format
 msgid "{count} more not shown here"
 msgid_plural "{count} more not shown here"
-msgstr[0] "{count} więcej nie pokazano"
-msgstr[1] "{count} więcej nie pokazano"
-msgstr[2] "{count} więcej nie pokazano"
+msgstr[0] "{count} altro non mostrato qui"
+msgstr[1] "altri {count} non mostrati qui"
 
 #. TRANSLATORS: Credit line at the foot. {brand} is a company name and is never
 #. translated.
 #: ui/status_layout.py:255 ui/status_layout.py:324
 #, python-brace-format
 msgid "Developed by {brand}"
-msgstr "Stworzone przez {brand}"
+msgstr "Sviluppato da {brand}"
 
 #. TRANSLATORS: Link button label, opens the status website.
 #: ui/status_layout.py:274 ui/status_layout.py:328 ui/status_layout.py:436
 #: ui/status_layout.py:668
 msgid "Full Status Page"
-msgstr "Pełna strona statusu"
+msgstr "Pagina di stato completa"
 
 #. TRANSLATORS: Markdown link. Only the words outside the square brackets are
 #. translated.
 #: ui/status_layout.py:321
 #, python-brace-format
 msgid "Live status: [pinned panels]({url})"
-msgstr "Status na żywo: [przypięte panele]({url})"
+msgstr "Stato in tempo reale: [pannelli fissati]({url})"
 
 #. TRANSLATORS: The bot's own name, as the heading of its about card.
 #: ui/status_layout.py:357
 msgid "Uptime Tracker"
-msgstr "Monitor statusu"
+msgstr "Uptime Tracker"
 
 #: ui/status_layout.py:359
 #, python-brace-format
 msgid "A live status board for Stremio addons, developed by {brand}."
-msgstr "Tablica statusu na żywo dla dodatków Stremio, stworzona przez {brand}."
+msgstr ""
+"Un pannello di stato in tempo reale per gli addon di Stremio, sviluppato "
+"da {brand}."
 
 #. TRANSLATORS: About-card row. The label is translated; the version number
 #. below it is not.
@@ -559,7 +549,7 @@ msgid ""
 "**Version**\n"
 "`v{version}`"
 msgstr ""
-"**Wersja**\n"
+"**Versione**\n"
 "`v{version}`"
 
 #: ui/status_layout.py:369
@@ -569,86 +559,84 @@ msgid ""
 "Open source under the MIT licence — run your own instance from "
 "[GitHub]({url})."
 msgstr ""
-"**Źródło**\n"
-"Otwarte oprogramowanie na licencji MIT — uruchom własną instancję z "
-"[GitHuba]({url})."
+"**Codice**\n"
+"Open source con licenza MIT — ospita la tua istanza da [GitHub]({url})."
 
 #. TRANSLATORS: Link button labels on the about card.
 #: ui/status_layout.py:380
 msgid "Status Page"
-msgstr "Strona statusu"
+msgstr "Pagina di stato"
 
 #. TRANSLATORS: Link button label. Financial support for the project, not
 #. customer support.
 #: ui/status_layout.py:384
 msgid "Support"
-msgstr "Wsparcie"
+msgstr "Sostieni il progetto"
 
 #. TRANSLATORS: Link button label, opens a chat server.
 #: ui/status_layout.py:386
 msgid "Community"
-msgstr "Społeczność"
+msgstr "Community"
 
 #. TRANSLATORS: Link button label. Ibby is a person's name and is never
 #. translated.
 #: ui/status_layout.py:389
 msgid "Message Ibby"
-msgstr "Napisz do Ibby'ego"
+msgstr "Scrivi a Ibby"
 
 #. TRANSLATORS: Heading above a list of past outages.
 #: ui/status_layout.py:418
 msgid "Recent incidents"
-msgstr "Ostatnie incydenty"
+msgstr "Incidenti recenti"
 
 #. TRANSLATORS: Sits under a truncated list of past incidents.
 #: ui/status_layout.py:428
 #, python-brace-format
 msgid "{count} older not shown here"
 msgid_plural "{count} older not shown here"
-msgstr[0] "{count} starszy nie pokazano"
-msgstr[1] "{count} starsze nie pokazano"
-msgstr[2] "{count} starszych nie pokazano"
+msgstr[0] "{count} più vecchio non mostrato qui"
+msgstr[1] "altri {count} più vecchi non mostrati qui"
 
 #. TRANSLATORS: A service's state, shown as a single word beside it.
 #: ui/status_layout.py:506
 msgid "Up"
-msgstr "Działa"
+msgstr "Attivo"
 
 #. TRANSLATORS: A service's state, one word beside its name. It answered again
 #. and is
 #. being watched before it counts as up.
 #: ui/status_layout.py:514 ui/status_layout.py:624
 msgid "Recovering"
-msgstr "Przywracane"
+msgstr "In ripresa"
 
 #. TRANSLATORS: A service's state, one word beside its name. Planned work, not
 #. a fault.
 #: ui/status_layout.py:516
 msgid "Maintenance"
-msgstr "Prace serwisowe"
+msgstr "Manutenzione"
 
 #. TRANSLATORS: A service's state, one word beside its name. Nothing has been
 #. heard about
 #. it either way.
 #: ui/status_layout.py:519
 msgid "Unknown"
-msgstr "Nieznany"
+msgstr "Sconosciuto"
 
 #: ui/status_layout.py:546
 msgid "I could not fetch that service right now."
-msgstr "Nie udało się teraz pobrać tej usługi."
+msgstr "Non sono riuscito a recuperare quel servizio in questo momento."
 
 #. TRANSLATORS: Stands in for a service the status page gave no name for.
 #: ui/status_layout.py:578
 msgid "Unknown service"
-msgstr "Nieznana usługa"
+msgstr "Servizio sconosciuto"
 
 #. TRANSLATORS: A labelled row in a service's detail panel. The dot is a
 #. separator.
 #: ui/status_layout.py:590
 #, python-brace-format
 msgid "**State** · {state}"
-msgstr "**Stan** · {state}"
+msgstr "**Stato** · {state}"
 
 #. TRANSLATORS: A labelled row in a service's detail panel. {status} is a
 #. number
@@ -664,42 +652,42 @@ msgstr "**HTTP** · {status}"
 #: ui/status_layout.py:604
 #, python-brace-format
 msgid "**Latency** · {ms}ms"
-msgstr "**Opóźnienie** · {ms} ms"
+msgstr "**Latenza** · {ms} ms"
 
 #. TRANSLATORS: A labelled row. How long the service has been in its current
 #. state.
 #: ui/status_layout.py:611
 #, python-brace-format
 msgid "**Since** · {when}"
-msgstr "**Od** · {when}"
+msgstr "**Da** · {when}"
 
 #. TRANSLATORS: A warning under a service that keeps changing between up and
 #. down.
 #: ui/status_layout.py:622
 msgid "⚠️ Flapping between states"
-msgstr "⚠️ Stan się waha"
+msgstr "⚠️ Continua a cambiare stato"
 
 #. TRANSLATORS: A note under a service having planned work done.
 #: ui/status_layout.py:627
 msgid "🔧 Under maintenance"
-msgstr "🔧 Prace serwisowe"
+msgstr "🔧 In manutenzione"
 
 #. TRANSLATORS: Buttons choosing how far back a service's history chart
 #. reaches.
 #: ui/status_layout.py:657 ui/status_layout.py:696
 msgid "7 days"
-msgstr "7 dni"
+msgstr "7 giorni"
 
 #. TRANSLATORS: Button choosing how far back the history chart reaches.
 #: ui/status_layout.py:659 ui/status_layout.py:696
 msgid "30 days"
-msgstr "30 dni"
+msgstr "30 giorni"
 
 #. TRANSLATORS: Button choosing to show the last few individual checks
 #. instead of a chart.
 #: ui/status_layout.py:663
 msgid "Recent checks"
-msgstr "Ostatnie kontrole"
+msgstr "Controlli recenti"
 
 #. TRANSLATORS: Caption over a list of a service's most recent checks. The
 #. singular
@@ -708,9 +696,8 @@ msgstr "Ostatnie kontrole"
 #, python-brace-format
 msgid "Last check"
 msgid_plural "Last {n} checks"
-msgstr[0] "Ostatnia kontrola"
-msgstr[1] "Ostatnie {n} kontroli"
-msgstr[2] "Ostatnich {n} kontroli"
+msgstr[0] "Ultimo controllo"
+msgstr[1] "Ultimi {n} controlli"
 
 #. TRANSLATORS: One item in a comma-separated caption: "168 periods, no
 #. outages". A
@@ -719,24 +706,22 @@ msgstr[2] "Ostatnich {n} kontroli"
 #, python-brace-format
 msgid "{n} period"
 msgid_plural "{n} periods"
-msgstr[0] "{n} okres"
-msgstr[1] "{n} okresy"
-msgstr[2] "{n} okresów"
+msgstr[0] "{n} periodo"
+msgstr[1] "{n} periodi"
 
 #. TRANSLATORS: One item in that caption, counting periods that had an outage.
 #: ui/status_layout.py:709
 #, python-brace-format
 msgid "{n} with an outage"
 msgid_plural "{n} with an outage"
-msgstr[0] "{n} z awarią"
-msgstr[1] "{n} z awarią"
-msgstr[2] "{n} z awarią"
+msgstr[0] "{n} con un disservizio"
+msgstr[1] "{n} con un disservizio"
 
 #. TRANSLATORS: One item in a comma-separated caption: "168 periods, no
 #. outages".
 #: ui/status_layout.py:713
 msgid "no outages"
-msgstr "brak awarii"
+msgstr "nessun disservizio"
 
 #. TRANSLATORS: One item in that caption, counting periods that were degraded
 #. rather than down.
@@ -744,15 +729,14 @@ msgstr "brak awarii"
 #, python-brace-format
 msgid "{n} with slow or failed checks"
 msgid_plural "{n} with slow or failed checks"
-msgstr[0] "{n} z wolnymi lub nieudanymi kontrolami"
-msgstr[1] "{n} z wolnymi lub nieudanymi kontrolami"
-msgstr[2] "{n} z wolnymi lub nieudanymi kontrolami"
+msgstr[0] "{n} con controlli lenti o falliti"
+msgstr[1] "{n} con controlli lenti o falliti"
 
 #. TRANSLATORS: One item in a comma-separated caption, meaning the window is
 #. not fully covered.
 #: ui/status_layout.py:727
 msgid "partial history"
-msgstr "niepełna historia"
+msgstr "storico parziale"
 
 #. TRANSLATORS: Caption over the history chart. {span} is a length of time such
 #. as "7
@@ -760,5 +744,5 @@ msgstr "niepełna historia"
 #: ui/status_layout.py:730
 #, python-brace-format
 msgid "Last {span}"
-msgstr "Ostatnie {span}"
+msgstr "Ultimi {span}"
 
