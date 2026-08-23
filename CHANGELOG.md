@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.8](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.7...v0.8.8) (2026-08-23)
+
+
+### Bug Fixes
+
+* **alerts:** announce every outage the page holds, not only long ones ([41b5f15](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/41b5f157c147361933aabc11b93b93ef113c7320))
+* **alerts:** wait 30 minutes before announcing an outage ([06bf509](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/06bf5097a89dc1f537b5bbad7155d83a902bdd93))
+
 ## [0.8.7](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.6...v0.8.7) (2026-08-22)
 
 
