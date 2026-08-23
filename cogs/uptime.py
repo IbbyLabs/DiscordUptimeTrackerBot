@@ -731,7 +731,7 @@ class UptimeCog(commands.Cog):
             latency = int(last.get("latency") or 0)
             uptime_percent = float(service.get("uptimePercent") or 0)
             url = str(service.get("url") or page_url or self.bot.config.STATUS_PAGE_URL)
-            name = str(service.get("name") or "Unknown Service")
+            name = str(service.get("name") or _("Unknown Service"))
             if service.get("requiresAuth"):
                 name = f"{name} 🔒"
             uptime_bar = self.get_uptime_bar(uptime_percent)
