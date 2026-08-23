@@ -57,7 +57,14 @@ def _body_chunks(lines: list[str]) -> tuple[list[str], int]:
 
 
 class GroupSelect(ui.Select["StatusLayout"]):
-    def __init__(self, cog: "UptimeCog", data: dict[str, Any], current: str | None) -> None:
+    def __init__(
+        self,
+        cog: "UptimeCog",
+        data: dict[str, Any],
+        current: str | None,
+        translate: Translator | None = None,
+    ) -> None:
+        _ = translate or translator_for(None)
         groups = list(cog.group_services(data).keys())
         options = [
             discord.SelectOption(
@@ -68,7 +75,7 @@ class GroupSelect(ui.Select["StatusLayout"]):
             for name in groups[:SELECT_OPTION_LIMIT]
         ]
         super().__init__(
-            placeholder="Pick a group for the detail view",
+            placeholder=_("Pick a group for the detail view"),
             options=options,
             custom_id="uptime_group_select",
         )
@@ -76,14 +83,15 @@ class GroupSelect(ui.Select["StatusLayout"]):
 
     async def callback(self, interaction: discord.Interaction) -> None:
         data = self.cog.last_status or await self.cog.fetch_status()
+        settings = await self.cog.guild_render_settings(interaction.guild_id)
+        _ = settings["translate"]
         if not data:
             await interaction.response.send_message(
-                "I could not fetch status data right now.",
+                _("I could not fetch status data right now."),
                 ephemeral=True,
             )
             return
         group_name = self.values[0]
-        settings = await self.cog.guild_render_settings(interaction.guild_id)
         layout = StatusLayout(self.cog, data, group_name=group_name, **settings)
         await interaction.response.send_message(view=layout, ephemeral=True)
 
@@ -231,9 +239,11 @@ class StatusLayout(ui.LayoutView):
         )
         self.add_item(container)
         if groups:
-            self.add_item(ui.ActionRow(GroupSelect(cog, data, group_name)))
+            self.add_item(
+                ui.ActionRow(GroupSelect(cog, data, group_name, self._))
+            )
         self.add_item(
-            ui.ActionRow(ui.Button(label="Full Status Page", url=page_url))
+            ui.ActionRow(ui.Button(label=self._("Full Status Page"), url=page_url))
         )
 
 
@@ -313,7 +323,7 @@ class AboutLayout(ui.LayoutView):
         self.add_item(
             ui.Container(
                 ui.TextDisplay(
-                    f"## {marker} Uptime Tracker\n"
+                    f"## {marker} " + self._("Uptime Tracker") + "\n"
                     + self._(
                         "A live status board for Stremio addons, developed by {brand}."
                     ).format(brand="IbbyLabs")
@@ -365,12 +375,21 @@ class IncidentHistoryLayout(ui.LayoutView):
         page_url = page_url or cog.bot.config.STATUS_PAGE_URL
         chunks, dropped = _body_chunks(lines)
         children: list[ui.Item[Any]] = [
-            ui.TextDisplay("## Recent incidents"),
+            ui.TextDisplay("## " + self._("Recent incidents")),
             ui.Separator(),
             *(ui.TextDisplay(chunk) for chunk in chunks),
         ]
         if dropped:
-            children.append(ui.TextDisplay(f"-# {dropped} older not shown here"))
+            children.append(
+                ui.TextDisplay(
+                    "-# "
+                    + self._.ngettext(
+                        "{count} older not shown here",
+                        "{count} older not shown here",
+                        dropped,
+                    ).format(count=dropped)
+                )
+            )
         self.add_item(ui.Container(*children, accent_colour=0x5865F2))
         self.add_item(
             ui.ActionRow(ui.Button(label=self._("Full Status Page"), url=page_url))
@@ -438,6 +457,19 @@ def _period_counts(buckets: list[dict[str, Any]]) -> tuple[int, int]:
     return down, degraded
 
 
+def _state_word(state: str, translate: Translator) -> str:
+    """The display state as a reader sees it. An unlisted state passes through."""
+    _ = translate
+    return {
+        "UP": _("Up"),
+        "DOWN": _("Down"),
+        "DEGRADED": _("Degraded"),
+        "RECOVERING": _("Recovering"),
+        "MAINTENANCE": _("Maintenance"),
+        "UNKNOWN": _("Unknown"),
+    }.get(state.upper(), state.title())
+
+
 class WindowButton(ui.Button["HostLayout"]):
     def __init__(self, label: str, window: str, current: str, service_id: str) -> None:
         super().__init__(
@@ -457,12 +489,14 @@ class WindowButton(ui.Button["HostLayout"]):
         view: "HostLayout" = self.view  # type: ignore[assignment]
         await interaction.response.defer()
         detail = await view.cog.fetch_service_detail(self.service_id)
+        settings = await view.cog.guild_render_settings(interaction.guild_id)
+        _ = settings["translate"]
         if detail is None:
             await interaction.followup.send(
-                "I could not fetch that service right now.", ephemeral=True
+                _("I could not fetch that service right now."),
+                ephemeral=True,
             )
             return
-        settings = await view.cog.guild_render_settings(interaction.guild_id)
         await interaction.edit_original_response(
             view=HostLayout(view.cog, detail, window=self.window, **settings)
         )
@@ -490,7 +524,7 @@ class HostLayout(ui.LayoutView):
         page_url = page_url or cog.bot.config.STATUS_PAGE_URL
         last = service.get("last") or {}
         state = status_api.display_state(service)
-        name = str(service.get("name") or "Unknown service")
+        name = str(service.get("name") or self._("Unknown service"))
         if service.get("requiresAuth"):
             name = f"{name} 🔒"
         service_id = str(service.get("id") or "")
@@ -500,14 +534,24 @@ class HostLayout(ui.LayoutView):
         if group:
             head.append(f"-# {group}")
 
-        facts = [f"**State** · {state.title()}"]
+        facts = [
+            self._("**State** · {state}").format(
+                state=_state_word(state, self._)
+            )
+        ]
         if last.get("status"):
-            facts.append(f"**HTTP** · {last['status']}")
+            facts.append(
+                self._("**HTTP** · {status}").format(status=last["status"])
+            )
         if last.get("latency"):
-            facts.append(f"**Latency** · {int(last['latency'])}ms")
+            facts.append(
+                self._("**Latency** · {ms}ms").format(ms=int(last["latency"]))
+            )
         since = service.get("downSince") if state != "UP" else service.get("upSince")
         if since:
-            facts.append(f"**Since** · {_discord_time(since)}")
+            facts.append(
+                self._("**Since** · {when}").format(when=_discord_time(since))
+            )
         detail_line = " | ".join(facts)
 
         notes = []
@@ -516,11 +560,11 @@ class HostLayout(ui.LayoutView):
         if last.get("degradedReason"):
             notes.append(f"⚠️ {last['degradedReason']}")
         if last.get("flapping"):
-            notes.append("⚠️ Flapping between states")
+            notes.append(self._("⚠️ Flapping between states"))
         if last.get("recovering"):
-            notes.append("Recovering")
+            notes.append(self._("Recovering"))
         if service.get("maintenance"):
-            notes.append("🔧 Under maintenance")
+            notes.append(self._("🔧 Under maintenance"))
 
         windows = service.get("uptimeWindows") or {}
         uptime_line = " | ".join(
@@ -549,9 +593,11 @@ class HostLayout(ui.LayoutView):
         if service_id:
             self.add_item(
                 ui.ActionRow(
-                    WindowButton("7 days", "d7", window, service_id),
-                    WindowButton("30 days", "d30", window, service_id),
-                    WindowButton("Recent checks", "recent", window, service_id),
+                    WindowButton(self._("7 days"), "d7", window, service_id),
+                    WindowButton(self._("30 days"), "d30", window, service_id),
+                    WindowButton(
+                        self._("Recent checks"), "recent", window, service_id
+                    ),
                 )
             )
         self.add_item(
