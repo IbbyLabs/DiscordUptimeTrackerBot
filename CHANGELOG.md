@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.9.0...v0.10.0) (2026-08-23)
+
+
+### Features
+
+* **i18n:** add Simplified and Traditional Chinese catalogues ([f81a842](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/f81a84278d36d760cd570d7f1e815da619101bc2))
+
 ## [0.9.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.8...v0.9.0) (2026-08-23)
 
 
