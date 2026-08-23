@@ -365,8 +365,8 @@ msgid "Who made this bot, and how to run your own"
 msgstr "Kto stworzył tego bota i jak uruchomić własnego"
 
 #: cogs/uptime.py:1448
-msgid "Recent outages and who they affected"
-msgstr "Ostatnie awarie i kogo dotyczyły"
+msgid "Recent outages and the services they affected"
+msgstr "Ostatnie awarie i usługi, których dotyczyły"
 
 #: cogs/uptime.py:1461
 msgid "View live service uptime"

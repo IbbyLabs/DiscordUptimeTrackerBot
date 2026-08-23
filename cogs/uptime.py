@@ -1445,7 +1445,8 @@ class UptimeCog(commands.Cog):
             view=AboutLayout(self, **settings), ephemeral=True
         )
 
-    @app_commands.command(name="incidents", description=_L("Recent outages and who they affected"))
+    # TRANSLATORS: An outage affects services, not people.
+    @app_commands.command(name="incidents", description=_L("Recent outages and the services they affected"))
     @app_commands.checks.cooldown(1, 10.0, key=lambda i: i.guild_id)
     async def incidents_slash(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
