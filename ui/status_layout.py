@@ -2,7 +2,9 @@ from typing import TYPE_CHECKING, Any
 
 import discord
 from discord import ui
+
 import status_api
+from i18n import Translator, translator_for
 
 if TYPE_CHECKING:
     from bot import DiscordUptimeTrackerBot
@@ -130,8 +132,10 @@ class StatusLayout(ui.LayoutView):
         page_url: str | None = None,
         group_name: str | None = None,
         states: tuple[str, ...] = (),
+        translate: Translator | None = None,
     ) -> None:
         super().__init__(timeout=None)
+        self._ = translate or translator_for(None)
         self.cog = cog
         self.data = data
         page_url = page_url or cog.bot.config.STATUS_PAGE_URL
@@ -227,8 +231,10 @@ class PanelLayout(ui.LayoutView):
         healthy: str | None = None,
         page_url: str | None = None,
         live_url: str | None = None,
+        translate: Translator | None = None,
     ) -> None:
         super().__init__(timeout=None)
+        self._ = translate or translator_for(None)
         del healthy
         page_url = page_url or cog.bot.config.STATUS_PAGE_URL
         chunks, dropped = _body_chunks(lines)
@@ -262,8 +268,10 @@ class AboutLayout(ui.LayoutView):
         *,
         healthy: str | None = None,
         page_url: str | None = None,
+        translate: Translator | None = None,
     ) -> None:
         super().__init__(timeout=None)
+        self._ = translate or translator_for(None)
         version = cog.bot.version
         marker = cog.get_state_emoji("UP", healthy)
         page_url = page_url or cog.bot.config.STATUS_PAGE_URL
@@ -308,8 +316,10 @@ class IncidentHistoryLayout(ui.LayoutView):
         *,
         healthy: str | None = None,
         page_url: str | None = None,
+        translate: Translator | None = None,
     ) -> None:
         super().__init__(timeout=None)
+        self._ = translate or translator_for(None)
         del healthy
         page_url = page_url or cog.bot.config.STATUS_PAGE_URL
         chunks, dropped = _body_chunks(lines)
@@ -429,8 +439,10 @@ class HostLayout(ui.LayoutView):
         window: str = "d7",
         healthy: str | None = None,
         page_url: str | None = None,
+        translate: Translator | None = None,
     ) -> None:
         super().__init__(timeout=None)
+        self._ = translate or translator_for(None)
         self.cog = cog
         page_url = page_url or cog.bot.config.STATUS_PAGE_URL
         last = service.get("last") or {}

@@ -182,6 +182,7 @@ class UptimeCog(commands.Cog):
         return {
             "healthy": await self.guild_setting(guild_id, "status_emoji"),
             "page_url": await self.guild_setting(guild_id, "status_page_url"),
+            "translate": translator_for(await self.guild_locale(guild_id)),
         }
 
     async def guild_locale(self, guild_id: int | str | None) -> str | None:
