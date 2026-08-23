@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 import status_api
 from panels import build_panel_specs
-from i18n import Translator, translator_for
+from i18n import Translator, has_catalogue, translator_for
 
 _L = app_commands.locale_str
 from incidents import (
@@ -93,13 +93,14 @@ def validate_guild_setting(
             return None, _("That emoji is too long.")
         return value, None
     if field == "locale":
-        # Checked against Discord's own list rather than accepted as any string:
-        # an unrecognised tag has no catalogue and would silently render English.
+        # A tag Discord names, or one we hold a catalogue for. Discord's list
+        # omits languages we translate into, such as European Portuguese.
         if not value:
             return "", None
         known = {str(locale.value) for locale in discord.Locale}
-        if value not in known:
-            return None, _("{value} is not a language Discord supports.").format(
+        if value not in known and not has_catalogue(value):
+            # TRANSLATORS: Error reply. {value} is the tag someone typed.
+            return None, _("{value} is not a language this bot can render.").format(
                 value=value
             )
         return value, None

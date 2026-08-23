@@ -55,6 +55,19 @@ def translator_for(locale: str | None) -> Translator:
     return Translator(found, locale)
 
 
+def has_catalogue(locale: str) -> bool:
+    """Whether a locale resolves to a catalogue on disk.
+
+    Uses the same candidate list as translator_for, so what is accepted and
+    what is loaded cannot drift apart.
+    """
+
+    if not locale:
+        return False
+    have = set(available_locales())
+    return any(candidate in have for candidate in _candidates(locale))
+
+
 def available_locales() -> list[str]:
     """Locales with a compiled catalogue on disk."""
 

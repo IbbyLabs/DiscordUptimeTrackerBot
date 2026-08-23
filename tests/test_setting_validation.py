@@ -61,3 +61,31 @@ def test_the_status_urls_ignore_the_environment(monkeypatch) -> None:
     assert "wrong.example" not in cfg.INCIDENTS_API_URL
     assert cfg.STATUS_API_URL.endswith("/v1/status")
     assert cfg.INCIDENTS_API_URL.endswith("/v1/incidents")
+
+
+def test_a_discord_locale_is_accepted():
+    assert validate_guild_setting("locale", "pt-BR") == ("pt-BR", None)
+
+
+def test_a_locale_with_a_catalogue_is_accepted_even_if_discord_omits_it():
+    """Discord names es-ES and es-419 but not plain es, which we translate into."""
+    assert validate_guild_setting("locale", "es") == ("es", None)
+
+
+def test_the_catalogue_check_is_what_accepts_it(monkeypatch):
+    """Without it, es falls back to Discord's list and is refused."""
+    monkeypatch.setattr("cogs.uptime.has_catalogue", lambda value: False)
+    cleaned, error = validate_guild_setting("locale", "es")
+    assert cleaned is None
+    assert error
+
+
+def test_a_locale_with_neither_is_refused():
+    """A tag with no catalogue would silently render English."""
+    cleaned, error = validate_guild_setting("locale", "klingon")
+    assert cleaned is None
+    assert error
+
+
+def test_clearing_the_locale_is_accepted():
+    assert validate_guild_setting("locale", "") == ("", None)
