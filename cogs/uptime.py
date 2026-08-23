@@ -32,6 +32,7 @@ from ui.status_layout import (
     IncidentHistoryLayout,
     PanelLayout,
     StatusLayout,
+    _state_word,
 )
 
 log = logging.getLogger("uptimebot.cogs.uptime")
@@ -737,7 +738,7 @@ class UptimeCog(commands.Cog):
             uptime_bar = self.get_uptime_bar(uptime_percent)
             lines.append(
                 f"{self.get_state_emoji(state, healthy)} **[{name}]({url})**: "
-                f"{state} ({latency}ms)\n"
+                f"{_state_word(state, _)} ({latency}ms)\n"
                 f"{uptime_bar} {uptime_percent:.1f}% uptime"
             )
         return lines
