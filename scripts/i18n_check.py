@@ -164,23 +164,32 @@ def placeholders(text: str) -> set[str]:
     return set(PLACEHOLDER.findall(text))
 
 
-def placeholder_faults(msgid: str, forms: list[tuple[int, bool, str]]) -> list[str]:
+def placeholder_faults(
+    msgid: str, forms: list[tuple[int, bool, str]], plural_msgid: str | None = None
+) -> list[str]:
     """Placeholder problems in one message's translations.
 
     An invented name raises at render time, in whichever guild chose that
     language, so it is a fault in every form. A dropped name costs the reader a
     value and is accepted only in a plural entry's first form, where several
     languages carry the count in the grammar instead.
+
+    A plural entry's two msgids can carry different placeholders — "Last check"
+    beside "Last {n} checks" is the ordinary English shape — so what a form may
+    use comes from both, and what it must keep comes from its own.
     """
 
-    expected = placeholders(msgid)
+    singular = placeholders(msgid)
+    plural = placeholders(plural_msgid) if plural_msgid else singular
+    available = singular | plural
     faults: list[str] = []
-    for index, plural, text in forms:
-        invented = placeholders(text) - expected
+    for index, is_plural, text in forms:
+        invented = placeholders(text) - available
         if invented:
             faults.append(f"{text!r} uses {sorted(invented)}, which {msgid!r} cannot supply")
-        missing = expected - placeholders(text)
-        if missing and not (plural and index == 0):
+        required = singular if index == 0 else plural
+        missing = required - placeholders(text)
+        if missing and not (is_plural and index == 0):
             faults.append(f"{text!r} drops {sorted(missing)} from {msgid!r}")
     return faults
 

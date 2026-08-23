@@ -65,10 +65,14 @@ def test_a_translation_never_invents_a_placeholder_and_drops_one_only_in_a_singu
     """
 
     for locale in catalogues():
+        plurals = catalogue_plurals(locale)
         for msgid, forms in catalogue_forms(locale).items():
-            faults = placeholder_faults(msgid, forms)
+            faults = placeholder_faults(msgid, forms, plurals.get(msgid))
             assert not faults, f"{locale}: " + "; ".join(faults)
-            supplied = {name: "x" for name in placeholders(msgid)}
+            # The call site supplies every name either msgid can ask for.
+            supplied = {
+                name: "x" for name in placeholders(msgid) | placeholders(plurals.get(msgid) or "")
+            }
             for _index, _plural, text in forms:
                 text.format(**supplied)
 
@@ -215,3 +219,55 @@ def test_the_plural_guard_catches_a_reworded_plural(tmp_path) -> None:
     )
     assert source_plurals(root)["{n} down"] == "{n} are down"
     assert catalogue_plurals("xx", root / "locales")["{n} down"] == "{n} down"
+
+
+# An unnumbered singular beside a numbered plural is the ordinary English shape
+# — "Last check", "Last {n} checks". Reading only the singular makes every later
+# form look like it invented the number.
+UNNUMBERED_SINGULAR = (
+    'msgid "Last check"\nmsgid_plural "Last {n} checks"\n'
+    'msgstr[0] "Ostatnia kontrola"\n'
+    'msgstr[1] "Ostatnie {n} kontrole"\n'
+    'msgstr[2] "Ostatnich {n} kontroli"\n'
+)
+
+
+def test_a_plural_may_number_forms_its_singular_does_not(tmp_path) -> None:
+    root = _fixture(
+        tmp_path,
+        '_.ngettext("Last check", "Last {n} checks", n)\n',
+        UNNUMBERED_SINGULAR,
+        header=PLURAL_HEADER,
+    )
+    locales = root / "locales"
+    forms = catalogue_forms("xx", locales)
+    plurals = catalogue_plurals("xx", locales)
+    assert placeholder_faults("Last check", forms["Last check"], plurals["Last check"]) == []
+
+
+def test_invention_is_still_caught_when_the_msgids_differ(tmp_path) -> None:
+    root = _fixture(
+        tmp_path,
+        '_.ngettext("Last check", "Last {n} checks", n)\n',
+        UNNUMBERED_SINGULAR.replace('msgstr[1] "Ostatnie {n} kontrole"', 'msgstr[1] "Ostatnie {m} kontrole"'),
+        header=PLURAL_HEADER,
+    )
+    locales = root / "locales"
+    faults = placeholder_faults(
+        "Last check", catalogue_forms("xx", locales)["Last check"], catalogue_plurals("xx", locales)["Last check"]
+    )
+    assert any("'m'" in f and "uses" in f for f in faults)
+
+
+def test_a_later_form_still_may_not_drop_the_plural_number(tmp_path) -> None:
+    root = _fixture(
+        tmp_path,
+        '_.ngettext("Last check", "Last {n} checks", n)\n',
+        UNNUMBERED_SINGULAR.replace('msgstr[2] "Ostatnich {n} kontroli"', 'msgstr[2] "Ostatnich kontroli"'),
+        header=PLURAL_HEADER,
+    )
+    locales = root / "locales"
+    faults = placeholder_faults(
+        "Last check", catalogue_forms("xx", locales)["Last check"], catalogue_plurals("xx", locales)["Last check"]
+    )
+    assert len(faults) == 1 and "drops" in faults[0]

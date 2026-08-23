@@ -632,7 +632,10 @@ class HostLayout(ui.LayoutView):
                 for c in reversed(checks)
             ]
             return "\n".join(lines), "**" + self._.ngettext(
-                "Last {n} check", "Last {n} checks", len(lines)
+                # TRANSLATORS: Caption over a list of a service's most recent
+                # checks. The singular carries no number: "Last check", not
+                # "Last 1 check".
+                "Last check", "Last {n} checks", len(lines)
             ).format(n=len(lines)) + "**"
         timeline = (service.get("historyTimeline") or {}).get(window) or {}
         buckets = timeline.get("buckets") or []

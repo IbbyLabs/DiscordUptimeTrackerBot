@@ -567,9 +567,9 @@ msgstr "Ostatnie kontrole"
 
 #: ui/status_layout.py:635
 #, python-brace-format
-msgid "Last {n} check"
+msgid "Last check"
 msgid_plural "Last {n} checks"
-msgstr[0] "Ostatnie {n} kontrola"
+msgstr[0] "Ostatnia kontrola"
 msgstr[1] "Ostatnie {n} kontroli"
 msgstr[2] "Ostatnich {n} kontroli"
 
