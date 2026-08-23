@@ -126,7 +126,7 @@ def _with_outages(
         parts.append(_("{count} recovering").format(count=recovering))
     return [
         _("**Active outages** — {summary}").format(summary=" · ".join(parts)),
-        *(cog.outage_line(service) for service in outages),
+        *(cog.outage_line(service, _) for service in outages),
         "",
         *lines,
     ]
@@ -170,7 +170,11 @@ class StatusLayout(ui.LayoutView):
             " | **Unstable:** {unstable}"
         ).format(up=up, down=down, degraded=degraded, unstable=unstable)
         headline = (
-            f"### {cog.get_status_text(cog.visible_services(data), healthy, data)}\n"
+            "### "
+            + cog.get_status_text(
+                cog.visible_services(data), healthy, data, self._
+            )
+            + "\n"
             f"{counts}"
         )
 
@@ -182,7 +186,9 @@ class StatusLayout(ui.LayoutView):
                 if status_api.service_state(service) in wanted
             ]
             if matched:
-                lines = cog._detail_lines(matched, False, healthy, page_url)
+                lines = cog._detail_lines(
+                    matched, False, healthy, page_url, self._
+                )
             else:
                 lines = [self._("Nothing in that state right now.")]
         elif group_name is None:
@@ -200,7 +206,7 @@ class StatusLayout(ui.LayoutView):
             items = groups.get(group_name, [])
             has_auth = any(item.get("requiresAuth") for item in items)
             lines = [f"**{group_name}**"] + cog._detail_lines(
-                items, has_auth, healthy, page_url
+                items, has_auth, healthy, page_url, self._
             )
 
         chunks, dropped = _body_chunks(lines)

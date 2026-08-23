@@ -47,10 +47,15 @@ _SETTING_DEFAULTS = {
     "locale": "LOCALE",
 }
 
+def N_(message: str) -> str:
+    """Marks a string for extraction. The translation happens at the use site."""
+    return message
+
+
 _SETTING_LABELS = {
-    "status_emoji": "Status emoji",
-    "status_page_url": "Status page URL",
-    "locale": "Language",
+    "status_emoji": N_("Status emoji"),
+    "status_page_url": N_("Status page URL"),
+    "locale": N_("Language"),
 }
 
 
@@ -403,17 +408,24 @@ class UptimeCog(commands.Cog):
             if isinstance(service.get("maintenance"), dict)
         ]
 
-    def known_issue_line(self, service: StatusData) -> str:
-        name = str(service.get("name") or "Unknown Service")
+    def known_issue_line(
+        self, service: StatusData, translate: "Translator | None" = None
+    ) -> str:
+        _ = translate or translator_for(None)
+        name = str(service.get("name") or _("Unknown Service"))
         maintenance = service.get("maintenance") or {}
         reason = str(
             maintenance.get("reason")
             or maintenance.get("title")
             or maintenance.get("message")
-            or "No reason given"
+            or _("No reason given")
         ).strip()
         started = str(maintenance.get("startedAt") or maintenance.get("changedAt") or "")
-        when = f" since {_discord_relative(started)}" if started else ""
+        when = (
+            " " + _("since {when}").format(when=_discord_relative(started))
+            if started
+            else ""
+        )
         return f"🛠️ **{name}**{when}\n-# {reason}"
 
     def unstable_count(self, data: StatusData) -> int:
@@ -455,11 +467,18 @@ class UptimeCog(commands.Cog):
         # someone is most likely asking about.
         return sorted(down, key=lambda s: str(s.get("downSince") or "9999"))
 
-    def outage_line(self, service: StatusData) -> str:
-        name = str(service.get("name") or "Unknown Service")
+    def outage_line(
+        self, service: StatusData, translate: "Translator | None" = None
+    ) -> str:
+        _ = translate or translator_for(None)
+        name = str(service.get("name") or _("Unknown Service"))
         group = str(service.get("group") or "Other")
         since = str(service.get("downSince") or "")
-        when = f" since {_discord_relative(since)}" if since else ""
+        when = (
+            " " + _("since {when}").format(when=_discord_relative(since))
+            if since
+            else ""
+        )
         if status_api.service_recovering(service):
             held = f" · down since {_discord_relative(since)}" if since else ""
             return f"🟡 **{name}** ({group}) · responding again, held until stable{held}"
@@ -520,7 +539,9 @@ class UptimeCog(commands.Cog):
         services: list[StatusData],
         healthy: str | None = None,
         data: StatusData | None = None,
+        translate: "Translator | None" = None,
     ) -> str:
+        _ = translate or translator_for(None)
         # The page publishes its verdict and why. Reading it is the only way the
         # two boards say the same thing: counting states cannot reproduce a rule
         # built on core services, critical services and group ratios.
@@ -538,7 +559,10 @@ class UptimeCog(commands.Cog):
                 # put the two boards back into disagreement.
                 headline = verdict.get("headline") or ALL_CLEAR
                 if headline == ALL_CLEAR:
-                    return f"{self.get_state_emoji('UP', healthy)} {headline}"
+                    return (
+                        f"{self.get_state_emoji('UP', healthy)} "
+                        + _("All Systems Operational")
+                    )
                 # Green is read before the words are, and these words are not
                 # the all-clear.
                 amber = self.get_state_emoji("DEGRADED", healthy)
@@ -575,6 +599,8 @@ class UptimeCog(commands.Cog):
 
     def service_key(self, service: StatusData) -> str:
         group_name = str(service.get("group") or "Other").strip()
+        # A dedup key, not display text. Translating it would key the same
+        # nameless service differently per guild.
         service_name = str(service.get("name") or "Unknown Service").strip()
         service_url = str(service.get("url") or "").strip()
         return "|".join((group_name, service_name, service_url))
@@ -689,10 +715,14 @@ class UptimeCog(commands.Cog):
         has_auth: bool,
         healthy: str | None = None,
         page_url: str | None = None,
+        translate: "Translator | None" = None,
     ) -> list[str]:
+        _ = translate or translator_for(None)
         lines: list[str] = []
         if has_auth:
-            lines.append("Some services are behind authentication and marked with a lock.")
+            lines.append(
+                _("Some services are behind authentication and marked with a lock.")
+            )
         for service in services:
             last = service.get("last", {})
             state = status_api.display_state(service)
@@ -987,11 +1017,21 @@ class UptimeCog(commands.Cog):
                 )
         return updated
 
-    def refresh_result_text(self, updated: int, alerts_sent: int) -> str:
-        tracker_text = f"Refreshed {updated} uptime tracker message(s)."
+    def refresh_result_text(
+        self, updated: int, alerts_sent: int, translate: "Translator | None" = None
+    ) -> str:
+        _ = translate or translator_for(None)
+        tracker_text = _.ngettext(
+            "Refreshed {count} uptime tracker message.",
+            "Refreshed {count} uptime tracker messages.",
+            updated,
+        ).format(count=updated)
         if alerts_sent == 0:
             return tracker_text
-        return f"{tracker_text} Sent {alerts_sent} alert(s)."
+        sent = _.ngettext(
+            "Sent {count} alert.", "Sent {count} alerts.", alerts_sent
+        ).format(count=alerts_sent)
+        return f"{tracker_text} {sent}"
 
     async def send_uptime_response(
         self,
@@ -1211,7 +1251,7 @@ class UptimeCog(commands.Cog):
         row = await self.bot.db.get_guild_settings(str(interaction.guild_id)) or {}
         lines = []
         for field in GUILD_SETTING_FIELDS:
-            label = _SETTING_LABELS[field]
+            label = _(_SETTING_LABELS[field])
             override = row.get(field)
             default = getattr(self.bot.config, _SETTING_DEFAULTS[field])
             if override is None:
@@ -1249,7 +1289,7 @@ class UptimeCog(commands.Cog):
             )
             return
         guild_id = str(interaction.guild_id)
-        label = _SETTING_LABELS[field.value]
+        label = _(_SETTING_LABELS[field.value])
         if value is None or not value.strip():
             await self.bot.db.set_guild_setting(guild_id, field.value, None)
             self.invalidate_guild_settings(guild_id)
