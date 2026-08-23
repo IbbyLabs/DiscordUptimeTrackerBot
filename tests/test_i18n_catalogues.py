@@ -15,9 +15,11 @@ from scripts.i18n_check import (
     catalogues,
     compiled_entries,
     catalogue_forms,
+    catalogue_plurals,
     placeholder_faults,
     placeholders,
     source_msgids,
+    source_plurals,
 )
 
 from babel.messages.catalog import Catalog
@@ -187,3 +189,29 @@ def test_the_compile_guard_passes_when_they_agree(tmp_path) -> None:
         write_mo(handle, fresh)
     locales = root / "locales"
     assert compiled_entries("xx", locales) == catalogue_entries("xx", locales)
+
+
+# A catalogue is keyed by a plural message's singular, so its own plural form is
+# carried along unchecked. Rewording one in the source leaves every catalogue
+# describing a sentence the bot no longer has.
+def test_a_catalogue_records_the_plural_the_source_asks_for() -> None:
+    wanted = source_plurals()
+    for locale in catalogues():
+        have = catalogue_plurals(locale)
+        for singular, plural in wanted.items():
+            assert have.get(singular) == plural, (
+                f"{locale}: {singular!r} has plural {have.get(singular)!r}, "
+                f"the source says {plural!r}"
+            )
+
+
+def test_the_plural_guard_catches_a_reworded_plural(tmp_path) -> None:
+    root = _fixture(
+        tmp_path,
+        '_.ngettext("{n} down", "{n} are down", n)\n',
+        'msgid "{n} down"\nmsgid_plural "{n} down"\n'
+        'msgstr[0] "niedostepna"\nmsgstr[1] "{n} niedostepne"\nmsgstr[2] "{n} niedostepnych"\n',
+        header=PLURAL_HEADER,
+    )
+    assert source_plurals(root)["{n} down"] == "{n} are down"
+    assert catalogue_plurals("xx", root / "locales")["{n} down"] == "{n} down"

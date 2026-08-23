@@ -32,7 +32,12 @@ PLACEHOLDER = re.compile(r"\{([a-zA-Z_][a-zA-Z0-9_]*)\}")
 
 
 def source_msgids(root: Path = ROOT) -> set[str]:
-    """Every string the source marks for translation."""
+    """Every key the source asks a catalogue to answer.
+
+    A plural entry is one catalogue entry keyed by its singular; the plural form
+    is metadata on that entry rather than a second lookup, so asking for it by
+    name would demand something no catalogue can hold.
+    """
 
     found: set[str] = set()
     for filename, _lineno, message, _comments, _ctx in extract_from_dir(
@@ -43,11 +48,47 @@ def source_msgids(root: Path = ROOT) -> set[str]:
     ):
         if any(part in Path(filename).parts for part in EXCLUDE):
             continue
-        if isinstance(message, tuple):
-            found.update(m for m in message if m)
+        if isinstance(message, (list, tuple)):
+            first = next((m for m in message if m), None)
+            if first:
+                found.add(first)
         elif message:
             found.add(message)
     return found
+
+
+def source_plurals(root: Path = ROOT) -> dict[str, str]:
+    """Singular -> plural, for every plural message the source asks for.
+
+    The catalogue is keyed by the singular, so a plural reworded in the source
+    leaves the catalogue's own plural behind with nothing comparing the two.
+    """
+
+    found: dict[str, str] = {}
+    for filename, _lineno, message, _comments, _ctx in extract_from_dir(
+        str(root),
+        method_map=[("**.py", "python")],
+        options_map={"**.py": {}},
+        keywords=KEYWORDS,
+    ):
+        if any(part in Path(filename).parts for part in EXCLUDE):
+            continue
+        if isinstance(message, (list, tuple)) and len([m for m in message if m]) > 1:
+            forms = [m for m in message if m]
+            found[forms[0]] = forms[1]
+    return found
+
+
+def catalogue_plurals(locale: str, locale_dir: Path = LOCALE_DIR) -> dict[str, str]:
+    """The same mapping, as the catalogue records it."""
+
+    with catalogue_path(locale, locale_dir).open("rb") as handle:
+        catalog = read_po(handle)
+    out: dict[str, str] = {}
+    for message in catalog:
+        if isinstance(message.id, (list, tuple)) and len(message.id) > 1:
+            out[message.id[0]] = message.id[1]
+    return out
 
 
 def catalogue_path(locale: str, locale_dir: Path = LOCALE_DIR) -> Path:
@@ -69,8 +110,8 @@ def catalogue_entries(locale: str, locale_dir: Path = LOCALE_DIR) -> dict[str, l
     for message in catalog:
         if not message.id:
             continue
-        ids = message.id if isinstance(message.id, tuple) else (message.id,)
-        strings = message.string if isinstance(message.string, tuple) else (message.string,)
+        ids = message.id if isinstance(message.id, (list, tuple)) else (message.id,)
+        strings = message.string if isinstance(message.string, (list, tuple)) else (message.string,)
         out[ids[0]] = [s for s in strings if s]
     return out
 
@@ -91,8 +132,8 @@ def compiled_entries(locale: str, locale_dir: Path = LOCALE_DIR) -> dict[str, li
     for message in catalog:
         if not message.id:
             continue
-        ids = message.id if isinstance(message.id, tuple) else (message.id,)
-        strings = message.string if isinstance(message.string, tuple) else (message.string,)
+        ids = message.id if isinstance(message.id, (list, tuple)) else (message.id,)
+        strings = message.string if isinstance(message.string, (list, tuple)) else (message.string,)
         out[ids[0]] = [s for s in strings if s]
     return out
 
@@ -112,9 +153,9 @@ def catalogue_forms(
     for message in catalog:
         if not message.id:
             continue
-        plural = isinstance(message.id, tuple)
+        plural = isinstance(message.id, (list, tuple))
         ids = message.id if plural else (message.id,)
-        strings = message.string if isinstance(message.string, tuple) else (message.string,)
+        strings = message.string if isinstance(message.string, (list, tuple)) else (message.string,)
         out[ids[0]] = [(i, plural, s) for i, s in enumerate(strings) if s]
     return out
 
