@@ -130,3 +130,19 @@ def test_exactly_the_threshold_counts_as_long_enough() -> None:
 def test_an_unreadable_opened_at_is_announced_rather_than_swallowed() -> None:
     p = plan(rows=[_row("a", opened="not-a-timestamp")])
     assert [r["id"] for r in p["open"]] == ["a"]
+
+
+# The page keeps a closed incident only once it ran for its own
+# DEFAULT_MAJOR_INCIDENT_MINUTES, which is 30 and lives in a different repo and
+# language. Announcing earlier than that means announcing something that leaves
+# the feed when it ends, with no recovery possible — the bug this gate exists to
+# stop. Lowering MIN_OPEN_MINUTES reintroduces it silently, so it fails here
+# instead.
+def test_the_gate_is_never_shorter_than_the_pages_own_threshold() -> None:
+    from incidents import MIN_OPEN_MINUTES
+
+    assert MIN_OPEN_MINUTES >= 30, (
+        "MIN_OPEN_MINUTES must be >= the status page's "
+        "DEFAULT_MAJOR_INCIDENT_MINUTES (30, in uptime-status/src/incidents.mjs), "
+        "or an announced outage can close and drop out of the feed unretracted"
+    )
