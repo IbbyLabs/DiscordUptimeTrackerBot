@@ -1,5 +1,36 @@
 # Changelog
 
+## [0.9.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.8...v0.9.0) (2026-08-23)
+
+
+### Features
+
+* **i18n:** add a European Portuguese catalogue ([8065b56](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/8065b56902b6eed0ce0c0c91d2cae06427fb8d6e))
+* **i18n:** add a Polish catalogue, machine drafted and unreviewed ([c9d96cc](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/c9d96ccc27c394ff5d24b02bbc36a4d6cd835444))
+* **i18n:** add the catalogue machinery and its two guard tests ([c0127e2](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/c0127e26ec1c47526df96f86ec61838babcc8f5f))
+* **i18n:** give every rendered layout a translator ([33ae18f](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/33ae18f055b589fd54574dceb5b8b2431264a72d))
+* **i18n:** localise command descriptions and choice names ([26a0f1d](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/26a0f1d9afb80ae3087689aa8b68459d0c1cc847))
+* **i18n:** resolve a language per guild and add the translation runtime ([6905589](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/6905589be60f0abad78821e5e8dbee941ce82690))
+* **i18n:** translate board lines, outage lines and setting labels ([40bbdf0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/40bbdf07cbdcda1c66440d25fa886314e1275d33))
+* **i18n:** translate command responses and setting validation ([8072fae](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/8072fae5ef251f66c5d8c502fbb6b28a6e18a278))
+* **i18n:** translate the board, the panel and the about card ([456be48](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/456be484185635ab9ca4a6edfcd3d63d082a6018))
+* **i18n:** translate the bot into seven more languages ([eefe449](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/eefe4499c873a69d8cf2d45b450f92a3557eb646))
+* **i18n:** translate the outage alerts per guild ([47d3ed0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/47d3ed0dc39279d82fdbf006059c4a26b7db59f7))
+* **i18n:** translate the remaining status layout strings ([d0cb6fe](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/d0cb6fe39b0b9a4cb842025a5414e538bb679432))
+* **panels:** delete the pin notice Discord posts for a pinned panel ([0f72934](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/0f729349b2ad11f4a80c72f2ae4f584315e6a43b))
+* **settings:** accept any language with a catalogue ([b70aac7](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/b70aac7b950fbedd3f82fe407bb779c60a654338))
+
+
+### Bug Fixes
+
+* **i18n:** drop the number from the singular of the checks caption ([e45293b](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/e45293bdc93eb0e20ca34e77e62d34b73db548d3))
+* **i18n:** key a plural entry by its singular, as a catalogue does ([ab4887f](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/ab4887f28cdbdf2387d9471d2d66ad4eabf1661e))
+* **i18n:** say the incidents command affects services, not who ([d623e91](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/d623e91554967c1384cbb5329ae985e7bf105f32))
+* **i18n:** take a Polish speaker's corrections to the catalogue ([fd89950](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/fd89950fc4aa91420a211556fdcffea5ec59b796))
+* **i18n:** translate the board fallback, group names and command replies ([901ab87](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/901ab87c385fbce4988c637f24d3e35295447fde))
+* **i18n:** translate the fallback name in the detail lines ([bc39307](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/bc3930711962a4ef4910cf6b4efc882a8d4a66d2))
+* **i18n:** use one spelling of a service state across both surfaces ([0763318](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/076331803cc02000258675427dc14436fe2deaae))
+
 ## [0.8.8](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.8.7...v0.8.8) (2026-08-23)
 
 
