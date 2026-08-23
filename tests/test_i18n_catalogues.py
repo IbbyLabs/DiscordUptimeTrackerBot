@@ -24,6 +24,7 @@ from scripts.i18n_check import (
 
 from babel.messages.catalog import Catalog
 from babel.messages.mofile import write_mo
+from babel.messages.pofile import read_po
 
 PO_HEADER = 'msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=UTF-8\\n"\n\n'
 # Three forms, so a fixture can hold a plural entry whose first form is the one
@@ -271,3 +272,24 @@ def test_a_later_form_still_may_not_drop_the_plural_number(tmp_path) -> None:
         "Last check", catalogue_forms("xx", locales)["Last check"], catalogue_plurals("xx", locales)["Last check"]
     )
     assert len(faults) == 1 and "drops" in faults[0]
+
+
+# A language whose nouns do not inflect still has a plural rule, and the header
+# has to state the one CLDR gives rather than the one the words suggest.
+def test_every_catalogue_declares_the_plural_rule_cldr_gives() -> None:
+    import io
+
+    from scripts.i18n_check import LOCALE_DIR, catalogue_path
+
+    for locale in catalogues():
+        found = read_po(io.open(catalogue_path(locale, LOCALE_DIR), encoding="utf-8"), locale=locale)
+        expected = Catalog(locale=locale)
+        assert (found.num_plurals, str(found.plural_expr)) == (
+            expected.num_plurals,
+            str(expected.plural_expr),
+        ), (
+            f"{locale}: Plural-Forms says nplurals={found.num_plurals} "
+            f"plural={found.plural_expr}, CLDR says nplurals={expected.num_plurals} "
+            f"plural={expected.plural_expr}. A wrong rule picks the wrong form for "
+            f"some counts even when the forms read alike."
+        )
