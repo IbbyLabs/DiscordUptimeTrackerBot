@@ -1,0 +1,733 @@
+# Indonesian translations for DiscordUptimeTrackerBot.
+# Copyright (C) 2026 IbbyLabs
+# This file is distributed under the same license as the
+# DiscordUptimeTrackerBot project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: DiscordUptimeTrackerBot 0.8.8\n"
+"Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
+"POT-Creation-Date: 2026-08-23 21:55+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: in-house translation\n"
+"Language: id\n"
+"Language-Team: Indonesian\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: incidents.py:259
+#, python-brace-format
+msgid "{count} service is not responding."
+msgid_plural "{count} services are not responding."
+msgstr[0] "{count} layanan tidak merespons."
+msgstr[1] "{count} layanan tidak merespons."
+
+#. TRANSLATORS: Alert heading. A service has just gone down.
+#: incidents.py:266
+msgid "Outage started"
+msgstr "Gangguan dimulai"
+
+#. TRANSLATORS: Alert heading. Everything is working again.
+#: incidents.py:275
+msgid "All clear"
+msgstr "Semua kembali normal"
+
+#: incidents.py:275
+msgid "Every service is responding again."
+msgstr "Semua layanan sudah merespons kembali."
+
+#: incidents.py:280
+#, python-brace-format
+msgid "{count} service is responding again."
+msgid_plural "{count} services are responding again."
+msgstr[0] "{count} layanan sudah merespons kembali."
+msgstr[1] "{count} layanan sudah merespons kembali."
+
+#. TRANSLATORS: Alert heading meaning a service has recovered. Not a data
+#. backup.
+#: incidents.py:285
+msgid "Back up"
+msgstr "Sudah pulih"
+
+#. TRANSLATORS: A finished outage inside a list item: "Torbox — down from 14:02
+#. to
+#. 14:31".
+#: incidents.py:302
+#, python-brace-format
+msgid "down from {start} to {end}"
+msgstr "mati dari {start} sampai {end}"
+
+#. TRANSLATORS: An outage still going, inside a list item: "Torbox — since
+#. 14:02".
+#: incidents.py:307
+#, python-brace-format
+msgid "since {start}"
+msgstr "sejak {start}"
+
+#. TRANSLATORS: Setting label. The emoji shown beside a healthy service.
+#: cogs/uptime.py:63 cogs/uptime.py:1391
+msgid "Status emoji"
+msgstr "Emoji status"
+
+#. TRANSLATORS: Setting label. The web address of the status page this board
+#. reads.
+#: cogs/uptime.py:65 cogs/uptime.py:1392
+msgid "Status page URL"
+msgstr "URL halaman status"
+
+#. TRANSLATORS: Setting label. Which language this server's board is written
+#. in.
+#: cogs/uptime.py:67
+msgid "Language"
+msgstr "Bahasa"
+
+#. TRANSLATORS: The group a service falls into when the status page names none.
+#: cogs/uptime.py:73
+msgid "Other"
+msgstr "Lainnya"
+
+#: cogs/uptime.py:86
+msgid "That is not a valid URL. It needs to start with http:// or https://."
+msgstr "URL itu tidak valid. Harus diawali dengan http:// atau https://."
+
+#: cogs/uptime.py:89
+msgid "That URL is too long."
+msgstr "URL itu terlalu panjang."
+
+#: cogs/uptime.py:93
+msgid "That emoji is too long."
+msgstr "Emoji itu terlalu panjang."
+
+#. TRANSLATORS: Error reply. {value} is the tag someone typed.
+#: cogs/uptime.py:103
+#, python-brace-format
+msgid "{value} is not a language this bot can render."
+msgstr "{value} bukan bahasa yang bisa ditampilkan bot ini."
+
+#. TRANSLATORS: Error reply. {field} is the name someone typed, not a
+#. translated word.
+#: cogs/uptime.py:108
+#, python-brace-format
+msgid "Unknown setting: {field}"
+msgstr "Pengaturan tidak dikenal: {field}"
+
+#: cogs/uptime.py:174
+msgid "Manage uptime tracker messages"
+msgstr "Kelola pesan pemantau layanan"
+
+#. TRANSLATORS: Heading of an operator's announcement that carries no title of
+#. its own.
+#: cogs/uptime.py:398
+msgid "Notice"
+msgstr "Pengumuman"
+
+#. TRANSLATORS: Line under an announcement. {names} is a comma-separated list
+#. of
+#. service names.
+#: cogs/uptime.py:414
+#, python-brace-format
+msgid "Affects {names} and {n} more"
+msgid_plural "Affects {names} and {n} more"
+msgstr[0] "Memengaruhi {names} dan {n} lainnya"
+msgstr[1] "Memengaruhi {names} dan {n} lainnya"
+
+#. TRANSLATORS: Line under an announcement listing the services it concerns.
+#: cogs/uptime.py:420
+#, python-brace-format
+msgid "Affects {names}"
+msgstr "Memengaruhi {names}"
+
+#. TRANSLATORS: Small print under an announcement. {when} renders as "3 minutes
+#. ago".
+#: cogs/uptime.py:428
+#, python-brace-format
+msgid "Updated {when}"
+msgstr "Diperbarui {when}"
+
+#. TRANSLATORS: Stands in for a service the status page gave no name for.
+#: cogs/uptime.py:450 cogs/uptime.py:513 cogs/uptime.py:816
+msgid "Unknown Service"
+msgstr "Layanan tidak dikenal"
+
+#. TRANSLATORS: Stands in where the status page offered no explanation for
+#. planned
+#. work.
+#: cogs/uptime.py:458
+msgid "No reason given"
+msgstr "Tidak ada alasan yang diberikan"
+
+#. TRANSLATORS: Tail of an outage line: "Torbox (Debrid) since 14:02". Not a
+#. sentence
+#. on its own.
+#: cogs/uptime.py:464 cogs/uptime.py:517
+#, python-brace-format
+msgid "since {when}"
+msgstr "sejak {when}"
+
+#. TRANSLATORS: Tail of a recovering service's line, giving when it first went
+#. down.
+#: cogs/uptime.py:525
+#, python-brace-format
+msgid "down since {when}"
+msgstr "mati sejak {when}"
+
+#. TRANSLATORS: Middle of a line about a service that answered again and is
+#. being
+#. watched before it counts as up.
+#: cogs/uptime.py:533
+msgid "responding again, held until stable"
+msgstr "sudah merespons, ditahan sampai stabil"
+
+#. TRANSLATORS: Headline across the top of the board when the status page gave
+#. no
+#. wording of its own.
+#: cogs/uptime.py:614
+msgid "Services Down"
+msgstr "Layanan mati"
+
+#. TRANSLATORS: Headline across the top of the board. Working, but not
+#. properly.
+#: cogs/uptime.py:617 cogs/uptime.py:660
+msgid "Services Degraded"
+msgstr "Layanan bermasalah"
+
+#. TRANSLATORS: Headline across the top of the board when everything is
+#. working.
+#: cogs/uptime.py:628 cogs/uptime.py:664
+msgid "All Systems Operational"
+msgstr "Semua sistem berjalan normal"
+
+#. TRANSLATORS: Headline across the top of the board, counting the services
+#. that are
+#. down.
+#: cogs/uptime.py:652
+#, python-brace-format
+msgid "{n} Service Down"
+msgid_plural "{n} Services Down"
+msgstr[0] "{n} layanan mati"
+msgstr[1] "{n} layanan mati"
+
+#. TRANSLATORS: Headline counting services that keep changing between up and
+#. down.
+#: cogs/uptime.py:657
+#, python-brace-format
+msgid "{n} Service Unstable"
+msgid_plural "{n} Services Unstable"
+msgstr[0] "{n} layanan tidak stabil"
+msgstr[1] "{n} layanan tidak stabil"
+
+#. TRANSLATORS: Headline across the top of the board. Planned work, not a
+#. fault.
+#: cogs/uptime.py:663
+msgid "Under Maintenance"
+msgstr "Sedang dalam pemeliharaan"
+
+#: cogs/uptime.py:727
+#, python-brace-format
+msgid ""
+"The status page has not updated for {age}m. Anything over {threshold}m is"
+" treated as out of date, so this board may be behind."
+msgstr "Halaman status belum diperbarui selama {age} menit. Lebih dari {threshold} menit dianggap kedaluwarsa, jadi papan ini mungkin tertinggal."
+
+#: cogs/uptime.py:732
+msgid ""
+"The status page has not updated recently, so this board may be out of "
+"date."
+msgstr "Halaman status belum diperbarui baru-baru ini, jadi papan ini mungkin sudah kedaluwarsa."
+
+#. TRANSLATORS: Follows a count in a group's summary line: "3/3, operational".
+#: cogs/uptime.py:786
+msgid "operational"
+msgstr "normal"
+
+#. TRANSLATORS: Tail of a group's summary line: "3/4, problem with 1 service".
+#: cogs/uptime.py:790
+#, python-brace-format
+msgid "{n} service affected"
+msgid_plural "{n} services affected"
+msgstr[0] "{n} layanan terdampak"
+msgstr[1] "{n} layanan terdampak"
+
+#: cogs/uptime.py:808
+msgid "Some services are behind authentication and marked with a lock."
+msgstr "Sebagian layanan memerlukan autentikasi dan ditandai dengan ikon gembok."
+
+#: cogs/uptime.py:1132
+#, python-brace-format
+msgid "Refreshed {count} uptime tracker message."
+msgid_plural "Refreshed {count} uptime tracker messages."
+msgstr[0] "{count} pesan pemantau diperbarui."
+msgstr[1] "{count} pesan pemantau diperbarui."
+
+#: cogs/uptime.py:1139
+#, python-brace-format
+msgid "Sent {count} alert."
+msgid_plural "Sent {count} alerts."
+msgstr[0] "{count} notifikasi terkirim."
+msgstr[1] "{count} notifikasi terkirim."
+
+#: cogs/uptime.py:1159 cogs/uptime.py:1186 cogs/uptime.py:1318
+#: ui/status_layout.py:91
+msgid "I could not fetch status data right now."
+msgstr "Saya tidak bisa mengambil data status saat ini."
+
+#: cogs/uptime.py:1162
+msgid "No services were found."
+msgstr "Tidak ada layanan yang ditemukan."
+
+#: cogs/uptime.py:1169
+msgid "Create a live uptime tracker message"
+msgstr "Buat pesan pemantau layanan secara langsung"
+
+#: cogs/uptime.py:1178 cogs/uptime.py:1220 cogs/uptime.py:1227
+#: cogs/uptime.py:1234 cogs/uptime.py:1358 cogs/uptime.py:1405
+#: cogs/uptime.py:1443 cogs/uptime.py:1467
+msgid "Cannot use this command here."
+msgstr "Perintah ini tidak bisa dipakai di sini."
+
+#: cogs/uptime.py:1199
+msgid "Uptime tracker message created. It will refresh automatically."
+msgstr "Pesan pemantau layanan dibuat. Pesan akan diperbarui otomatis."
+
+#: cogs/uptime.py:1203
+msgid "Refresh all live uptime tracker messages"
+msgstr "Perbarui semua pesan pemantau layanan"
+
+#: cogs/uptime.py:1214
+msgid "Send status alerts to this channel"
+msgstr "Kirim notifikasi status ke saluran ini"
+
+#: cogs/uptime.py:1243
+msgid "Status alerts will be sent to this channel."
+msgstr "Notifikasi status akan dikirim ke saluran ini."
+
+#: cogs/uptime.py:1288
+msgid "Service status, by group or by host"
+msgstr "Status layanan, per grup atau per host"
+
+#: cogs/uptime.py:1290
+msgid "Show one group's services"
+msgstr "Tampilkan layanan dalam satu grup"
+
+#: cogs/uptime.py:1291
+msgid "Show one service in detail, with its uptime history"
+msgstr "Tampilkan detail satu layanan beserta riwayat ketersediaannya"
+
+#: cogs/uptime.py:1292
+msgid "List every service currently in this state"
+msgstr "Tampilkan semua layanan yang sedang dalam status ini"
+
+#. TRANSLATORS: Choice in a command that filters services by their state.
+#. TRANSLATORS: Choice in a command that filters services by state, and a
+#. service's state
+#. elsewhere.
+#: cogs/uptime.py:1297 ui/status_layout.py:509
+msgid "Down"
+msgstr "Mati"
+
+#. TRANSLATORS: Choice in that filter, and a service's state. Working, but not
+#. properly.
+#: cogs/uptime.py:1300 ui/status_layout.py:511
+msgid "Degraded"
+msgstr "Bermasalah"
+
+#. TRANSLATORS: Choice in that same filter, meaning either state.
+#: cogs/uptime.py:1302
+msgid "Down or degraded"
+msgstr "Mati atau bermasalah"
+
+#: cogs/uptime.py:1327
+#, python-brace-format
+msgid "I could not find a service called {name}."
+msgstr "Saya tidak menemukan layanan bernama {name}."
+
+#: cogs/uptime.py:1337
+#, python-brace-format
+msgid "I could not find a group called {name}."
+msgstr "Saya tidak menemukan grup bernama {name}."
+
+#: cogs/uptime.py:1352
+msgid "Show this server's tracker settings"
+msgstr "Tampilkan pengaturan pemantau di server ini"
+
+#. TRANSLATORS: Shown beside a setting nobody has changed. {value} is the
+#. inherited value.
+#: cogs/uptime.py:1373
+#, python-brace-format
+msgid "{value} (default)"
+msgstr "{value} (bawaan)"
+
+#: cogs/uptime.py:1380
+msgid "Change one with `/tracker set`."
+msgstr "Ubah dengan `/tracker set`."
+
+#: cogs/uptime.py:1384
+msgid "Change a tracker setting for this server"
+msgstr "Ubah pengaturan pemantau di server ini"
+
+#: cogs/uptime.py:1386
+msgid "Which setting to change"
+msgstr "Pengaturan mana yang diubah"
+
+#: cogs/uptime.py:1387
+msgid "The new value. Leave this empty to go back to the default."
+msgstr "Nilai baru. Kosongkan untuk kembali ke bawaan."
+
+#. TRANSLATORS: Reply after clearing a setting. {setting} is one of the setting
+#. labels.
+#: cogs/uptime.py:1418
+#, python-brace-format
+msgid "{setting} is back to the default: {value}"
+msgstr "{setting} kembali ke bawaan: {value}"
+
+#: cogs/uptime.py:1431
+#, python-brace-format
+msgid "{setting} is now {value}. It applies from the next refresh."
+msgstr "{setting} sekarang {value}. Berlaku mulai pembaruan berikutnya."
+
+#: cogs/uptime.py:1437
+msgid "Stop sending status alerts in this guild"
+msgstr "Berhenti mengirim notifikasi status di server ini"
+
+#: cogs/uptime.py:1451
+msgid "Status alerts are now disabled for this guild."
+msgstr "Notifikasi status di server ini sudah dinonaktifkan."
+
+#: cogs/uptime.py:1454
+#, python-brace-format
+msgid "{n} panel removed."
+msgid_plural "{n} panels removed."
+msgstr[0] "{n} panel dihapus."
+msgstr[1] "{n} panel dihapus."
+
+#: cogs/uptime.py:1460
+msgid "Stop tracking the live uptime message for this guild"
+msgstr "Berhenti memantau pesan ketersediaan di server ini"
+
+#: cogs/uptime.py:1489
+msgid "Removed the tracked uptime message for this guild."
+msgstr "Pesan ketersediaan yang dipantau di server ini sudah dihapus."
+
+#: cogs/uptime.py:1492
+msgid "The board itself could not be deleted and is now stale."
+msgstr "Papannya sendiri tidak bisa dihapus dan sekarang sudah kedaluwarsa."
+
+#: cogs/uptime.py:1500
+msgid "Who made this bot, and how to run your own"
+msgstr "Siapa yang membuat bot ini, dan cara menjalankan milik Anda sendiri"
+
+#. TRANSLATORS: An outage affects services, not people.
+#: cogs/uptime.py:1511
+msgid "Recent outages and the services they affected"
+msgstr "Gangguan terbaru dan layanan yang terdampak"
+
+#: cogs/uptime.py:1524
+msgid "View live service uptime"
+msgstr "Lihat ketersediaan layanan secara langsung"
+
+#. TRANSLATORS: Placeholder text in a dropdown listing the service groups.
+#: ui/status_layout.py:79
+msgid "Pick a group for the detail view"
+msgstr "Pilih grup untuk melihat detailnya"
+
+#. TRANSLATORS: Part of a summary line above the board, joined to others by a
+#. comma.
+#: ui/status_layout.py:122
+#, python-brace-format
+msgid "{count} service not responding"
+msgid_plural "{count} services not responding"
+msgstr[0] "{count} layanan tidak merespons"
+msgstr[1] "{count} layanan tidak merespons"
+
+#. TRANSLATORS: Part of that same summary line. The service answered again and
+#. is being
+#. watched before it counts as up.
+#: ui/status_layout.py:130
+#, python-brace-format
+msgid "{count} recovering"
+msgstr "{count} sedang pulih"
+
+#. TRANSLATORS: Heading above the list of what is down. {summary} is the counts
+#. line.
+#: ui/status_layout.py:133
+#, python-brace-format
+msgid "**Active outages** — {summary}"
+msgstr "**Gangguan aktif** — {summary}"
+
+#. TRANSLATORS: Says the board is showing only some services. {states} is a
+#. list of
+#. state names.
+#: ui/status_layout.py:169
+#, python-brace-format
+msgid "Filtered to {states}"
+msgstr "Disaring ke {states}"
+
+#. TRANSLATORS: The whole counts line as one string, so the labels, numbers and
+#. separators can be reordered.
+#: ui/status_layout.py:178
+#, python-brace-format
+msgid ""
+"**Up:** {up} | **Down:** {down} | **Degraded:** {degraded} | "
+"**Unstable:** {unstable}"
+msgstr "**Normal:** {up} | **Mati:** {down} | **Bermasalah:** {degraded} | **Tidak stabil:** {unstable}"
+
+#: ui/status_layout.py:202
+msgid "Nothing in that state right now."
+msgstr "Tidak ada yang berstatus itu saat ini."
+
+#. TRANSLATORS: Small print at the foot of the board. {when} renders as "3
+#. minutes
+#. ago".
+#: ui/status_layout.py:232
+#, python-brace-format
+msgid "Last updated {when}"
+msgstr "Terakhir diperbarui {when}"
+
+#. TRANSLATORS: Small print replacing the timestamp when the status page gave
+#. none.
+#: ui/status_layout.py:235
+msgid "The status page did not say when this was generated"
+msgstr "Halaman status tidak mencantumkan kapan ini dibuat"
+
+#. TRANSLATORS: The board hit its size limit. Sits under a truncated list.
+#: ui/status_layout.py:245 ui/status_layout.py:309
+#, python-brace-format
+msgid "{count} more not shown here"
+msgid_plural "{count} more not shown here"
+msgstr[0] "{count} lainnya tidak ditampilkan di sini"
+msgstr[1] "{count} lainnya tidak ditampilkan di sini"
+
+#. TRANSLATORS: Credit line at the foot. {brand} is a company name and is never
+#. translated.
+#: ui/status_layout.py:255 ui/status_layout.py:324
+#, python-brace-format
+msgid "Developed by {brand}"
+msgstr "Dikembangkan oleh {brand}"
+
+#. TRANSLATORS: Link button label, opens the status website.
+#: ui/status_layout.py:274 ui/status_layout.py:328 ui/status_layout.py:436
+#: ui/status_layout.py:668
+msgid "Full Status Page"
+msgstr "Halaman status lengkap"
+
+#. TRANSLATORS: Markdown link. Only the words outside the square brackets are
+#. translated.
+#: ui/status_layout.py:321
+#, python-brace-format
+msgid "Live status: [pinned panels]({url})"
+msgstr "Status langsung: [panel tersemat]({url})"
+
+#. TRANSLATORS: The bot's own name, as the heading of its about card.
+#: ui/status_layout.py:357
+msgid "Uptime Tracker"
+msgstr "Pemantau Layanan"
+
+#: ui/status_layout.py:359
+#, python-brace-format
+msgid "A live status board for Stremio addons, developed by {brand}."
+msgstr "Papan status langsung untuk addon Stremio, dikembangkan oleh {brand}."
+
+#. TRANSLATORS: About-card row. The label is translated; the version number
+#. below it is not.
+#: ui/status_layout.py:366
+#, python-brace-format
+msgid ""
+"**Version**\n"
+"`v{version}`"
+msgstr ""
+"**Versi**\n"
+"`v{version}`"
+
+#: ui/status_layout.py:369
+#, python-brace-format
+msgid ""
+"**Source**\n"
+"Open source under the MIT licence — run your own instance from "
+"[GitHub]({url})."
+msgstr ""
+"**Kode sumber**\n"
+"Sumber terbuka dengan lisensi MIT — jalankan instans Anda sendiri dari [GitHub]({url})."
+
+#. TRANSLATORS: Link button labels on the about card.
+#: ui/status_layout.py:380
+msgid "Status Page"
+msgstr "Halaman status"
+
+#. TRANSLATORS: Link button label. Financial support for the project, not
+#. customer support.
+#: ui/status_layout.py:384
+msgid "Support"
+msgstr "Dukung"
+
+#. TRANSLATORS: Link button label, opens a chat server.
+#: ui/status_layout.py:386
+msgid "Community"
+msgstr "Komunitas"
+
+#. TRANSLATORS: Link button label. Ibby is a person's name and is never
+#. translated.
+#: ui/status_layout.py:389
+msgid "Message Ibby"
+msgstr "Hubungi Ibby"
+
+#. TRANSLATORS: Heading above a list of past outages.
+#: ui/status_layout.py:418
+msgid "Recent incidents"
+msgstr "Insiden terbaru"
+
+#. TRANSLATORS: Sits under a truncated list of past incidents.
+#: ui/status_layout.py:428
+#, python-brace-format
+msgid "{count} older not shown here"
+msgid_plural "{count} older not shown here"
+msgstr[0] "{count} catatan lama tidak ditampilkan di sini"
+msgstr[1] "{count} catatan lama tidak ditampilkan di sini"
+
+#. TRANSLATORS: A service's state, shown as a single word beside it.
+#: ui/status_layout.py:506
+msgid "Up"
+msgstr "Normal"
+
+#. TRANSLATORS: A service's state, one word beside its name. It answered again
+#. and is
+#. being watched before it counts as up.
+#: ui/status_layout.py:514 ui/status_layout.py:624
+msgid "Recovering"
+msgstr "Sedang pulih"
+
+#. TRANSLATORS: A service's state, one word beside its name. Planned work, not
+#. a fault.
+#: ui/status_layout.py:516
+msgid "Maintenance"
+msgstr "Pemeliharaan"
+
+#. TRANSLATORS: A service's state, one word beside its name. Nothing has been
+#. heard about
+#. it either way.
+#: ui/status_layout.py:519
+msgid "Unknown"
+msgstr "Tidak diketahui"
+
+#: ui/status_layout.py:546
+msgid "I could not fetch that service right now."
+msgstr "Saya tidak bisa mengambil data layanan itu saat ini."
+
+#. TRANSLATORS: Stands in for a service the status page gave no name for.
+#: ui/status_layout.py:578
+msgid "Unknown service"
+msgstr "Layanan tidak dikenal"
+
+#. TRANSLATORS: A labelled row in a service's detail panel. The dot is a
+#. separator.
+#: ui/status_layout.py:590
+#, python-brace-format
+msgid "**State** · {state}"
+msgstr "**Status** · {state}"
+
+#. TRANSLATORS: A labelled row in a service's detail panel. {status} is a
+#. number
+#. such as 200 or 503.
+#: ui/status_layout.py:598
+#, python-brace-format
+msgid "**HTTP** · {status}"
+msgstr "**HTTP** · {status}"
+
+#. TRANSLATORS: A labelled row. {ms} is a number of milliseconds and the
+#. trailing
+#. ms is the unit.
+#: ui/status_layout.py:604
+#, python-brace-format
+msgid "**Latency** · {ms}ms"
+msgstr "**Latensi** · {ms} md"
+
+#. TRANSLATORS: A labelled row. How long the service has been in its current
+#. state.
+#: ui/status_layout.py:611
+#, python-brace-format
+msgid "**Since** · {when}"
+msgstr "**Sejak** · {when}"
+
+#. TRANSLATORS: A warning under a service that keeps changing between up and
+#. down.
+#: ui/status_layout.py:622
+msgid "⚠️ Flapping between states"
+msgstr "⚠️ Status berubah-ubah"
+
+#. TRANSLATORS: A note under a service having planned work done.
+#: ui/status_layout.py:627
+msgid "🔧 Under maintenance"
+msgstr "🔧 Sedang dalam pemeliharaan"
+
+#. TRANSLATORS: Buttons choosing how far back a service's history chart
+#. reaches.
+#: ui/status_layout.py:657 ui/status_layout.py:696
+msgid "7 days"
+msgstr "7 hari"
+
+#. TRANSLATORS: Button choosing how far back the history chart reaches.
+#: ui/status_layout.py:659 ui/status_layout.py:696
+msgid "30 days"
+msgstr "30 hari"
+
+#. TRANSLATORS: Button choosing to show the last few individual checks
+#. instead of a chart.
+#: ui/status_layout.py:663
+msgid "Recent checks"
+msgstr "Pemeriksaan terbaru"
+
+#. TRANSLATORS: Caption over a list of a service's most recent checks. The
+#. singular
+#. carries no number.
+#: ui/status_layout.py:685
+#, python-brace-format
+msgid "Last check"
+msgid_plural "Last {n} checks"
+msgstr[0] "{n} pemeriksaan terakhir"
+msgstr[1] "{n} pemeriksaan terakhir"
+
+#. TRANSLATORS: One item in a comma-separated caption: "168 periods, no
+#. outages". A
+#. period is one block of the history chart.
+#: ui/status_layout.py:703
+#, python-brace-format
+msgid "{n} period"
+msgid_plural "{n} periods"
+msgstr[0] "{n} periode"
+msgstr[1] "{n} periode"
+
+#. TRANSLATORS: One item in that caption, counting periods that had an outage.
+#: ui/status_layout.py:709
+#, python-brace-format
+msgid "{n} with an outage"
+msgid_plural "{n} with an outage"
+msgstr[0] "{n} dengan gangguan"
+msgstr[1] "{n} dengan gangguan"
+
+#. TRANSLATORS: One item in a comma-separated caption: "168 periods, no
+#. outages".
+#: ui/status_layout.py:713
+msgid "no outages"
+msgstr "tanpa gangguan"
+
+#. TRANSLATORS: One item in that caption, counting periods that were degraded
+#. rather than down.
+#: ui/status_layout.py:720
+#, python-brace-format
+msgid "{n} with slow or failed checks"
+msgid_plural "{n} with slow or failed checks"
+msgstr[0] "{n} dengan pemeriksaan lambat atau gagal"
+msgstr[1] "{n} dengan pemeriksaan lambat atau gagal"
+
+#. TRANSLATORS: One item in a comma-separated caption, meaning the window is
+#. not fully covered.
+#: ui/status_layout.py:727
+msgid "partial history"
+msgstr "riwayat tidak lengkap"
+
+#. TRANSLATORS: Caption over the history chart. {span} is a length of time such
+#. as "7
+#. days".
+#: ui/status_layout.py:730
+#, python-brace-format
+msgid "Last {span}"
+msgstr "{span} terakhir"
