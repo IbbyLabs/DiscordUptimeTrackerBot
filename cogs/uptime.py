@@ -56,8 +56,11 @@ def N_(message: str) -> str:
 
 
 _SETTING_LABELS = {
+    # TRANSLATORS: Setting label. The emoji shown beside a healthy service.
     "status_emoji": N_("Status emoji"),
+    # TRANSLATORS: Setting label. The web address of the status page this board reads.
     "status_page_url": N_("Status page URL"),
+    # TRANSLATORS: Setting label. Which language this server's board is written in.
     "locale": N_("Language"),
 }
 
@@ -97,6 +100,7 @@ def validate_guild_setting(
                 value=value
             )
         return value, None
+    # TRANSLATORS: Error reply. {field} is the name someone typed, not a translated word.
     return None, _("Unknown setting: {field}").format(field=field)
 
 StatusData = dict[str, Any]
@@ -400,18 +404,23 @@ class UptimeCog(commands.Cog):
             shown = ", ".join(names[:5])
             extra = len(names) - 5
             if extra > 0:
+                # TRANSLATORS: Line under an announcement. {names} is a comma-separated list of
+                # service names.
                 line = _.ngettext(
                     "Affects {names} and {n} more",
                     "Affects {names} and {n} more",
                     extra,
                 ).format(names=shown, n=extra)
             else:
+                # TRANSLATORS: Line under an announcement listing the services it concerns.
                 line = _("Affects {names}").format(names=shown)
             lines.append("-# " + line)
 
         updated = str(bulletin.get("updatedAt") or "")
         if updated:
             lines.append(
+                # TRANSLATORS: Small print under an announcement. {when} renders as "3 minutes
+                # ago".
                 "-# " + _("Updated {when}").format(when=_discord_relative(updated))
             )
         return lines
@@ -433,16 +442,21 @@ class UptimeCog(commands.Cog):
         self, service: StatusData, translate: "Translator | None" = None
     ) -> str:
         _ = translate or translator_for(None)
+        # TRANSLATORS: Stands in for a service the status page gave no name for.
         name = str(service.get("name") or _("Unknown Service"))
         maintenance = service.get("maintenance") or {}
         reason = str(
             maintenance.get("reason")
             or maintenance.get("title")
             or maintenance.get("message")
+            # TRANSLATORS: Stands in where the status page offered no explanation for planned
+            # work.
             or _("No reason given")
         ).strip()
         started = str(maintenance.get("startedAt") or maintenance.get("changedAt") or "")
         when = (
+            # TRANSLATORS: Tail of an outage line: "Torbox (Debrid) since 14:02". Not a sentence
+            # on its own.
             " " + _("since {when}").format(when=_discord_relative(started))
             if started
             else ""
@@ -502,12 +516,16 @@ class UptimeCog(commands.Cog):
         )
         if status_api.service_recovering(service):
             held = (
+                # TRANSLATORS: Tail of a recovering service's line, giving when it first went
+                # down.
                 " · " + _("down since {when}").format(when=_discord_relative(since))
                 if since
                 else ""
             )
             return (
                 f"🟡 **{name}** ({group}) · "
+                # TRANSLATORS: Middle of a line about a service that answered again and is being
+                # watched before it counts as up.
                 + _("responding again, held until stable")
                 + held
             )
@@ -587,8 +605,11 @@ class UptimeCog(commands.Cog):
             reason = verdict["reason"]
             sentence = reason[:1].upper() + reason[1:] if reason else ""
             if verdict["state"] == "DOWN":
+                # TRANSLATORS: Headline across the top of the board when the status page gave no
+                # wording of its own.
                 return f"🔴 {sentence}" if sentence else "🔴 " + _("Services Down")
             if verdict["state"] == "DEGRADED":
+                # TRANSLATORS: Headline across the top of the board. Working, but not properly.
                 return f"🟡 {sentence}" if sentence else "🟡 " + _("Services Degraded")
             if verdict["state"] == "UP":
                 # A verdict of UP with services down is still UP, and the page
@@ -598,6 +619,8 @@ class UptimeCog(commands.Cog):
                 if headline == ALL_CLEAR:
                     return (
                         f"{self.get_state_emoji('UP', healthy)} "
+                        # TRANSLATORS: Headline across the top of the board when everything is
+                        # working.
                         + _("All Systems Operational")
                     )
                 # Green is read before the words are, and these words are not
@@ -619,16 +642,20 @@ class UptimeCog(commands.Cog):
         maintenance_count = count("MAINTENANCE")
         unstable_count = sum(1 for service in services if self.is_unstable(service))
         if down_count > 0:
+            # TRANSLATORS: Headline across the top of the board, counting the services that are
+            # down.
             return "🔴 " + _.ngettext(
                 "{n} Service Down", "{n} Services Down", down_count
             ).format(n=down_count)
         if unstable_count > 0:
+            # TRANSLATORS: Headline counting services that keep changing between up and down.
             return f"{UNSTABLE_EMOJI} " + _.ngettext(
                 "{n} Service Unstable", "{n} Services Unstable", unstable_count
             ).format(n=unstable_count)
         if degraded_count > 0:
             return "🟡 " + _("Services Degraded")
         if maintenance_count > 0:
+            # TRANSLATORS: Headline across the top of the board. Planned work, not a fault.
             return "🛠️ " + _("Under Maintenance")
         return f"{self.get_state_emoji('UP', healthy)} " + _("All Systems Operational")
 
@@ -754,6 +781,7 @@ class UptimeCog(commands.Cog):
             # TRANSLATORS: Follows a count in a group's summary line: "3/3, operational".
             status_text = _("operational")
         else:
+            # TRANSLATORS: Tail of a group's summary line: "3/4, problem with 1 service".
             status_text = _.ngettext(
                 "{n} service affected", "{n} services affected", affected
             ).format(n=affected)
@@ -1240,7 +1268,10 @@ class UptimeCog(commands.Cog):
         state=[
             # TRANSLATORS: Choice in a command that filters services by their state.
             app_commands.Choice(name=_L("Down"), value="DOWN"),
+            # TRANSLATORS: Choice in that filter, and a service's state. Working, but not
+            # properly.
             app_commands.Choice(name=_L("Degraded"), value="DEGRADED"),
+            # TRANSLATORS: Choice in that same filter, meaning either state.
             app_commands.Choice(name=_L("Down or degraded"), value="DOWN,DEGRADED"),
         ]
     )
@@ -1310,6 +1341,8 @@ class UptimeCog(commands.Cog):
             if override is None:
                 lines.append(
                     f"**{label}**: "
+                    # TRANSLATORS: Shown beside a setting nobody has changed. {value} is the
+                    # inherited value.
                     + _("{value} (default)").format(value=default)
                 )
             else:
@@ -1353,6 +1386,8 @@ class UptimeCog(commands.Cog):
             self.invalidate_guild_settings(guild_id)
             default = getattr(self.bot.config, _SETTING_DEFAULTS[field.value])
             await interaction.response.send_message(
+                # TRANSLATORS: Reply after clearing a setting. {setting} is one of the setting
+                # labels.
                 _("{setting} is back to the default: {value}").format(
                     setting=label, value=default
                 ),

@@ -75,6 +75,7 @@ class GroupSelect(ui.Select["StatusLayout"]):
             for name in groups[:SELECT_OPTION_LIMIT]
         ]
         super().__init__(
+            # TRANSLATORS: Placeholder text in a dropdown listing the service groups.
             placeholder=_("Pick a group for the detail view"),
             options=options,
             custom_id="uptime_group_select",
@@ -116,6 +117,7 @@ def _with_outages(
     parts = []
     if not_responding:
         parts.append(
+            # TRANSLATORS: Part of a summary line above the board, joined to others by a comma.
             _.ngettext(
                 "{count} service not responding",
                 "{count} services not responding",
@@ -123,8 +125,11 @@ def _with_outages(
             ).format(count=not_responding)
         )
     if recovering:
+        # TRANSLATORS: Part of that same summary line. The service answered again and is being
+        # watched before it counts as up.
         parts.append(_("{count} recovering").format(count=recovering))
     return [
+        # TRANSLATORS: Heading above the list of what is down. {summary} is the counts line.
         _("**Active outages** — {summary}").format(summary=" · ".join(parts)),
         *(cog.outage_line(service, _) for service in outages),
         "",
@@ -159,12 +164,16 @@ class StatusLayout(ui.LayoutView):
 
         header = f"## {cog.tracker_name(data)}"
         if states:
+            # TRANSLATORS: Says the board is showing only some services. {states} is a list of
+            # state names.
             header += "\n-# " + self._("Filtered to {states}").format(
                 states=", ".join(st.lower() for st in states)
             )
         up, down, degraded, unstable = cog.headline_counts(data)
         # One sentence rather than four fragments: the separator and the order
         # of label and number are the translator's to choose.
+        # TRANSLATORS: The whole counts line as one string, so the labels, numbers and
+        # separators can be reordered.
         counts = self._(
             "**Up:** {up} | **Down:** {down} | **Degraded:** {degraded}"
             " | **Unstable:** {unstable}"
@@ -218,8 +227,11 @@ class StatusLayout(ui.LayoutView):
         chunks, dropped = _body_chunks(lines)
         generated = cog.last_updated_unix(data)
         updated = (
+            # TRANSLATORS: Small print at the foot of the board. {when} renders as "3 minutes
+            # ago".
             "-# " + self._("Last updated {when}").format(when=f"<t:{generated}:R>")
             if generated is not None
+            # TRANSLATORS: Small print replacing the timestamp when the status page gave none.
             else "-# " + self._("The status page did not say when this was generated")
         )
         # Above the credit rather than buried: a board that stopped updating
@@ -228,6 +240,7 @@ class StatusLayout(ui.LayoutView):
         if stale:
             updated = f"{stale}\n{updated}"
         if dropped:
+            # TRANSLATORS: The board hit its size limit. Sits under a truncated list.
             more = self._.ngettext(
                 "{count} more not shown here",
                 "{count} more not shown here",
@@ -237,6 +250,8 @@ class StatusLayout(ui.LayoutView):
         # Credit only. A board sits in a channel permanently, so anything that
         # does not change does not belong on it; the links live in /about.
         # The name is a brand and stays put; only the words around it move.
+        # TRANSLATORS: Credit line at the foot. {brand} is a company name and is never
+        # translated.
         credit = self._("Developed by {brand}").format(brand="IbbyLabs")
         updated = f"{updated}\n-# {credit} • v{cog.bot.version}"
 
@@ -255,6 +270,7 @@ class StatusLayout(ui.LayoutView):
                 ui.ActionRow(GroupSelect(cog, data, group_name, self._))
             )
         self.add_item(
+            # TRANSLATORS: Link button label, opens the status website.
             ui.ActionRow(ui.Button(label=self._("Full Status Page"), url=page_url))
         )
 
@@ -300,6 +316,8 @@ class PanelLayout(ui.LayoutView):
         if live_url:
             children.append(
                 ui.TextDisplay(
+                    # TRANSLATORS: Markdown link. Only the words outside the square brackets are
+                    # translated.
                     "-# " + self._("Live status: [pinned panels]({url})").format(url=live_url)
                 )
             )
@@ -343,6 +361,8 @@ class AboutLayout(ui.LayoutView):
                 ),
                 ui.Separator(),
                 ui.TextDisplay(
+                    # TRANSLATORS: About-card row. The label is translated; the version number
+                    # below it is not.
                     self._("**Version**\n`v{version}`").format(version=version)
                     + "\n\n"
                     + self._(
@@ -359,8 +379,13 @@ class AboutLayout(ui.LayoutView):
                 # TRANSLATORS: Link button labels on the about card.
                 ui.Button(label=self._("Status Page"), url=page_url),
                 ui.Button(label="IbbyLabs", url=BRAND_SITE_URL),
+                # TRANSLATORS: Link button label. Financial support for the project, not
+                # customer support.
                 ui.Button(label=self._("Support"), url=KOFI_URL),
+                # TRANSLATORS: Link button label, opens a chat server.
                 ui.Button(label=self._("Community"), url=COMMUNITY_URL),
+                # TRANSLATORS: Link button label. Ibby is a person's name and is never
+                # translated.
                 ui.Button(label=self._("Message Ibby"), url=DM_URL),
             )
         )
@@ -389,6 +414,7 @@ class IncidentHistoryLayout(ui.LayoutView):
         page_url = page_url or cog.bot.config.STATUS_PAGE_URL
         chunks, dropped = _body_chunks(lines)
         children: list[ui.Item[Any]] = [
+            # TRANSLATORS: Heading above a list of past outages.
             ui.TextDisplay("## " + self._("Recent incidents")),
             ui.Separator(),
             *(ui.TextDisplay(chunk) for chunk in chunks),
@@ -397,6 +423,7 @@ class IncidentHistoryLayout(ui.LayoutView):
             children.append(
                 ui.TextDisplay(
                     "-# "
+                    # TRANSLATORS: Sits under a truncated list of past incidents.
                     + self._.ngettext(
                         "{count} older not shown here",
                         "{count} older not shown here",
@@ -477,10 +504,18 @@ def _state_word(state: str, translate: Translator) -> str:
     return {
         # TRANSLATORS: A service's state, shown as a single word beside it.
         "UP": _("Up"),
+        # TRANSLATORS: Choice in a command that filters services by state, and a service's state
+        # elsewhere.
         "DOWN": _("Down"),
+        # TRANSLATORS: Choice in that filter, and a service's state. Working, but not properly.
         "DEGRADED": _("Degraded"),
+        # TRANSLATORS: A service's state, one word beside its name. It answered again and is
+        # being watched before it counts as up.
         "RECOVERING": _("Recovering"),
+        # TRANSLATORS: A service's state, one word beside its name. Planned work, not a fault.
         "MAINTENANCE": _("Maintenance"),
+        # TRANSLATORS: A service's state, one word beside its name. Nothing has been heard about
+        # it either way.
         "UNKNOWN": _("Unknown"),
     }.get(state.upper(), state.title())
 
@@ -539,6 +574,7 @@ class HostLayout(ui.LayoutView):
         page_url = page_url or cog.bot.config.STATUS_PAGE_URL
         last = service.get("last") or {}
         state = status_api.display_state(service)
+        # TRANSLATORS: Stands in for a service the status page gave no name for.
         name = str(service.get("name") or self._("Unknown service"))
         if service.get("requiresAuth"):
             name = f"{name} 🔒"
@@ -550,21 +586,28 @@ class HostLayout(ui.LayoutView):
             head.append(f"-# {group}")
 
         facts = [
+            # TRANSLATORS: A labelled row in a service's detail panel. The dot is a separator.
             self._("**State** · {state}").format(
                 state=_state_word(state, self._)
             )
         ]
         if last.get("status"):
             facts.append(
+                # TRANSLATORS: A labelled row in a service's detail panel. {status} is a number
+                # such as 200 or 503.
                 self._("**HTTP** · {status}").format(status=last["status"])
             )
         if last.get("latency"):
             facts.append(
+                # TRANSLATORS: A labelled row. {ms} is a number of milliseconds and the trailing
+                # ms is the unit.
                 self._("**Latency** · {ms}ms").format(ms=int(last["latency"]))
             )
         since = service.get("downSince") if state != "UP" else service.get("upSince")
         if since:
             facts.append(
+                # TRANSLATORS: A labelled row. How long the service has been in its current
+                # state.
                 self._("**Since** · {when}").format(when=_discord_time(since))
             )
         detail_line = " | ".join(facts)
@@ -575,10 +618,12 @@ class HostLayout(ui.LayoutView):
         if last.get("degradedReason"):
             notes.append(f"⚠️ {last['degradedReason']}")
         if last.get("flapping"):
+            # TRANSLATORS: A warning under a service that keeps changing between up and down.
             notes.append(self._("⚠️ Flapping between states"))
         if last.get("recovering"):
             notes.append(self._("Recovering"))
         if service.get("maintenance"):
+            # TRANSLATORS: A note under a service having planned work done.
             notes.append(self._("🔧 Under maintenance"))
 
         windows = service.get("uptimeWindows") or {}
@@ -610,8 +655,11 @@ class HostLayout(ui.LayoutView):
                 ui.ActionRow(
                     # TRANSLATORS: Buttons choosing how far back a service's history chart reaches.
                     WindowButton(self._("7 days"), "d7", window, service_id),
+                    # TRANSLATORS: Button choosing how far back the history chart reaches.
                     WindowButton(self._("30 days"), "d30", window, service_id),
                     WindowButton(
+                        # TRANSLATORS: Button choosing to show the last few individual checks
+                        # instead of a chart.
                         self._("Recent checks"), "recent", window, service_id
                     ),
                 )
@@ -631,6 +679,8 @@ class HostLayout(ui.LayoutView):
                 f"{int(c.get('latency') or 0)}ms"
                 for c in reversed(checks)
             ]
+            # TRANSLATORS: Caption over a list of a service's most recent checks. The singular
+            # carries no number.
             return "\n".join(lines), "**" + self._.ngettext(
                 # TRANSLATORS: Caption over a list of a service's most recent
                 # checks. The singular carries no number: "Last check", not
@@ -647,11 +697,14 @@ class HostLayout(ui.LayoutView):
         # Counts are of source periods, not of blocks drawn: each block merges
         # several, so the two numbers do not match and the wording says which.
         parts = [
+            # TRANSLATORS: One item in a comma-separated caption: "168 periods, no outages". A
+            # period is one block of the history chart.
             self._.ngettext(
                 "{n} period", "{n} periods", len(buckets)
             ).format(n=len(buckets))
         ]
         parts.append(
+            # TRANSLATORS: One item in that caption, counting periods that had an outage.
             self._.ngettext(
                 "{n} with an outage", "{n} with an outage", down
             ).format(n=down)
@@ -661,6 +714,8 @@ class HostLayout(ui.LayoutView):
         )
         if degraded:
             parts.append(
+                # TRANSLATORS: One item in that caption, counting periods that were degraded
+                # rather than down.
                 self._.ngettext(
                     "{n} with slow or failed checks",
                     "{n} with slow or failed checks",
@@ -670,6 +725,8 @@ class HostLayout(ui.LayoutView):
         if _coverage_is_short(timeline):
             # TRANSLATORS: One item in a comma-separated caption, meaning the window is not fully covered.
             parts.append(self._("partial history"))
+        # TRANSLATORS: Caption over the history chart. {span} is a length of time such as "7
+        # days".
         caption = self._("Last {span}").format(span=span)
         return bar, f"**{caption}** · " + ", ".join(parts)
 

@@ -262,6 +262,7 @@ def build_page_incident_messages(
         ).format(count=count)
         messages.append((
             "open",
+            # TRANSLATORS: Alert heading. A service has just gone down.
             f"## 🔴 {_('Outage started')}\n{body}",
             [_incident_line(row, "🔴", _) for row in opened],
         ))
@@ -270,6 +271,7 @@ def build_page_incident_messages(
     if closed:
         if plan["all_clear"]:
             heading = (
+                # TRANSLATORS: Alert heading. Everything is working again.
                 f"## 🟢 {_('All clear')}\n{_('Every service is responding again.')}"
             )
         else:
@@ -295,9 +297,12 @@ def _incident_line(
     where = f" ({row['group']})" if row.get("group") else ""
     started = _iso_stamp(row["opened_at"])
     if row.get("closed_at"):
+        # TRANSLATORS: A finished outage inside a list item: "Torbox — down from 14:02 to
+        # 14:31".
         when = _("down from {start} to {end}").format(
             start=started, end=_iso_stamp(row["closed_at"])
         )
     else:
+        # TRANSLATORS: An outage still going, inside a list item: "Torbox — since 14:02".
         when = _("since {start}").format(start=started)
     return f"{marker} **{row['name']}**{where}\n-# {when}"
