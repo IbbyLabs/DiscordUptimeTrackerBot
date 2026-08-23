@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 import status_api
 from panels import build_panel_specs
-from i18n import translator_for
+from i18n import Translator, translator_for
 from incidents import (
     alertable_rows,
     build_page_incident_messages,
@@ -54,19 +54,24 @@ _SETTING_LABELS = {
 }
 
 
-def validate_guild_setting(field: str, value: str) -> tuple[str | None, str | None]:
+def validate_guild_setting(
+    field: str, value: str, translate: "Translator | None" = None
+) -> tuple[str | None, str | None]:
     """Returns (cleaned, error). A bad URL would break every embed for the guild."""
+    _ = translate or translator_for(None)
     value = value.strip()
     if field == "status_page_url":
         parsed = urlparse(value)
         if parsed.scheme not in ("http", "https") or not parsed.netloc:
-            return None, "That is not a valid URL. It needs to start with http:// or https://."
+            return None, _(
+                "That is not a valid URL. It needs to start with http:// or https://."
+            )
         if len(value) > 500:
-            return None, "That URL is too long."
+            return None, _("That URL is too long.")
         return value, None
     if field == "status_emoji":
         if len(value) > 64:
-            return None, "That emoji is too long."
+            return None, _("That emoji is too long.")
         return value, None
     if field == "locale":
         # Checked against Discord's own list rather than accepted as any string:
@@ -75,9 +80,11 @@ def validate_guild_setting(field: str, value: str) -> tuple[str | None, str | No
             return "", None
         known = {str(locale.value) for locale in discord.Locale}
         if value not in known:
-            return None, f"{value} is not a language Discord supports."
+            return None, _("{value} is not a language Discord supports.").format(
+                value=value
+            )
         return value, None
-    return None, f"Unknown setting: {field}"
+    return None, _("Unknown setting: {field}").format(field=field)
 
 StatusData = dict[str, Any]
 StatusSender = Callable[[discord.ui.LayoutView], Awaitable[object]]
@@ -184,6 +191,10 @@ class UptimeCog(commands.Cog):
             "page_url": await self.guild_setting(guild_id, "status_page_url"),
             "translate": translator_for(await self.guild_locale(guild_id)),
         }
+
+    async def guild_translator(self, guild_id: int | str | None) -> Translator:
+        """The translator for a guild, for call sites that render no settings."""
+        return translator_for(await self.guild_locale(guild_id))
 
     async def guild_locale(self, guild_id: int | str | None) -> str | None:
         """The language to render a guild's messages in.
@@ -996,11 +1007,12 @@ class UptimeCog(commands.Cog):
             data = await self.fetch_status()
             if data:
                 self.last_status = data
+        _ = await self.guild_translator(guild_id)
         if not data:
-            await send_error("I could not fetch status data right now.")
+            await send_error(_("I could not fetch status data right now."))
             return
         if not self.group_services(data):
-            await send_error("No services were found.")
+            await send_error(_("No services were found."))
             return
         layout = StatusLayout(
             self, data, **await self.guild_render_settings(guild_id)
@@ -1010,12 +1022,13 @@ class UptimeCog(commands.Cog):
     @tracker.command(name="setup", description="Create a live uptime tracker message")
     @can_manage_guild()
     async def setup_tracker(self, interaction: discord.Interaction) -> None:
+        _ = await self.guild_translator(interaction.guild_id)
         if not interaction.guild or not isinstance(
             interaction.channel,
             TRACKER_CHANNEL_TYPES,
         ):
             await interaction.response.send_message(
-                "Cannot use this command here.",
+                _("Cannot use this command here."),
                 ephemeral=True,
             )
             return
@@ -1023,7 +1036,7 @@ class UptimeCog(commands.Cog):
         data = await self.fetch_status()
         if not data or self.bot.db is None:
             await interaction.followup.send(
-                "I could not fetch status data right now.",
+                _("I could not fetch status data right now."),
                 ephemeral=True,
             )
             return
@@ -1036,7 +1049,7 @@ class UptimeCog(commands.Cog):
             str(message.id),
         )
         await interaction.followup.send(
-            "Uptime tracker message created. It will refresh automatically.",
+            _("Uptime tracker message created. It will refresh automatically."),
             ephemeral=True,
         )
 
@@ -1054,23 +1067,24 @@ class UptimeCog(commands.Cog):
     @tracker.command(name="alerts", description="Send status alerts to this channel")
     @can_manage_guild()
     async def setup_alerts(self, interaction: discord.Interaction) -> None:
+        _ = await self.guild_translator(interaction.guild_id)
         if not interaction.guild or not interaction.channel or self.bot.db is None:
             await interaction.response.send_message(
-                "Cannot use this command here.",
+                _("Cannot use this command here."),
                 ephemeral=True,
             )
             return
         channel_id = interaction.channel_id
         if channel_id is None:
             await interaction.response.send_message(
-                "Cannot use this command here.",
+                _("Cannot use this command here."),
                 ephemeral=True,
             )
             return
         channel = await self.resolve_tracker_channel(channel_id)
         if channel is None:
             await interaction.response.send_message(
-                "Cannot use this command here.",
+                _("Cannot use this command here."),
                 ephemeral=True,
             )
             return
@@ -1079,7 +1093,7 @@ class UptimeCog(commands.Cog):
             str(channel_id),
         )
         await interaction.response.send_message(
-            "Status alerts will be sent to this channel.",
+            _("Status alerts will be sent to this channel."),
             ephemeral=True,
         )
 
@@ -1145,11 +1159,12 @@ class UptimeCog(commands.Cog):
         host: str | None = None,
         state: app_commands.Choice[str] | None = None,
     ) -> None:
+        _ = await self.guild_translator(interaction.guild_id)
         await interaction.response.defer(ephemeral=True)
         data = await self._status_data()
         if not data:
             await interaction.followup.send(
-                "I could not fetch status data right now.",
+                _("I could not fetch status data right now."),
                 ephemeral=True,
             )
             return
@@ -1186,9 +1201,10 @@ class UptimeCog(commands.Cog):
     @tracker.command(name="settings", description="Show this server's tracker settings")
     @can_manage_guild()
     async def show_settings(self, interaction: discord.Interaction) -> None:
+        _ = await self.guild_translator(interaction.guild_id)
         if not interaction.guild or self.bot.db is None:
             await interaction.response.send_message(
-                "Cannot use this command here.",
+                _("Cannot use this command here."),
                 ephemeral=True,
             )
             return
@@ -1225,9 +1241,10 @@ class UptimeCog(commands.Cog):
         field: app_commands.Choice[str],
         value: str | None = None,
     ) -> None:
+        _ = await self.guild_translator(interaction.guild_id)
         if not interaction.guild or self.bot.db is None:
             await interaction.response.send_message(
-                "Cannot use this command here.",
+                _("Cannot use this command here."),
                 ephemeral=True,
             )
             return
@@ -1242,7 +1259,7 @@ class UptimeCog(commands.Cog):
                 ephemeral=True,
             )
             return
-        cleaned, error = validate_guild_setting(field.value, value)
+        cleaned, error = validate_guild_setting(field.value, value, _)
         if error:
             await interaction.response.send_message(error, ephemeral=True)
             return
@@ -1256,9 +1273,10 @@ class UptimeCog(commands.Cog):
     @tracker.command(name="stopalerts", description="Stop sending status alerts in this guild")
     @can_manage_guild()
     async def remove_alerts(self, interaction: discord.Interaction) -> None:
+        _ = await self.guild_translator(interaction.guild_id)
         if not interaction.guild or self.bot.db is None:
             await interaction.response.send_message(
-                "Cannot use this command here.",
+                _("Cannot use this command here."),
                 ephemeral=True,
             )
             return
@@ -1266,7 +1284,7 @@ class UptimeCog(commands.Cog):
         guild_id = str(interaction.guild_id)
         await self.bot.db.delete_alert_channel(guild_id)
         removed = await self.delete_panels(guild_id)
-        detail = "Status alerts are now disabled for this guild."
+        detail = _("Status alerts are now disabled for this guild.")
         if removed:
             noun = "panel" if removed == 1 else "panels"
             detail += f" {removed} {noun} removed."
@@ -1278,9 +1296,10 @@ class UptimeCog(commands.Cog):
     )
     @can_manage_guild()
     async def remove_tracker(self, interaction: discord.Interaction) -> None:
+        _ = await self.guild_translator(interaction.guild_id)
         if not interaction.guild or self.bot.db is None:
             await interaction.response.send_message(
-                "Cannot use this command here.",
+                _("Cannot use this command here."),
                 ephemeral=True,
             )
             return
@@ -1302,7 +1321,7 @@ class UptimeCog(commands.Cog):
                     deleted = True
                 except discord.HTTPException as exc:
                     log.warning("Could not delete the board for %s: %s", guild_id, exc)
-        detail = "Removed the tracked uptime message for this guild."
+        detail = _("Removed the tracked uptime message for this guild.")
         if stored and not deleted:
             detail += " The board itself could not be deleted and is now stale."
         await interaction.followup.send(detail, ephemeral=True)
