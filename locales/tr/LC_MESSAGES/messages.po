@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiscordUptimeTrackerBot VERSION\n"
 "Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
-"POT-Creation-Date: 2026-08-24 10:25+0100\n"
+"POT-Creation-Date: 2026-08-24 12:57+0100\n"
 "PO-Revision-Date: 2026-08-23 21:46+0100\n"
 "Last-Translator: in-house translation\n"
 "Language: tr\n"
@@ -120,15 +120,15 @@ msgstr "{count} tanesi belirtilmiş bir nedenle"
 msgid "Incident history"
 msgstr "Olay geçmişi"
 
-#: cogs/uptime.py:63 cogs/uptime.py:1392
+#: cogs/uptime.py:63 cogs/uptime.py:1395
 msgid "Status emoji"
 msgstr "Durum emojisi"
 
-#: cogs/uptime.py:65 cogs/uptime.py:1393
+#: cogs/uptime.py:65 cogs/uptime.py:1396
 msgid "Status page URL"
 msgstr "Durum sayfası adresi"
 
-#: cogs/uptime.py:67 cogs/uptime.py:1394
+#: cogs/uptime.py:67 cogs/uptime.py:1397
 msgid "Language"
 msgstr "Dil"
 
@@ -255,166 +255,166 @@ msgstr[0] "{n} servis etkilendi"
 msgid "Some services are behind authentication and marked with a lock."
 msgstr "Bazı servisler giriş gerektiriyor ve kilit simgesiyle işaretli."
 
-#: cogs/uptime.py:824
-#, python-brace-format, python-format
-msgid "{percent}% uptime"
-msgstr "%{percent} çalışma süresi"
+#: cogs/uptime.py:827
+#, python-brace-format
+msgid "{percent} uptime"
+msgstr "{percent} çalışma süresi"
 
-#: cogs/uptime.py:1133
+#: cogs/uptime.py:1136
 #, python-brace-format
 msgid "Refreshed {count} uptime tracker message."
 msgid_plural "Refreshed {count} uptime tracker messages."
 msgstr[0] "{count} durum takip mesajı yenilendi."
 
-#: cogs/uptime.py:1140
+#: cogs/uptime.py:1143
 #, python-brace-format
 msgid "Sent {count} alert."
 msgid_plural "Sent {count} alerts."
 msgstr[0] "{count} uyarı gönderildi."
 
-#: cogs/uptime.py:1160 cogs/uptime.py:1187 cogs/uptime.py:1319
+#: cogs/uptime.py:1163 cogs/uptime.py:1190 cogs/uptime.py:1322
 #: ui/status_layout.py:91
 msgid "I could not fetch status data right now."
 msgstr "Şu anda durum verilerini alamadım."
 
-#: cogs/uptime.py:1163
+#: cogs/uptime.py:1166
 msgid "No services were found."
 msgstr "Hiçbir servis bulunamadı."
 
-#: cogs/uptime.py:1170
+#: cogs/uptime.py:1173
 msgid "Create a live uptime tracker message"
 msgstr "Canlı bir durum takip mesajı oluştur"
 
-#: cogs/uptime.py:1179 cogs/uptime.py:1221 cogs/uptime.py:1228
-#: cogs/uptime.py:1235 cogs/uptime.py:1359 cogs/uptime.py:1407
-#: cogs/uptime.py:1445 cogs/uptime.py:1469
+#: cogs/uptime.py:1182 cogs/uptime.py:1224 cogs/uptime.py:1231
+#: cogs/uptime.py:1238 cogs/uptime.py:1362 cogs/uptime.py:1410
+#: cogs/uptime.py:1448 cogs/uptime.py:1472
 msgid "Cannot use this command here."
 msgstr "Bu komut burada kullanılamaz."
 
-#: cogs/uptime.py:1200
+#: cogs/uptime.py:1203
 msgid "Uptime tracker message created. It will refresh automatically."
 msgstr "Durum takip mesajı oluşturuldu. Kendiliğinden yenilenecek."
 
-#: cogs/uptime.py:1204
+#: cogs/uptime.py:1207
 msgid "Refresh all live uptime tracker messages"
 msgstr "Tüm canlı durum takip mesajlarını yenile"
 
-#: cogs/uptime.py:1215
+#: cogs/uptime.py:1218
 msgid "Send status alerts to this channel"
 msgstr "Durum uyarılarını bu kanala gönder"
 
-#: cogs/uptime.py:1244
+#: cogs/uptime.py:1247
 msgid "Status alerts will be sent to this channel."
 msgstr "Durum uyarıları bu kanala gönderilecek."
 
-#: cogs/uptime.py:1289
+#: cogs/uptime.py:1292
 msgid "Service status, by group or by host"
 msgstr "Servis durumu, gruba veya sağlayıcıya göre"
 
-#: cogs/uptime.py:1291
+#: cogs/uptime.py:1294
 msgid "Show one group's services"
 msgstr "Bir grubun servislerini göster"
 
-#: cogs/uptime.py:1292
+#: cogs/uptime.py:1295
 msgid "Show one service in detail, with its uptime history"
 msgstr "Bir servisi geçmişiyle birlikte ayrıntılı göster"
 
-#: cogs/uptime.py:1293
+#: cogs/uptime.py:1296
 msgid "List every service currently in this state"
 msgstr "Şu anda bu durumdaki tüm servisleri listele"
 
-#: cogs/uptime.py:1298 ui/status_layout.py:509
+#: cogs/uptime.py:1301 ui/status_layout.py:509
 msgid "Down"
 msgstr "Erişilemiyor"
 
-#: cogs/uptime.py:1301 ui/status_layout.py:511
+#: cogs/uptime.py:1304 ui/status_layout.py:511
 msgid "Degraded"
 msgstr "Sorunlu"
 
-#: cogs/uptime.py:1303
+#: cogs/uptime.py:1306
 msgid "Down or degraded"
 msgstr "Erişilemiyor veya sorunlu"
 
-#: cogs/uptime.py:1328
+#: cogs/uptime.py:1331
 #, python-brace-format
 msgid "I could not find a service called {name}."
 msgstr "{name} adında bir servis bulamadım."
 
-#: cogs/uptime.py:1338
+#: cogs/uptime.py:1341
 #, python-brace-format
 msgid "I could not find a group called {name}."
 msgstr "{name} adında bir grup bulamadım."
 
-#: cogs/uptime.py:1353
+#: cogs/uptime.py:1356
 msgid "Show this server's tracker settings"
 msgstr "Bu sunucunun takip ayarlarını göster"
 
-#: cogs/uptime.py:1374
+#: cogs/uptime.py:1377
 #, python-brace-format
 msgid "{value} (default)"
 msgstr "{value} (varsayılan)"
 
-#: cogs/uptime.py:1381
+#: cogs/uptime.py:1384
 msgid "Change one with `/tracker set`."
 msgstr "`/tracker set` ile değiştirebilirsin."
 
-#: cogs/uptime.py:1385
+#: cogs/uptime.py:1388
 msgid "Change a tracker setting for this server"
 msgstr "Bu sunucu için bir takip ayarını değiştir"
 
-#: cogs/uptime.py:1387
+#: cogs/uptime.py:1390
 msgid "Which setting to change"
 msgstr "Hangi ayarın değiştirileceği"
 
-#: cogs/uptime.py:1388
+#: cogs/uptime.py:1391
 msgid "The new value. Leave this empty to go back to the default."
 msgstr "Yeni değer. Varsayılana dönmek için boş bırak."
 
-#: cogs/uptime.py:1420
+#: cogs/uptime.py:1423
 #, python-brace-format
 msgid "{setting} is back to the default: {value}"
 msgstr "{setting} varsayılana döndü: {value}"
 
-#: cogs/uptime.py:1433
+#: cogs/uptime.py:1436
 #, python-brace-format
 msgid "{setting} is now {value}. It applies from the next refresh."
 msgstr "{setting} artık {value}. Bir sonraki yenilemeden itibaren geçerli."
 
-#: cogs/uptime.py:1439
+#: cogs/uptime.py:1442
 msgid "Stop sending status alerts in this guild"
 msgstr "Bu sunucuda durum uyarılarını göndermeyi bırak"
 
-#: cogs/uptime.py:1453
+#: cogs/uptime.py:1456
 msgid "Status alerts are now disabled for this guild."
 msgstr "Bu sunucuda durum uyarıları artık kapalı."
 
-#: cogs/uptime.py:1456
+#: cogs/uptime.py:1459
 #, python-brace-format
 msgid "{n} panel removed."
 msgid_plural "{n} panels removed."
 msgstr[0] "{n} panel kaldırıldı."
 
-#: cogs/uptime.py:1462
+#: cogs/uptime.py:1465
 msgid "Stop tracking the live uptime message for this guild"
 msgstr "Bu sunucunun canlı durum mesajını takip etmeyi bırak"
 
-#: cogs/uptime.py:1491
+#: cogs/uptime.py:1494
 msgid "Removed the tracked uptime message for this guild."
 msgstr "Bu sunucu için takip edilen durum mesajı kaldırıldı."
 
-#: cogs/uptime.py:1494
+#: cogs/uptime.py:1497
 msgid "The board itself could not be deleted and is now stale."
 msgstr "Panelin kendisi silinemedi ve artık güncellenmiyor."
 
-#: cogs/uptime.py:1502
+#: cogs/uptime.py:1505
 msgid "Who made this bot, and how to run your own"
 msgstr "Bu botu kimin yaptığı ve kendi kopyanı nasıl çalıştıracağın"
 
-#: cogs/uptime.py:1513
+#: cogs/uptime.py:1516
 msgid "Recent outages and the services they affected"
 msgstr "Son kesintiler ve etkiledikleri servisler"
 
-#: cogs/uptime.py:1526
+#: cogs/uptime.py:1529
 msgid "View live service uptime"
 msgstr "Servislerin canlı durumunu gör"
 
@@ -478,7 +478,7 @@ msgstr "Uptime Tracker"
 #: ui/status_layout.py:359
 #, python-brace-format
 msgid "A live status board for Stremio addons, developed by {brand}."
-msgstr "Stremio eklentileri için canlı bir durum panosu, {brand} tarafından geliştirildi.Stremio eklentileri için canlı bir durum paneli, {brand} tarafından geliştirildi."
+msgstr "Stremio eklentileri için canlı bir durum paneli, {brand} tarafından geliştirildi."
 
 #: ui/status_layout.py:366
 #, python-brace-format

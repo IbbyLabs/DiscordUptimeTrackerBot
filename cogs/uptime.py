@@ -821,7 +821,10 @@ class UptimeCog(commands.Cog):
                 f"{self.get_state_emoji(state, healthy)} **[{name}]({url})**: "
                 f"{_state_word(state, _)} ({latency}ms)\n"
                 f"{uptime_bar} "
-                + _("{percent}% uptime").format(percent=f"{uptime_percent:.1f}")
+                # The percent sign travels with the number: a "%" in the msgid
+                # makes gettext read the string as printf and reject every
+                # translation whose next character differs.
+                + _("{percent} uptime").format(percent=f"{uptime_percent:.1f}%")
             )
         return lines
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiscordUptimeTrackerBot 0.8.8\n"
 "Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
-"POT-Creation-Date: 2026-08-24 10:25+0100\n"
+"POT-Creation-Date: 2026-08-24 12:57+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: in-house translation\n"
 "Language: pt_BR\n"
@@ -123,15 +123,15 @@ msgstr "{count} com motivo informado"
 msgid "Incident history"
 msgstr "Histórico de incidentes"
 
-#: cogs/uptime.py:63 cogs/uptime.py:1392
+#: cogs/uptime.py:63 cogs/uptime.py:1395
 msgid "Status emoji"
 msgstr "Emoji de status"
 
-#: cogs/uptime.py:65 cogs/uptime.py:1393
+#: cogs/uptime.py:65 cogs/uptime.py:1396
 msgid "Status page URL"
 msgstr "URL da página de status"
 
-#: cogs/uptime.py:67 cogs/uptime.py:1394
+#: cogs/uptime.py:67 cogs/uptime.py:1397
 msgid "Language"
 msgstr "Idioma"
 
@@ -262,169 +262,169 @@ msgstr[1] "{n} serviços afetados"
 msgid "Some services are behind authentication and marked with a lock."
 msgstr "Alguns serviços exigem autenticação e estão marcados com um cadeado."
 
-#: cogs/uptime.py:824
-#, python-brace-format, python-format
-msgid "{percent}% uptime"
-msgstr "{percent}% de disponibilidade"
+#: cogs/uptime.py:827
+#, python-brace-format
+msgid "{percent} uptime"
+msgstr "{percent} de disponibilidade"
 
-#: cogs/uptime.py:1133
+#: cogs/uptime.py:1136
 #, python-brace-format
 msgid "Refreshed {count} uptime tracker message."
 msgid_plural "Refreshed {count} uptime tracker messages."
 msgstr[0] "{count} mensagem do monitor atualizada."
 msgstr[1] "{count} mensagens do monitor atualizadas."
 
-#: cogs/uptime.py:1140
+#: cogs/uptime.py:1143
 #, python-brace-format
 msgid "Sent {count} alert."
 msgid_plural "Sent {count} alerts."
 msgstr[0] "{count} alerta enviado."
 msgstr[1] "{count} alertas enviados."
 
-#: cogs/uptime.py:1160 cogs/uptime.py:1187 cogs/uptime.py:1319
+#: cogs/uptime.py:1163 cogs/uptime.py:1190 cogs/uptime.py:1322
 #: ui/status_layout.py:91
 msgid "I could not fetch status data right now."
 msgstr "Não consegui obter os dados de status agora."
 
-#: cogs/uptime.py:1163
+#: cogs/uptime.py:1166
 msgid "No services were found."
 msgstr "Nenhum serviço foi encontrado."
 
-#: cogs/uptime.py:1170
+#: cogs/uptime.py:1173
 msgid "Create a live uptime tracker message"
 msgstr "Criar uma mensagem de monitor de disponibilidade ao vivo"
 
-#: cogs/uptime.py:1179 cogs/uptime.py:1221 cogs/uptime.py:1228
-#: cogs/uptime.py:1235 cogs/uptime.py:1359 cogs/uptime.py:1407
-#: cogs/uptime.py:1445 cogs/uptime.py:1469
+#: cogs/uptime.py:1182 cogs/uptime.py:1224 cogs/uptime.py:1231
+#: cogs/uptime.py:1238 cogs/uptime.py:1362 cogs/uptime.py:1410
+#: cogs/uptime.py:1448 cogs/uptime.py:1472
 msgid "Cannot use this command here."
 msgstr "Não é possível usar este comando aqui."
 
-#: cogs/uptime.py:1200
+#: cogs/uptime.py:1203
 msgid "Uptime tracker message created. It will refresh automatically."
 msgstr "Mensagem do monitor criada. Ela será atualizada automaticamente."
 
-#: cogs/uptime.py:1204
+#: cogs/uptime.py:1207
 msgid "Refresh all live uptime tracker messages"
 msgstr "Atualizar todas as mensagens do monitor de disponibilidade"
 
-#: cogs/uptime.py:1215
+#: cogs/uptime.py:1218
 msgid "Send status alerts to this channel"
 msgstr "Enviar alertas de status para este canal"
 
-#: cogs/uptime.py:1244
+#: cogs/uptime.py:1247
 msgid "Status alerts will be sent to this channel."
 msgstr "Os alertas de status serão enviados para este canal."
 
-#: cogs/uptime.py:1289
+#: cogs/uptime.py:1292
 msgid "Service status, by group or by host"
 msgstr "Status dos serviços, por grupo ou por host"
 
-#: cogs/uptime.py:1291
+#: cogs/uptime.py:1294
 msgid "Show one group's services"
 msgstr "Mostrar os serviços de um grupo"
 
-#: cogs/uptime.py:1292
+#: cogs/uptime.py:1295
 msgid "Show one service in detail, with its uptime history"
 msgstr "Mostrar um serviço em detalhe, com seu histórico de disponibilidade"
 
-#: cogs/uptime.py:1293
+#: cogs/uptime.py:1296
 msgid "List every service currently in this state"
 msgstr "Listar todos os serviços atualmente neste estado"
 
-#: cogs/uptime.py:1298 ui/status_layout.py:509
+#: cogs/uptime.py:1301 ui/status_layout.py:509
 msgid "Down"
 msgstr "Fora do ar"
 
-#: cogs/uptime.py:1301 ui/status_layout.py:511
+#: cogs/uptime.py:1304 ui/status_layout.py:511
 msgid "Degraded"
 msgstr "Com problemas"
 
-#: cogs/uptime.py:1303
+#: cogs/uptime.py:1306
 msgid "Down or degraded"
 msgstr "Fora do ar ou com problemas"
 
-#: cogs/uptime.py:1328
+#: cogs/uptime.py:1331
 #, python-brace-format
 msgid "I could not find a service called {name}."
 msgstr "Não encontrei nenhum serviço chamado {name}."
 
-#: cogs/uptime.py:1338
+#: cogs/uptime.py:1341
 #, python-brace-format
 msgid "I could not find a group called {name}."
 msgstr "Não encontrei nenhum grupo chamado {name}."
 
-#: cogs/uptime.py:1353
+#: cogs/uptime.py:1356
 msgid "Show this server's tracker settings"
 msgstr "Mostrar as configurações do monitor neste servidor"
 
-#: cogs/uptime.py:1374
+#: cogs/uptime.py:1377
 #, python-brace-format
 msgid "{value} (default)"
 msgstr "{value} (padrão)"
 
-#: cogs/uptime.py:1381
+#: cogs/uptime.py:1384
 msgid "Change one with `/tracker set`."
 msgstr "Altere uma com `/tracker set`."
 
-#: cogs/uptime.py:1385
+#: cogs/uptime.py:1388
 msgid "Change a tracker setting for this server"
 msgstr "Alterar uma configuração do monitor neste servidor"
 
-#: cogs/uptime.py:1387
+#: cogs/uptime.py:1390
 msgid "Which setting to change"
 msgstr "Qual configuração alterar"
 
-#: cogs/uptime.py:1388
+#: cogs/uptime.py:1391
 msgid "The new value. Leave this empty to go back to the default."
 msgstr "O novo valor. Deixe em branco para voltar ao padrão."
 
-#: cogs/uptime.py:1420
+#: cogs/uptime.py:1423
 #, python-brace-format
 msgid "{setting} is back to the default: {value}"
 msgstr "{setting} voltou ao padrão: {value}"
 
-#: cogs/uptime.py:1433
+#: cogs/uptime.py:1436
 #, python-brace-format
 msgid "{setting} is now {value}. It applies from the next refresh."
 msgstr "{setting} agora é {value}. Vale a partir da próxima atualização."
 
-#: cogs/uptime.py:1439
+#: cogs/uptime.py:1442
 msgid "Stop sending status alerts in this guild"
 msgstr "Parar de enviar alertas de status neste servidor"
 
-#: cogs/uptime.py:1453
+#: cogs/uptime.py:1456
 msgid "Status alerts are now disabled for this guild."
 msgstr "Os alertas de status estão desativados neste servidor."
 
-#: cogs/uptime.py:1456
+#: cogs/uptime.py:1459
 #, python-brace-format
 msgid "{n} panel removed."
 msgid_plural "{n} panels removed."
 msgstr[0] "{n} painel removido."
 msgstr[1] "{n} painéis removidos."
 
-#: cogs/uptime.py:1462
+#: cogs/uptime.py:1465
 msgid "Stop tracking the live uptime message for this guild"
 msgstr "Parar de acompanhar a mensagem de disponibilidade neste servidor"
 
-#: cogs/uptime.py:1491
+#: cogs/uptime.py:1494
 msgid "Removed the tracked uptime message for this guild."
 msgstr "Removi a mensagem de disponibilidade acompanhada neste servidor."
 
-#: cogs/uptime.py:1494
+#: cogs/uptime.py:1497
 msgid "The board itself could not be deleted and is now stale."
 msgstr "Não foi possível apagar o painel em si, e ele está desatualizado."
 
-#: cogs/uptime.py:1502
+#: cogs/uptime.py:1505
 msgid "Who made this bot, and how to run your own"
 msgstr "Quem fez este bot, e como rodar o seu próprio"
 
-#: cogs/uptime.py:1513
+#: cogs/uptime.py:1516
 msgid "Recent outages and the services they affected"
 msgstr "Indisponibilidades recentes e os serviços afetados"
 
-#: cogs/uptime.py:1526
+#: cogs/uptime.py:1529
 msgid "View live service uptime"
 msgstr "Ver a disponibilidade dos serviços ao vivo"
 
