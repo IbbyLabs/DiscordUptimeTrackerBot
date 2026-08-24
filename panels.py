@@ -7,6 +7,7 @@ loop that delivers them.
 
 from typing import Any
 
+from i18n import Translator, translator_for
 from incidents import format_page_incidents
 
 OUTAGE_RED = 0xD90429
@@ -17,18 +18,25 @@ HISTORY_BLURPLE = 0x5865F2
 PanelSpec = tuple[str, str, list[str], int]
 
 
-def _outage_heading(not_responding: int, recovering: int) -> str:
+def _outage_heading(not_responding: int, recovering: int, _: Translator) -> str:
     """Say what is true of each, rather than counting them all as one thing."""
 
     parts = []
     if not_responding:
-        parts.append(f"{not_responding} not responding")
+        # The board's own summary says this; the same words keep one vocabulary.
+        parts.append(
+            _.ngettext(
+                "{count} service not responding",
+                "{count} services not responding",
+                not_responding,
+            ).format(count=not_responding)
+        )
     if recovering:
-        parts.append(f"{recovering} recovering")
+        parts.append(_("{count} recovering").format(count=recovering))
     if not parts:
-        return "## 🟢 Active outages"
+        return "## 🟢 " + _("Active outages")
     icon = "🔴" if not_responding else "🟡"
-    return f"## {icon} Active outages\n" + " · ".join(parts)
+    return f"## {icon} " + _("Active outages") + "\n" + " · ".join(parts)
 
 
 def _outage_accent(not_responding: int, recovering: int) -> int:
@@ -38,9 +46,14 @@ def _outage_accent(not_responding: int, recovering: int) -> int:
 
 
 def build_panel_specs(
-    cog: Any, data: dict[str, Any], incidents: list[dict[str, Any]]
+    cog: Any,
+    data: dict[str, Any],
+    incidents: list[dict[str, Any]],
+    translate: Translator | None = None,
 ) -> list[PanelSpec]:
     """One spec per panel: its key, heading, body lines and accent."""
+
+    _ = translate or translator_for(None)
 
     outages = cog.active_outages(data)
     recovering = cog.recovering_services(data)
@@ -50,26 +63,28 @@ def build_panel_specs(
     specs: list[PanelSpec] = [
         (
             "outages",
-            _outage_heading(not_responding, len(recovering)),
-            [cog.outage_line(service) for service in outages] or ["Everything is responding."],
+            _outage_heading(not_responding, len(recovering), _),
+            [cog.outage_line(service, _) for service in outages]
+            or [_("Everything is responding.")],
             _outage_accent(not_responding, len(recovering)),
         ),
     ]
     # Only when it has something to say. A panel reading "nothing is in
     # maintenance" is one nobody reads on the day it matters.
     if issues or bulletin:
-        lines = list(cog.bulletin_lines(bulletin)) if bulletin else []
+        lines = list(cog.bulletin_lines(bulletin, _)) if bulletin else []
         if lines and issues:
             lines.append("")
-        lines.extend(cog.known_issue_line(service) for service in issues)
-        heading = f"## 🛠️ Known issues\n{len(issues)} with a stated reason" if issues \
-            else "## 🛠️ Known issues"
+        lines.extend(cog.known_issue_line(service, _) for service in issues)
+        heading = "## 🛠️ " + _("Known issues")
+        if issues:
+            heading += "\n" + _("{count} with a stated reason").format(count=len(issues))
         specs.append(("known_issues", heading, lines, MAINTENANCE_AMBER))
     specs.append(
         (
             "history",
-            "## 📡 Incident history",
-            format_page_incidents(incidents),
+            "## 📡 " + _("Incident history"),
+            format_page_incidents(incidents, translate=_),
             HISTORY_BLURPLE,
         )
     )

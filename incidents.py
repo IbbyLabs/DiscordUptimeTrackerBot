@@ -85,7 +85,7 @@ def normalise_page_incidents(payload: Any) -> list[dict[str, Any]]:
         rows.append({
             "id": str(item.get("id") or ""),
             "service_id": str(service.get("id") or ""),
-            "name": str(service.get("name") or service.get("id") or "Unknown service"),
+            "name": str(service.get("name") or service.get("id") or ""),
             "group": str(service.get("group") or ""),
             "state": str(item.get("state") or "").upper(),
             "opened_at": opened,
@@ -109,11 +109,16 @@ def normalise_page_incidents(payload: Any) -> list[dict[str, Any]]:
     return rows
 
 
-def format_page_incidents(rows: list[dict[str, Any]], limit: int = 10) -> list[str]:
+def format_page_incidents(
+    rows: list[dict[str, Any]],
+    limit: int = 10,
+    translate: Translator | None = None,
+) -> list[str]:
     """One line per incident, ongoing ones first and newest within that."""
 
+    _ = translate or translator_for(None)
     if not rows:
-        return ["No incidents recorded yet."]
+        return [_("No incidents recorded yet.")]
 
     ongoing = [r for r in rows if not r["closed_at"]]
     closed = [r for r in rows if r["closed_at"]]
@@ -123,12 +128,13 @@ def format_page_incidents(rows: list[dict[str, Any]], limit: int = 10) -> list[s
         where = f" ({row['group']})" if row["group"] else ""
         when = _iso_stamp(row["opened_at"])
         if row.get("opened_at_is_floor"):
-            when = f"about {when}"
+            when = _("about {when}").format(when=when)
         if row["closed_at"]:
-            when = f"{when} to {_iso_stamp(row['closed_at'])}"
+            when = _("{start} to {end}").format(start=when, end=_iso_stamp(row["closed_at"]))
         else:
-            when = f"{when}, ongoing"
-        line = f"{marker} **{row['name']}**{where}\n-# {when}"
+            when = _("{when}, ongoing").format(when=when)
+        name = row["name"] or _("Unknown service")
+        line = f"{marker} **{name}**{where}\n-# {when}"
         chain = _event_chain(row)
         if chain:
             line += f"\n-# {chain}"
@@ -137,9 +143,11 @@ def format_page_incidents(rows: list[dict[str, Any]], limit: int = 10) -> list[s
     # state neither a window nor a total. The page holds the full history.
     total = len(ongoing) + len(closed)
     if total > limit:
-        lines.append(f"-# The {limit} most recent major outages. Full history on the status page.")
+        lines.append("-# " + _(
+            "The {limit} most recent major outages. Full history on the status page."
+        ).format(limit=limit))
     else:
-        lines.append("-# Major outages. Full history on the status page.")
+        lines.append("-# " + _("Major outages. Full history on the status page."))
     return lines
 
 

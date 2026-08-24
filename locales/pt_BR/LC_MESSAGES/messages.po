@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiscordUptimeTrackerBot 0.8.8\n"
 "Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
-"POT-Creation-Date: 2026-08-24 10:14+0100\n"
+"POT-Creation-Date: 2026-08-24 10:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: in-house translation\n"
 "Language: pt_BR\n"
@@ -18,45 +18,110 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: incidents.py:259
+#: incidents.py:121
+msgid "No incidents recorded yet."
+msgstr "Nenhum incidente registrado até agora."
+
+#: incidents.py:131
+#, python-brace-format
+msgid "about {when}"
+msgstr "por volta de {when}"
+
+#: incidents.py:133
+#, python-brace-format
+msgid "{start} to {end}"
+msgstr "{start} até {end}"
+
+#: incidents.py:135
+#, python-brace-format
+msgid "{when}, ongoing"
+msgstr "{when}, em andamento"
+
+#: incidents.py:136 ui/status_layout.py:578
+msgid "Unknown service"
+msgstr "Serviço desconhecido"
+
+#: incidents.py:147
+#, python-brace-format
+msgid "The {limit} most recent major outages. Full history on the status page."
+msgstr "As {limit} interrupções importantes mais recentes. Histórico completo na página de status."
+
+#: incidents.py:150
+msgid "Major outages. Full history on the status page."
+msgstr "Interrupções importantes. Histórico completo na página de status."
+
+#: incidents.py:267
 #, python-brace-format
 msgid "{count} service is not responding."
 msgid_plural "{count} services are not responding."
 msgstr[0] "{count} serviço não está respondendo."
 msgstr[1] "{count} serviços não estão respondendo."
 
-#: incidents.py:266
+#: incidents.py:274
 msgid "Outage started"
 msgstr "Início da indisponibilidade"
 
-#: incidents.py:275
+#: incidents.py:283
 msgid "All clear"
 msgstr "Tudo normalizado"
 
-#: incidents.py:275
+#: incidents.py:283
 msgid "Every service is responding again."
 msgstr "Todos os serviços voltaram a responder."
 
-#: incidents.py:280
+#: incidents.py:288
 #, python-brace-format
 msgid "{count} service is responding again."
 msgid_plural "{count} services are responding again."
 msgstr[0] "{count} serviço voltou a responder."
 msgstr[1] "{count} serviços voltaram a responder."
 
-#: incidents.py:285
+#: incidents.py:293
 msgid "Back up"
 msgstr "No ar novamente"
 
-#: incidents.py:302
+#: incidents.py:310
 #, python-brace-format
 msgid "down from {start} to {end}"
 msgstr "fora do ar de {start} até {end}"
 
-#: incidents.py:307
+#: incidents.py:315
 #, python-brace-format
 msgid "since {start}"
 msgstr "desde {start}"
+
+#: panels.py:29 ui/status_layout.py:122
+#, python-brace-format
+msgid "{count} service not responding"
+msgid_plural "{count} services not responding"
+msgstr[0] "{count} serviço não está respondendo"
+msgstr[1] "{count} serviços não estão respondendo"
+
+#: panels.py:35 ui/status_layout.py:130
+#, python-brace-format
+msgid "{count} recovering"
+msgstr "{count} em recuperação"
+
+#: panels.py:37 panels.py:39
+msgid "Active outages"
+msgstr "Interrupções ativas"
+
+#: panels.py:68
+msgid "Everything is responding."
+msgstr "Todos os serviços estão respondendo."
+
+#: panels.py:79
+msgid "Known issues"
+msgstr "Problemas conhecidos"
+
+#: panels.py:81
+#, python-brace-format
+msgid "{count} with a stated reason"
+msgstr "{count} com motivo informado"
+
+#: panels.py:86
+msgid "Incident history"
+msgstr "Histórico de incidentes"
 
 #: cogs/uptime.py:63 cogs/uptime.py:1392
 msgid "Status emoji"
@@ -175,20 +240,12 @@ msgstr "Em manutenção"
 
 #: cogs/uptime.py:727
 #, python-brace-format
-msgid ""
-"The status page has not updated for {age}m. Anything over {threshold}m is"
-" treated as out of date, so this board may be behind."
-msgstr ""
-"A página de status não é atualizada há {age} min. Acima de {threshold} "
-"min consideramos desatualizado, então este painel pode estar atrasado."
+msgid "The status page has not updated for {age}m. Anything over {threshold}m is treated as out of date, so this board may be behind."
+msgstr "A página de status não é atualizada há {age} min. Acima de {threshold} min consideramos desatualizado, então este painel pode estar atrasado."
 
 #: cogs/uptime.py:732
-msgid ""
-"The status page has not updated recently, so this board may be out of "
-"date."
-msgstr ""
-"A página de status não foi atualizada recentemente, então este painel "
-"pode estar desatualizado."
+msgid "The status page has not updated recently, so this board may be out of date."
+msgstr "A página de status não foi atualizada recentemente, então este painel pode estar desatualizado."
 
 #: cogs/uptime.py:786
 msgid "operational"
@@ -375,18 +432,6 @@ msgstr "Ver a disponibilidade dos serviços ao vivo"
 msgid "Pick a group for the detail view"
 msgstr "Escolha um grupo para ver os detalhes"
 
-#: ui/status_layout.py:122
-#, python-brace-format
-msgid "{count} service not responding"
-msgid_plural "{count} services not responding"
-msgstr[0] "{count} serviço não está respondendo"
-msgstr[1] "{count} serviços não estão respondendo"
-
-#: ui/status_layout.py:130
-#, python-brace-format
-msgid "{count} recovering"
-msgstr "{count} em recuperação"
-
 #: ui/status_layout.py:133
 #, python-brace-format
 msgid "**Active outages** — {summary}"
@@ -399,12 +444,8 @@ msgstr "Filtrado por {states}"
 
 #: ui/status_layout.py:178
 #, python-brace-format
-msgid ""
-"**Up:** {up} | **Down:** {down} | **Degraded:** {degraded} | "
-"**Unstable:** {unstable}"
-msgstr ""
-"**No ar:** {up} | **Fora do ar:** {down} | **Com problemas:** {degraded} "
-"| **Instáveis:** {unstable}"
+msgid "**Up:** {up} | **Down:** {down} | **Degraded:** {degraded} | **Unstable:** {unstable}"
+msgstr "**No ar:** {up} | **Fora do ar:** {down} | **Com problemas:** {degraded} | **Instáveis:** {unstable}"
 
 #: ui/status_layout.py:202
 msgid "Nothing in that state right now."
@@ -448,9 +489,7 @@ msgstr "Monitor de Disponibilidade"
 #: ui/status_layout.py:359
 #, python-brace-format
 msgid "A live status board for Stremio addons, developed by {brand}."
-msgstr ""
-"Um painel de status ao vivo para addons do Stremio, desenvolvido por "
-"{brand}."
+msgstr "Um painel de status ao vivo para addons do Stremio, desenvolvido por {brand}.Um painel de status ao vivo para addons do Stremio, desenvolvido por {brand}."
 
 #: ui/status_layout.py:366
 #, python-brace-format
@@ -465,12 +504,10 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "**Source**\n"
-"Open source under the MIT licence — run your own instance from "
-"[GitHub]({url})."
+"Open source under the MIT licence — run your own instance from [GitHub]({url})."
 msgstr ""
 "**Código-fonte**\n"
-"Código aberto sob a licença MIT — rode a sua própria instância a partir "
-"do [GitHub]({url})."
+"Código aberto sob a licença MIT — rode a sua própria instância a partir do [GitHub]({url})."
 
 #: ui/status_layout.py:380
 msgid "Status Page"
@@ -518,10 +555,6 @@ msgstr "Desconhecido"
 #: ui/status_layout.py:546
 msgid "I could not fetch that service right now."
 msgstr "Não consegui obter esse serviço agora."
-
-#: ui/status_layout.py:578
-msgid "Unknown service"
-msgstr "Serviço desconhecido"
 
 #: ui/status_layout.py:590
 #, python-brace-format

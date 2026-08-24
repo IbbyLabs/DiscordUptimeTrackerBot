@@ -19,10 +19,10 @@ def _cog(issues=(), bulletin=None):
         active_outages=lambda _d: [],
         recovering_services=lambda _d: [],
         known_issues=lambda _d: list(issues),
-        outage_line=lambda _s: "",
-        known_issue_line=lambda s: f"**{s['name']}** {s['maintenance']['reason']}",
+        outage_line=lambda _s, _t=None: "",
+        known_issue_line=lambda s, _t=None: f"**{s['name']}** {s['maintenance']['reason']}",
         bulletin=lambda _d: bulletin,
-        bulletin_lines=lambda b: [f"📢 **{b['title']}**", b["message"]],
+        bulletin_lines=lambda b, _t=None: [f"📢 **{b['title']}**", b["message"]],
     )
 
 

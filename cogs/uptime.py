@@ -288,7 +288,7 @@ class UptimeCog(commands.Cog):
             if channel is None:
                 continue
             settings = await self.guild_render_settings(guild_id)
-            specs = build_panel_specs(self, data, incidents)
+            specs = build_panel_specs(self, data, incidents, settings.get("translate"))
             for panel, heading, lines, accent in specs:
                 await self.sync_panel(
                     guild_id,

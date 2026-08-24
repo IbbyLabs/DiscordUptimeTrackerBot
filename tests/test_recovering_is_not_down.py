@@ -93,9 +93,10 @@ def _panel(services, key="outages"):
 
 def test_the_heading_counts_the_two_separately() -> None:
     heading = _panel([DOWN, RECOVERING])[1]
-    assert "1 not responding" in heading
+    # The panel says the same words as the board, which the test below pins.
+    assert "1 service not responding" in heading
     assert "1 recovering" in heading
-    assert "2 not responding" not in heading, "a service returning 200 was counted as not responding"
+    assert "2 services not responding" not in heading, "a service returning 200 was counted as not responding"
 
 
 def test_only_recovering_is_amber_rather_than_red() -> None:

@@ -22,8 +22,9 @@ from pathlib import Path
 from babel.messages.extract import DEFAULT_KEYWORDS, extract_from_file
 
 ROOT = Path(__file__).resolve().parents[1]
-# The two files that write to a guild. Others say nothing a member reads.
-SOURCES = ("cogs/uptime.py", "ui/status_layout.py")
+# Every file that composes text a member reads. A file left off this list is
+# invisible to the check, which is how a whole panel shipped untranslated.
+SOURCES = ("cogs/uptime.py", "ui/status_layout.py", "incidents.py", "panels.py")
 KEYWORDS = {**DEFAULT_KEYWORDS, "_L": None}
 
 LOG_OBJECT = re.compile(r"^(log|logger|logging)$")
@@ -54,6 +55,11 @@ ALLOWED = {
     "IbbyLabs",
     # compared by control flow, so a catalogue must not move them
     "All Systems Operational", "Unknown Service",
+    # aliases the page has used for one service, matched by name
+    "webstreamr", "webstreamer", "webstreamer mbg", "webstreamr_mbg", "webstreamrmbg",
+    "webstreamer_mbg",
+    # Discord timestamp syntax, and the two keys an alert plan is grouped by
+    ":f>", "open", "close",
     # panel and setting names, and the config attributes they inherit from
     "history", "known_issues", "outages", "locale", "status_emoji", "status_page_url",
     "LOCALE", "STATUS_EMOJI", "STATUS_PAGE_URL",

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiscordUptimeTrackerBot 0.8.8\n"
 "Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
-"POT-Creation-Date: 2026-08-24 10:14+0100\n"
+"POT-Creation-Date: 2026-08-24 10:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: in-house translation\n"
 "Language: zh_CN\n"
@@ -18,43 +18,107 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: incidents.py:259
+#: incidents.py:121
+msgid "No incidents recorded yet."
+msgstr "尚未记录任何事件。"
+
+#: incidents.py:131
+#, python-brace-format
+msgid "about {when}"
+msgstr "约 {when}"
+
+#: incidents.py:133
+#, python-brace-format
+msgid "{start} to {end}"
+msgstr "{start} 至 {end}"
+
+#: incidents.py:135
+#, python-brace-format
+msgid "{when}, ongoing"
+msgstr "{when}，仍在持续"
+
+#: incidents.py:136 ui/status_layout.py:578
+msgid "Unknown service"
+msgstr "未知服务"
+
+#: incidents.py:147
+#, python-brace-format
+msgid "The {limit} most recent major outages. Full history on the status page."
+msgstr "最近 {limit} 次主要故障。完整历史请见状态页面。"
+
+#: incidents.py:150
+msgid "Major outages. Full history on the status page."
+msgstr "主要故障。完整历史请见状态页面。"
+
+#: incidents.py:267
 #, python-brace-format
 msgid "{count} service is not responding."
 msgid_plural "{count} services are not responding."
 msgstr[0] "{count} 个服务无响应。"
 
-#: incidents.py:266
+#: incidents.py:274
 msgid "Outage started"
 msgstr "故障开始"
 
-#: incidents.py:275
+#: incidents.py:283
 msgid "All clear"
 msgstr "全部恢复"
 
-#: incidents.py:275
+#: incidents.py:283
 msgid "Every service is responding again."
 msgstr "所有服务都已恢复响应。"
 
-#: incidents.py:280
+#: incidents.py:288
 #, python-brace-format
 msgid "{count} service is responding again."
 msgid_plural "{count} services are responding again."
 msgstr[0] "{count} 个服务已恢复响应。"
 
-#: incidents.py:285
+#: incidents.py:293
 msgid "Back up"
 msgstr "已恢复"
 
-#: incidents.py:302
+#: incidents.py:310
 #, python-brace-format
 msgid "down from {start} to {end}"
 msgstr "从 {start} 到 {end} 无法访问"
 
-#: incidents.py:307
+#: incidents.py:315
 #, python-brace-format
 msgid "since {start}"
 msgstr "自 {start} 起"
+
+#: panels.py:29 ui/status_layout.py:122
+#, python-brace-format
+msgid "{count} service not responding"
+msgid_plural "{count} services not responding"
+msgstr[0] "{count} 个服务无响应"
+
+#: panels.py:35 ui/status_layout.py:130
+#, python-brace-format
+msgid "{count} recovering"
+msgstr "{count} 个正在恢复"
+
+#: panels.py:37 panels.py:39
+msgid "Active outages"
+msgstr "进行中的故障"
+
+#: panels.py:68
+msgid "Everything is responding."
+msgstr "所有服务均正常响应。"
+
+#: panels.py:79
+msgid "Known issues"
+msgstr "已知问题"
+
+#: panels.py:81
+#, python-brace-format
+msgid "{count} with a stated reason"
+msgstr "{count} 项已说明原因"
+
+#: panels.py:86
+msgid "Incident history"
+msgstr "事件历史"
 
 #: cogs/uptime.py:63 cogs/uptime.py:1392
 msgid "Status emoji"
@@ -170,15 +234,11 @@ msgstr "维护中"
 
 #: cogs/uptime.py:727
 #, python-brace-format
-msgid ""
-"The status page has not updated for {age}m. Anything over {threshold}m is"
-" treated as out of date, so this board may be behind."
+msgid "The status page has not updated for {age}m. Anything over {threshold}m is treated as out of date, so this board may be behind."
 msgstr "状态页面已有 {age} 分钟未更新。超过 {threshold} 分钟即视为过期，因此此面板可能滞后。"
 
 #: cogs/uptime.py:732
-msgid ""
-"The status page has not updated recently, so this board may be out of "
-"date."
+msgid "The status page has not updated recently, so this board may be out of date."
 msgstr "状态页面最近没有更新，因此此面板可能已过期。"
 
 #: cogs/uptime.py:786
@@ -362,17 +422,6 @@ msgstr "查看服务实时运行状态"
 msgid "Pick a group for the detail view"
 msgstr "选择一个分组查看详情"
 
-#: ui/status_layout.py:122
-#, python-brace-format
-msgid "{count} service not responding"
-msgid_plural "{count} services not responding"
-msgstr[0] "{count} 个服务无响应"
-
-#: ui/status_layout.py:130
-#, python-brace-format
-msgid "{count} recovering"
-msgstr "{count} 个正在恢复"
-
 #: ui/status_layout.py:133
 #, python-brace-format
 msgid "**Active outages** — {summary}"
@@ -385,9 +434,7 @@ msgstr "已筛选为 {states}"
 
 #: ui/status_layout.py:178
 #, python-brace-format
-msgid ""
-"**Up:** {up} | **Down:** {down} | **Degraded:** {degraded} | "
-"**Unstable:** {unstable}"
+msgid "**Up:** {up} | **Down:** {down} | **Degraded:** {degraded} | **Unstable:** {unstable}"
 msgstr "**正常：** {up} | **无法访问：** {down} | **异常：** {degraded} | **不稳定：** {unstable}"
 
 #: ui/status_layout.py:202
@@ -446,8 +493,7 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "**Source**\n"
-"Open source under the MIT licence — run your own instance from "
-"[GitHub]({url})."
+"Open source under the MIT licence — run your own instance from [GitHub]({url})."
 msgstr ""
 "**源代码**\n"
 "基于 MIT 许可开源 — 可从 [GitHub]({url}) 自行搭建。"
@@ -497,10 +543,6 @@ msgstr "未知"
 #: ui/status_layout.py:546
 msgid "I could not fetch that service right now."
 msgstr "目前无法获取该服务的信息。"
-
-#: ui/status_layout.py:578
-msgid "Unknown service"
-msgstr "未知服务"
 
 #: ui/status_layout.py:590
 #, python-brace-format

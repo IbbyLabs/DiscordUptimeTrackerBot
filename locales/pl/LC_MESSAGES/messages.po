@@ -7,19 +7,50 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiscordUptimeTrackerBot 0.8.8\n"
 "Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
-"POT-Creation-Date: 2026-08-24 10:14+0100\n"
+"POT-Creation-Date: 2026-08-24 10:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: machine draft, reviewed by a Polish speaker\n"
 "Language: pl\n"
 "Language-Team: Polish\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && "
-"(n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: incidents.py:259
+#: incidents.py:121
+msgid "No incidents recorded yet."
+msgstr "Nie zarejestrowano jeszcze żadnych incydentów."
+
+#: incidents.py:131
+#, python-brace-format
+msgid "about {when}"
+msgstr "około {when}"
+
+#: incidents.py:133
+#, python-brace-format
+msgid "{start} to {end}"
+msgstr "{start} do {end}"
+
+#: incidents.py:135
+#, python-brace-format
+msgid "{when}, ongoing"
+msgstr "{when}, trwa"
+
+#: incidents.py:136 ui/status_layout.py:578
+msgid "Unknown service"
+msgstr "Nieznana usługa"
+
+#: incidents.py:147
+#, python-brace-format
+msgid "The {limit} most recent major outages. Full history on the status page."
+msgstr "{limit} ostatnich poważnych awarii. Pełna historia na stronie statusu."
+
+#: incidents.py:150
+msgid "Major outages. Full history on the status page."
+msgstr "Poważne awarie. Pełna historia na stronie statusu."
+
+#: incidents.py:267
 #, python-brace-format
 msgid "{count} service is not responding."
 msgid_plural "{count} services are not responding."
@@ -27,19 +58,19 @@ msgstr[0] "{count} usługa nie odpowiada."
 msgstr[1] "{count} usługi nie odpowiadają."
 msgstr[2] "{count} usług nie odpowiada."
 
-#: incidents.py:266
+#: incidents.py:274
 msgid "Outage started"
 msgstr "Rozpoczęła się awaria"
 
-#: incidents.py:275
+#: incidents.py:283
 msgid "All clear"
 msgstr "Wszystko działa"
 
-#: incidents.py:275
+#: incidents.py:283
 msgid "Every service is responding again."
 msgstr "Wszystkie usługi znów odpowiadają."
 
-#: incidents.py:280
+#: incidents.py:288
 #, python-brace-format
 msgid "{count} service is responding again."
 msgid_plural "{count} services are responding again."
@@ -47,19 +78,53 @@ msgstr[0] "{count} usługa znów odpowiada."
 msgstr[1] "{count} usługi znów odpowiadają."
 msgstr[2] "{count} usług znów odpowiada."
 
-#: incidents.py:285
+#: incidents.py:293
 msgid "Back up"
 msgstr "Znów działa"
 
-#: incidents.py:302
+#: incidents.py:310
 #, python-brace-format
 msgid "down from {start} to {end}"
 msgstr "niedostępne od {start} do {end}"
 
-#: incidents.py:307
+#: incidents.py:315
 #, python-brace-format
 msgid "since {start}"
 msgstr "od {start}"
+
+#: panels.py:29 ui/status_layout.py:122
+#, python-brace-format
+msgid "{count} service not responding"
+msgid_plural "{count} services not responding"
+msgstr[0] "{count} usługa nie odpowiada"
+msgstr[1] "{count} usługi nie odpowiadają"
+msgstr[2] "{count} usług nie odpowiada"
+
+#: panels.py:35 ui/status_layout.py:130
+#, python-brace-format
+msgid "{count} recovering"
+msgstr "{count} w trakcie przywracania"
+
+#: panels.py:37 panels.py:39
+msgid "Active outages"
+msgstr "Trwające awarie"
+
+#: panels.py:68
+msgid "Everything is responding."
+msgstr "Wszystkie usługi odpowiadają."
+
+#: panels.py:79
+msgid "Known issues"
+msgstr "Znane problemy"
+
+#: panels.py:81
+#, python-brace-format
+msgid "{count} with a stated reason"
+msgstr "{count} z podanym powodem"
+
+#: panels.py:86
+msgid "Incident history"
+msgstr "Historia incydentów"
 
 #: cogs/uptime.py:63 cogs/uptime.py:1392
 msgid "Status emoji"
@@ -79,9 +144,7 @@ msgstr "Inne"
 
 #: cogs/uptime.py:86
 msgid "That is not a valid URL. It needs to start with http:// or https://."
-msgstr ""
-"To nie jest prawidłowy adres URL. Musi zaczynać się od http:// lub "
-"https://."
+msgstr "To nie jest prawidłowy adres URL. Musi zaczynać się od http:// lub https://.To nie jest prawidłowy adres URL. Musi zaczynać się od http:// lub https://."
 
 #: cogs/uptime.py:89
 msgid "That URL is too long."
@@ -183,21 +246,12 @@ msgstr "Prace serwisowe"
 
 #: cogs/uptime.py:727
 #, python-brace-format
-msgid ""
-"The status page has not updated for {age}m. Anything over {threshold}m is"
-" treated as out of date, so this board may be behind."
-msgstr ""
-"Strona statusu nie była aktualizowana od {age} min. Wszystko powyżej "
-"{threshold} min jest traktowane jako nieaktualne, więc ta tablica może "
-"być opóźniona."
+msgid "The status page has not updated for {age}m. Anything over {threshold}m is treated as out of date, so this board may be behind."
+msgstr "Strona statusu nie była aktualizowana od {age} min. Wszystko powyżej {threshold} min jest traktowane jako nieaktualne, więc ta tablica może być opóźniona."
 
 #: cogs/uptime.py:732
-msgid ""
-"The status page has not updated recently, so this board may be out of "
-"date."
-msgstr ""
-"Strona statusu nie była ostatnio aktualizowana, więc ta tablica może być "
-"nieaktualna."
+msgid "The status page has not updated recently, so this board may be out of date."
+msgstr "Strona statusu nie była ostatnio aktualizowana, więc ta tablica może być nieaktualna."
 
 #: cogs/uptime.py:786
 msgid "operational"
@@ -388,19 +442,6 @@ msgstr "Zobacz dostępność usług na żywo"
 msgid "Pick a group for the detail view"
 msgstr "Wybierz grupę, aby zobaczyć szczegóły"
 
-#: ui/status_layout.py:122
-#, python-brace-format
-msgid "{count} service not responding"
-msgid_plural "{count} services not responding"
-msgstr[0] "{count} usługa nie odpowiada"
-msgstr[1] "{count} usługi nie odpowiadają"
-msgstr[2] "{count} usług nie odpowiada"
-
-#: ui/status_layout.py:130
-#, python-brace-format
-msgid "{count} recovering"
-msgstr "{count} w trakcie przywracania"
-
 #: ui/status_layout.py:133
 #, python-brace-format
 msgid "**Active outages** — {summary}"
@@ -413,12 +454,8 @@ msgstr "Filtr: {states}"
 
 #: ui/status_layout.py:178
 #, python-brace-format
-msgid ""
-"**Up:** {up} | **Down:** {down} | **Degraded:** {degraded} | "
-"**Unstable:** {unstable}"
-msgstr ""
-"**Działa:** {up} | **Niedostępne:** {down} | **Zakłócone:** {degraded} | "
-"**Niestabilne:** {unstable}"
+msgid "**Up:** {up} | **Down:** {down} | **Degraded:** {degraded} | **Unstable:** {unstable}"
+msgstr "**Działa:** {up} | **Niedostępne:** {down} | **Zakłócone:** {degraded} | **Niestabilne:** {unstable}"
 
 #: ui/status_layout.py:202
 msgid "Nothing in that state right now."
@@ -478,12 +515,10 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "**Source**\n"
-"Open source under the MIT licence — run your own instance from "
-"[GitHub]({url})."
+"Open source under the MIT licence — run your own instance from [GitHub]({url})."
 msgstr ""
 "**Źródło**\n"
-"Otwarte oprogramowanie na licencji MIT — uruchom własną instancję z "
-"[GitHuba]({url})."
+"Otwarte oprogramowanie na licencji MIT — uruchom własną instancję z [GitHuba]({url})."
 
 #: ui/status_layout.py:380
 msgid "Status Page"
@@ -532,10 +567,6 @@ msgstr "Nieznany"
 #: ui/status_layout.py:546
 msgid "I could not fetch that service right now."
 msgstr "Nie udało się teraz pobrać tej usługi."
-
-#: ui/status_layout.py:578
-msgid "Unknown service"
-msgstr "Nieznana usługa"
 
 #: ui/status_layout.py:590
 #, python-brace-format

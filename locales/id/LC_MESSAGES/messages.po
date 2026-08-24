@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiscordUptimeTrackerBot 0.8.8\n"
 "Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
-"POT-Creation-Date: 2026-08-24 10:14+0100\n"
+"POT-Creation-Date: 2026-08-24 10:25+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: in-house translation\n"
 "Language: id\n"
@@ -18,45 +18,110 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: incidents.py:259
+#: incidents.py:121
+msgid "No incidents recorded yet."
+msgstr "Belum ada insiden yang tercatat."
+
+#: incidents.py:131
+#, python-brace-format
+msgid "about {when}"
+msgstr "sekitar {when}"
+
+#: incidents.py:133
+#, python-brace-format
+msgid "{start} to {end}"
+msgstr "{start} sampai {end}"
+
+#: incidents.py:135
+#, python-brace-format
+msgid "{when}, ongoing"
+msgstr "{when}, masih berlangsung"
+
+#: incidents.py:136 ui/status_layout.py:578
+msgid "Unknown service"
+msgstr "Layanan tidak dikenal"
+
+#: incidents.py:147
+#, python-brace-format
+msgid "The {limit} most recent major outages. Full history on the status page."
+msgstr "{limit} gangguan besar terbaru. Riwayat lengkap ada di halaman status."
+
+#: incidents.py:150
+msgid "Major outages. Full history on the status page."
+msgstr "Gangguan besar. Riwayat lengkap ada di halaman status."
+
+#: incidents.py:267
 #, python-brace-format
 msgid "{count} service is not responding."
 msgid_plural "{count} services are not responding."
 msgstr[0] "{count} layanan tidak merespons."
 msgstr[1] "{count} layanan tidak merespons."
 
-#: incidents.py:266
+#: incidents.py:274
 msgid "Outage started"
 msgstr "Gangguan dimulai"
 
-#: incidents.py:275
+#: incidents.py:283
 msgid "All clear"
 msgstr "Semua kembali normal"
 
-#: incidents.py:275
+#: incidents.py:283
 msgid "Every service is responding again."
 msgstr "Semua layanan sudah merespons kembali."
 
-#: incidents.py:280
+#: incidents.py:288
 #, python-brace-format
 msgid "{count} service is responding again."
 msgid_plural "{count} services are responding again."
 msgstr[0] "{count} layanan sudah merespons kembali."
 msgstr[1] "{count} layanan sudah merespons kembali."
 
-#: incidents.py:285
+#: incidents.py:293
 msgid "Back up"
 msgstr "Sudah pulih"
 
-#: incidents.py:302
+#: incidents.py:310
 #, python-brace-format
 msgid "down from {start} to {end}"
 msgstr "mati dari {start} sampai {end}"
 
-#: incidents.py:307
+#: incidents.py:315
 #, python-brace-format
 msgid "since {start}"
 msgstr "sejak {start}"
+
+#: panels.py:29 ui/status_layout.py:122
+#, python-brace-format
+msgid "{count} service not responding"
+msgid_plural "{count} services not responding"
+msgstr[0] "{count} layanan tidak merespons"
+msgstr[1] "{count} layanan tidak merespons"
+
+#: panels.py:35 ui/status_layout.py:130
+#, python-brace-format
+msgid "{count} recovering"
+msgstr "{count} sedang pulih"
+
+#: panels.py:37 panels.py:39
+msgid "Active outages"
+msgstr "Gangguan aktif"
+
+#: panels.py:68
+msgid "Everything is responding."
+msgstr "Semua layanan merespons."
+
+#: panels.py:79
+msgid "Known issues"
+msgstr "Masalah yang diketahui"
+
+#: panels.py:81
+#, python-brace-format
+msgid "{count} with a stated reason"
+msgstr "{count} dengan alasan tercantum"
+
+#: panels.py:86
+msgid "Incident history"
+msgstr "Riwayat insiden"
 
 #: cogs/uptime.py:63 cogs/uptime.py:1392
 msgid "Status emoji"
@@ -175,21 +240,12 @@ msgstr "Sedang dalam pemeliharaan"
 
 #: cogs/uptime.py:727
 #, python-brace-format
-msgid ""
-"The status page has not updated for {age}m. Anything over {threshold}m is"
-" treated as out of date, so this board may be behind."
-msgstr ""
-"Halaman status belum diperbarui selama {age} menit. Lebih dari "
-"{threshold} menit dianggap kedaluwarsa, jadi papan ini mungkin "
-"tertinggal."
+msgid "The status page has not updated for {age}m. Anything over {threshold}m is treated as out of date, so this board may be behind."
+msgstr "Halaman status belum diperbarui selama {age} menit. Lebih dari {threshold} menit dianggap kedaluwarsa, jadi papan ini mungkin tertinggal."
 
 #: cogs/uptime.py:732
-msgid ""
-"The status page has not updated recently, so this board may be out of "
-"date."
-msgstr ""
-"Halaman status belum diperbarui baru-baru ini, jadi papan ini mungkin "
-"sudah kedaluwarsa."
+msgid "The status page has not updated recently, so this board may be out of date."
+msgstr "Halaman status belum diperbarui baru-baru ini, jadi papan ini mungkin sudah kedaluwarsa."
 
 #: cogs/uptime.py:786
 msgid "operational"
@@ -376,18 +432,6 @@ msgstr "Lihat ketersediaan layanan secara langsung"
 msgid "Pick a group for the detail view"
 msgstr "Pilih grup untuk melihat detailnya"
 
-#: ui/status_layout.py:122
-#, python-brace-format
-msgid "{count} service not responding"
-msgid_plural "{count} services not responding"
-msgstr[0] "{count} layanan tidak merespons"
-msgstr[1] "{count} layanan tidak merespons"
-
-#: ui/status_layout.py:130
-#, python-brace-format
-msgid "{count} recovering"
-msgstr "{count} sedang pulih"
-
 #: ui/status_layout.py:133
 #, python-brace-format
 msgid "**Active outages** — {summary}"
@@ -400,12 +444,8 @@ msgstr "Disaring ke {states}"
 
 #: ui/status_layout.py:178
 #, python-brace-format
-msgid ""
-"**Up:** {up} | **Down:** {down} | **Degraded:** {degraded} | "
-"**Unstable:** {unstable}"
-msgstr ""
-"**Normal:** {up} | **Mati:** {down} | **Bermasalah:** {degraded} | "
-"**Tidak stabil:** {unstable}"
+msgid "**Up:** {up} | **Down:** {down} | **Degraded:** {degraded} | **Unstable:** {unstable}"
+msgstr "**Normal:** {up} | **Mati:** {down} | **Bermasalah:** {degraded} | **Tidak stabil:** {unstable}"
 
 #: ui/status_layout.py:202
 msgid "Nothing in that state right now."
@@ -464,12 +504,10 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "**Source**\n"
-"Open source under the MIT licence — run your own instance from "
-"[GitHub]({url})."
+"Open source under the MIT licence — run your own instance from [GitHub]({url})."
 msgstr ""
 "**Kode sumber**\n"
-"Sumber terbuka dengan lisensi MIT — jalankan instans Anda sendiri dari "
-"[GitHub]({url})."
+"Sumber terbuka dengan lisensi MIT — jalankan instans Anda sendiri dari [GitHub]({url})."
 
 #: ui/status_layout.py:380
 msgid "Status Page"
@@ -517,10 +555,6 @@ msgstr "Tidak diketahui"
 #: ui/status_layout.py:546
 msgid "I could not fetch that service right now."
 msgstr "Saya tidak bisa mengambil data layanan itu saat ini."
-
-#: ui/status_layout.py:578
-msgid "Unknown service"
-msgstr "Layanan tidak dikenal"
 
 #: ui/status_layout.py:590
 #, python-brace-format
