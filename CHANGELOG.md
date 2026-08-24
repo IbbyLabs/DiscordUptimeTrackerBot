@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.11.1](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.11.0...v0.11.1) (2026-08-24)
+
+
+### Bug Fixes
+
+* **i18n:** render the persistent panels in the guild's language ([6b811b4](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/6b811b48a584b91367ae4e5c6c9376b2ca574b3a))
+* **i18n:** translate the uptime percentage, and let the scanner see it ([7b208b9](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/7b208b96d2d88f5984e3a1d26492d865b02af670))
+* **uptime:** offer Language in /tracker set ([72edc73](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/72edc73fdd54df7838cf04ea19876e3271933b33))
+
 ## [0.11.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.10.0...v0.11.0) (2026-08-23)
 
 
