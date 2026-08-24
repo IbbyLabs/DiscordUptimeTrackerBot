@@ -161,7 +161,9 @@ def unmarked(path: Path) -> list[tuple[int, str]]:
         # A type annotation arrives as a string; so do a format spec and a URL.
         if not re.search(r"[A-Za-z]", value) or "|" in value:
             continue
-        if value.startswith(("%", "http")):
+        # A printf spec is a percent against its conversion; "% uptime" is a
+        # percentage sign in a sentence and belongs in the catalogue.
+        if re.match(r"^%\S", value) or value.startswith("http"):
             continue
         if _addresses_data(node, parents):
             continue

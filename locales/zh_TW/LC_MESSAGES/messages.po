@@ -7,12 +7,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiscordUptimeTrackerBot 0.8.8\n"
 "Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
-"POT-Creation-Date: 2026-08-23 21:55+0100\n"
+"POT-Creation-Date: 2026-08-24 10:14+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: in-house translation\n"
 "Language: zh_TW\n"
 "Language-Team: Traditional Chinese\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
 #: incidents.py:259
@@ -21,12 +24,10 @@ msgid "{count} service is not responding."
 msgid_plural "{count} services are not responding."
 msgstr[0] "{count} 個服務無回應。"
 
-#. TRANSLATORS: Alert heading. A service has just gone down.
 #: incidents.py:266
 msgid "Outage started"
 msgstr "故障開始"
 
-#. TRANSLATORS: Alert heading. Everything is working again.
 #: incidents.py:275
 msgid "All clear"
 msgstr "全部恢復"
@@ -41,45 +42,32 @@ msgid "{count} service is responding again."
 msgid_plural "{count} services are responding again."
 msgstr[0] "{count} 個服務已恢復回應。"
 
-#. TRANSLATORS: Alert heading meaning a service has recovered. Not a data
-#. backup.
 #: incidents.py:285
 msgid "Back up"
 msgstr "已恢復"
 
-#. TRANSLATORS: A finished outage inside a list item: "Torbox — down from 14:02
-#. to
-#. 14:31".
 #: incidents.py:302
 #, python-brace-format
 msgid "down from {start} to {end}"
 msgstr "從 {start} 到 {end} 無法連線"
 
-#. TRANSLATORS: An outage still going, inside a list item: "Torbox — since
-#. 14:02".
 #: incidents.py:307
 #, python-brace-format
 msgid "since {start}"
 msgstr "自 {start} 起"
 
-#. TRANSLATORS: Setting label. The emoji shown beside a healthy service.
-#: cogs/uptime.py:63 cogs/uptime.py:1391
+#: cogs/uptime.py:63 cogs/uptime.py:1392
 msgid "Status emoji"
 msgstr "狀態表情符號"
 
-#. TRANSLATORS: Setting label. The web address of the status page this board
-#. reads.
-#: cogs/uptime.py:65 cogs/uptime.py:1392
+#: cogs/uptime.py:65 cogs/uptime.py:1393
 msgid "Status page URL"
 msgstr "狀態頁面網址"
 
-#. TRANSLATORS: Setting label. Which language this server's board is written
-#. in.
-#: cogs/uptime.py:67
+#: cogs/uptime.py:67 cogs/uptime.py:1394
 msgid "Language"
 msgstr "語言"
 
-#. TRANSLATORS: The group a service falls into when the status page names none.
 #: cogs/uptime.py:73
 msgid "Other"
 msgstr "其他"
@@ -96,14 +84,11 @@ msgstr "這個網址太長了。"
 msgid "That emoji is too long."
 msgstr "這個表情符號太長了。"
 
-#. TRANSLATORS: Error reply. {value} is the tag someone typed.
 #: cogs/uptime.py:103
 #, python-brace-format
 msgid "{value} is not a language this bot can render."
 msgstr "{value} 不是本機器人可以顯示的語言。"
 
-#. TRANSLATORS: Error reply. {field} is the name someone typed, not a
-#. translated word.
 #: cogs/uptime.py:108
 #, python-brace-format
 msgid "Unknown setting: {field}"
@@ -113,106 +98,72 @@ msgstr "未知的設定：{field}"
 msgid "Manage uptime tracker messages"
 msgstr "管理運作狀態監控訊息"
 
-#. TRANSLATORS: Heading of an operator's announcement that carries no title of
-#. its own.
 #: cogs/uptime.py:398
 msgid "Notice"
 msgstr "公告"
 
-#. TRANSLATORS: Line under an announcement. {names} is a comma-separated list
-#. of
-#. service names.
 #: cogs/uptime.py:414
 #, python-brace-format
 msgid "Affects {names} and {n} more"
 msgid_plural "Affects {names} and {n} more"
 msgstr[0] "影響 {names} 等 {n} 個服務"
 
-#. TRANSLATORS: Line under an announcement listing the services it concerns.
 #: cogs/uptime.py:420
 #, python-brace-format
 msgid "Affects {names}"
 msgstr "影響 {names}"
 
-#. TRANSLATORS: Small print under an announcement. {when} renders as "3 minutes
-#. ago".
 #: cogs/uptime.py:428
 #, python-brace-format
 msgid "Updated {when}"
 msgstr "更新於 {when}"
 
-#. TRANSLATORS: Stands in for a service the status page gave no name for.
 #: cogs/uptime.py:450 cogs/uptime.py:513 cogs/uptime.py:816
 msgid "Unknown Service"
 msgstr "未知服務"
 
-#. TRANSLATORS: Stands in where the status page offered no explanation for
-#. planned
-#. work.
 #: cogs/uptime.py:458
 msgid "No reason given"
 msgstr "未說明原因"
 
-#. TRANSLATORS: Tail of an outage line: "Torbox (Debrid) since 14:02". Not a
-#. sentence
-#. on its own.
 #: cogs/uptime.py:464 cogs/uptime.py:517
 #, python-brace-format
 msgid "since {when}"
 msgstr "自 {when} 起"
 
-#. TRANSLATORS: Tail of a recovering service's line, giving when it first went
-#. down.
 #: cogs/uptime.py:525
 #, python-brace-format
 msgid "down since {when}"
 msgstr "自 {when} 起無法連線"
 
-#. TRANSLATORS: Middle of a line about a service that answered again and is
-#. being
-#. watched before it counts as up.
 #: cogs/uptime.py:533
 msgid "responding again, held until stable"
 msgstr "已恢復回應，等待穩定後確認"
 
-#. TRANSLATORS: Headline across the top of the board when the status page gave
-#. no
-#. wording of its own.
 #: cogs/uptime.py:614
 msgid "Services Down"
 msgstr "服務無法連線"
 
-#. TRANSLATORS: Headline across the top of the board. Working, but not
-#. properly.
 #: cogs/uptime.py:617 cogs/uptime.py:660
 msgid "Services Degraded"
 msgstr "服務運作異常"
 
-#. TRANSLATORS: Headline across the top of the board when everything is
-#. working.
 #: cogs/uptime.py:628 cogs/uptime.py:664
 msgid "All Systems Operational"
 msgstr "所有系統運作正常"
 
-#. TRANSLATORS: Headline across the top of the board, counting the services
-#. that are
-#. down.
 #: cogs/uptime.py:652
 #, python-brace-format
 msgid "{n} Service Down"
 msgid_plural "{n} Services Down"
 msgstr[0] "{n} 個服務無法連線"
 
-#. TRANSLATORS: Headline counting services that keep changing between up and
-#. down.
 #: cogs/uptime.py:657
 #, python-brace-format
 msgid "{n} Service Unstable"
 msgid_plural "{n} Services Unstable"
 msgstr[0] "{n} 個服務不穩定"
 
-#. TRANSLATORS: Headline across the top of the board. Planned work, not a
-#. fault.
 #: cogs/uptime.py:663
 msgid "Under Maintenance"
 msgstr "維護中"
@@ -230,12 +181,10 @@ msgid ""
 "date."
 msgstr "狀態頁面最近沒有更新，因此此面板可能已過期。"
 
-#. TRANSLATORS: Follows a count in a group's summary line: "3/3, operational".
 #: cogs/uptime.py:786
 msgid "operational"
 msgstr "運作正常"
 
-#. TRANSLATORS: Tail of a group's summary line: "3/4, problem with 1 service".
 #: cogs/uptime.py:790
 #, python-brace-format
 msgid "{n} service affected"
@@ -246,214 +195,194 @@ msgstr[0] "{n} 個服務受影響"
 msgid "Some services are behind authentication and marked with a lock."
 msgstr "部分服務需要驗證，已用鎖形圖示標示。"
 
-#: cogs/uptime.py:1132
+#: cogs/uptime.py:824
+#, python-brace-format, python-format
+msgid "{percent}% uptime"
+msgstr "正常運作時間 {percent}%"
+
+#: cogs/uptime.py:1133
 #, python-brace-format
 msgid "Refreshed {count} uptime tracker message."
 msgid_plural "Refreshed {count} uptime tracker messages."
 msgstr[0] "已重新整理 {count} 則監控訊息。"
 
-#: cogs/uptime.py:1139
+#: cogs/uptime.py:1140
 #, python-brace-format
 msgid "Sent {count} alert."
 msgid_plural "Sent {count} alerts."
 msgstr[0] "已傳送 {count} 則通知。"
 
-#: cogs/uptime.py:1159 cogs/uptime.py:1186 cogs/uptime.py:1318
+#: cogs/uptime.py:1160 cogs/uptime.py:1187 cogs/uptime.py:1319
 #: ui/status_layout.py:91
 msgid "I could not fetch status data right now."
 msgstr "目前無法取得狀態資料。"
 
-#: cogs/uptime.py:1162
+#: cogs/uptime.py:1163
 msgid "No services were found."
 msgstr "找不到任何服務。"
 
-#: cogs/uptime.py:1169
+#: cogs/uptime.py:1170
 msgid "Create a live uptime tracker message"
 msgstr "建立即時運作狀態監控訊息"
 
-#: cogs/uptime.py:1178 cogs/uptime.py:1220 cogs/uptime.py:1227
-#: cogs/uptime.py:1234 cogs/uptime.py:1358 cogs/uptime.py:1405
-#: cogs/uptime.py:1443 cogs/uptime.py:1467
+#: cogs/uptime.py:1179 cogs/uptime.py:1221 cogs/uptime.py:1228
+#: cogs/uptime.py:1235 cogs/uptime.py:1359 cogs/uptime.py:1407
+#: cogs/uptime.py:1445 cogs/uptime.py:1469
 msgid "Cannot use this command here."
 msgstr "無法在此處使用這個指令。"
 
-#: cogs/uptime.py:1199
+#: cogs/uptime.py:1200
 msgid "Uptime tracker message created. It will refresh automatically."
 msgstr "運作狀態監控訊息已建立，將自動重新整理。"
 
-#: cogs/uptime.py:1203
+#: cogs/uptime.py:1204
 msgid "Refresh all live uptime tracker messages"
 msgstr "重新整理所有即時運作狀態監控訊息"
 
-#: cogs/uptime.py:1214
+#: cogs/uptime.py:1215
 msgid "Send status alerts to this channel"
 msgstr "將狀態通知傳送到這個頻道"
 
-#: cogs/uptime.py:1243
+#: cogs/uptime.py:1244
 msgid "Status alerts will be sent to this channel."
 msgstr "狀態通知將傳送到這個頻道。"
 
-#: cogs/uptime.py:1288
+#: cogs/uptime.py:1289
 msgid "Service status, by group or by host"
 msgstr "服務狀態，依群組或主機檢視"
 
-#: cogs/uptime.py:1290
+#: cogs/uptime.py:1291
 msgid "Show one group's services"
 msgstr "顯示某個群組的服務"
 
-#: cogs/uptime.py:1291
+#: cogs/uptime.py:1292
 msgid "Show one service in detail, with its uptime history"
 msgstr "顯示單一服務的詳細資訊及其運作狀態歷史"
 
-#: cogs/uptime.py:1292
+#: cogs/uptime.py:1293
 msgid "List every service currently in this state"
 msgstr "列出目前處於這個狀態的所有服務"
 
-#. TRANSLATORS: Choice in a command that filters services by their state.
-#. TRANSLATORS: Choice in a command that filters services by state, and a
-#. service's state
-#. elsewhere.
-#: cogs/uptime.py:1297 ui/status_layout.py:509
+#: cogs/uptime.py:1298 ui/status_layout.py:509
 msgid "Down"
 msgstr "無法連線"
 
-#. TRANSLATORS: Choice in that filter, and a service's state. Working, but not
-#. properly.
-#: cogs/uptime.py:1300 ui/status_layout.py:511
+#: cogs/uptime.py:1301 ui/status_layout.py:511
 msgid "Degraded"
 msgstr "運作異常"
 
-#. TRANSLATORS: Choice in that same filter, meaning either state.
-#: cogs/uptime.py:1302
+#: cogs/uptime.py:1303
 msgid "Down or degraded"
 msgstr "無法連線或運作異常"
 
-#: cogs/uptime.py:1327
+#: cogs/uptime.py:1328
 #, python-brace-format
 msgid "I could not find a service called {name}."
 msgstr "找不到名為 {name} 的服務。"
 
-#: cogs/uptime.py:1337
+#: cogs/uptime.py:1338
 #, python-brace-format
 msgid "I could not find a group called {name}."
 msgstr "找不到名為 {name} 的群組。"
 
-#: cogs/uptime.py:1352
+#: cogs/uptime.py:1353
 msgid "Show this server's tracker settings"
 msgstr "顯示本伺服器的監控設定"
 
-#. TRANSLATORS: Shown beside a setting nobody has changed. {value} is the
-#. inherited value.
-#: cogs/uptime.py:1373
+#: cogs/uptime.py:1374
 #, python-brace-format
 msgid "{value} (default)"
 msgstr "{value}（預設）"
 
-#: cogs/uptime.py:1380
+#: cogs/uptime.py:1381
 msgid "Change one with `/tracker set`."
 msgstr "使用 `/tracker set` 修改設定。"
 
-#: cogs/uptime.py:1384
+#: cogs/uptime.py:1385
 msgid "Change a tracker setting for this server"
 msgstr "修改本伺服器的監控設定"
 
-#: cogs/uptime.py:1386
+#: cogs/uptime.py:1387
 msgid "Which setting to change"
 msgstr "要修改哪一項設定"
 
-#: cogs/uptime.py:1387
+#: cogs/uptime.py:1388
 msgid "The new value. Leave this empty to go back to the default."
 msgstr "新的值。留空則恢復預設。"
 
-#. TRANSLATORS: Reply after clearing a setting. {setting} is one of the setting
-#. labels.
-#: cogs/uptime.py:1418
+#: cogs/uptime.py:1420
 #, python-brace-format
 msgid "{setting} is back to the default: {value}"
 msgstr "{setting} 已恢復預設：{value}"
 
-#: cogs/uptime.py:1431
+#: cogs/uptime.py:1433
 #, python-brace-format
 msgid "{setting} is now {value}. It applies from the next refresh."
 msgstr "{setting} 已改為 {value}，將於下次重新整理時生效。"
 
-#: cogs/uptime.py:1437
+#: cogs/uptime.py:1439
 msgid "Stop sending status alerts in this guild"
 msgstr "停止在本伺服器傳送狀態通知"
 
-#: cogs/uptime.py:1451
+#: cogs/uptime.py:1453
 msgid "Status alerts are now disabled for this guild."
 msgstr "本伺服器的狀態通知已關閉。"
 
-#: cogs/uptime.py:1454
+#: cogs/uptime.py:1456
 #, python-brace-format
 msgid "{n} panel removed."
 msgid_plural "{n} panels removed."
 msgstr[0] "已移除 {n} 個面板。"
 
-#: cogs/uptime.py:1460
+#: cogs/uptime.py:1462
 msgid "Stop tracking the live uptime message for this guild"
 msgstr "停止追蹤本伺服器的即時運作狀態訊息"
 
-#: cogs/uptime.py:1489
+#: cogs/uptime.py:1491
 msgid "Removed the tracked uptime message for this guild."
 msgstr "已移除本伺服器所追蹤的運作狀態訊息。"
 
-#: cogs/uptime.py:1492
+#: cogs/uptime.py:1494
 msgid "The board itself could not be deleted and is now stale."
 msgstr "面板本身無法刪除，現在已經過期。"
 
-#: cogs/uptime.py:1500
+#: cogs/uptime.py:1502
 msgid "Who made this bot, and how to run your own"
 msgstr "本機器人的作者，以及如何自行架設"
 
-#. TRANSLATORS: An outage affects services, not people.
-#: cogs/uptime.py:1511
+#: cogs/uptime.py:1513
 msgid "Recent outages and the services they affected"
 msgstr "近期故障及受影響的服務"
 
-#: cogs/uptime.py:1524
+#: cogs/uptime.py:1526
 msgid "View live service uptime"
 msgstr "檢視服務即時運作狀態"
 
-#. TRANSLATORS: Placeholder text in a dropdown listing the service groups.
 #: ui/status_layout.py:79
 msgid "Pick a group for the detail view"
 msgstr "選擇一個群組檢視詳細資訊"
 
-#. TRANSLATORS: Part of a summary line above the board, joined to others by a
-#. comma.
 #: ui/status_layout.py:122
 #, python-brace-format
 msgid "{count} service not responding"
 msgid_plural "{count} services not responding"
 msgstr[0] "{count} 個服務無回應"
 
-#. TRANSLATORS: Part of that same summary line. The service answered again and
-#. is being
-#. watched before it counts as up.
 #: ui/status_layout.py:130
 #, python-brace-format
 msgid "{count} recovering"
 msgstr "{count} 個正在恢復"
 
-#. TRANSLATORS: Heading above the list of what is down. {summary} is the counts
-#. line.
 #: ui/status_layout.py:133
 #, python-brace-format
 msgid "**Active outages** — {summary}"
 msgstr "**目前故障** — {summary}"
 
-#. TRANSLATORS: Says the board is showing only some services. {states} is a
-#. list of
-#. state names.
 #: ui/status_layout.py:169
 #, python-brace-format
 msgid "Filtered to {states}"
 msgstr "已篩選為 {states}"
 
-#. TRANSLATORS: The whole counts line as one string, so the labels, numbers and
-#. separators can be reordered.
 #: ui/status_layout.py:178
 #, python-brace-format
 msgid ""
@@ -465,48 +394,36 @@ msgstr "**正常：** {up} | **無法連線：** {down} | **異常：** {degrade
 msgid "Nothing in that state right now."
 msgstr "目前沒有處於該狀態的服務。"
 
-#. TRANSLATORS: Small print at the foot of the board. {when} renders as "3
-#. minutes
-#. ago".
 #: ui/status_layout.py:232
 #, python-brace-format
 msgid "Last updated {when}"
 msgstr "最後更新於 {when}"
 
-#. TRANSLATORS: Small print replacing the timestamp when the status page gave
-#. none.
 #: ui/status_layout.py:235
 msgid "The status page did not say when this was generated"
 msgstr "狀態頁面未說明這份資料的產生時間"
 
-#. TRANSLATORS: The board hit its size limit. Sits under a truncated list.
 #: ui/status_layout.py:245 ui/status_layout.py:309
 #, python-brace-format
 msgid "{count} more not shown here"
 msgid_plural "{count} more not shown here"
 msgstr[0] "另有 {count} 項未顯示"
 
-#. TRANSLATORS: Credit line at the foot. {brand} is a company name and is never
-#. translated.
 #: ui/status_layout.py:255 ui/status_layout.py:324
 #, python-brace-format
 msgid "Developed by {brand}"
 msgstr "由 {brand} 開發"
 
-#. TRANSLATORS: Link button label, opens the status website.
 #: ui/status_layout.py:274 ui/status_layout.py:328 ui/status_layout.py:436
 #: ui/status_layout.py:668
 msgid "Full Status Page"
 msgstr "完整狀態頁面"
 
-#. TRANSLATORS: Markdown link. Only the words outside the square brackets are
-#. translated.
 #: ui/status_layout.py:321
 #, python-brace-format
 msgid "Live status: [pinned panels]({url})"
 msgstr "即時狀態：[釘選面板]({url})"
 
-#. TRANSLATORS: The bot's own name, as the heading of its about card.
 #: ui/status_layout.py:357
 msgid "Uptime Tracker"
 msgstr "運作狀態監控"
@@ -516,8 +433,6 @@ msgstr "運作狀態監控"
 msgid "A live status board for Stremio addons, developed by {brand}."
 msgstr "為 Stremio 附加元件打造的即時狀態面板，由 {brand} 開發。"
 
-#. TRANSLATORS: About-card row. The label is translated; the version number
-#. below it is not.
 #: ui/status_layout.py:366
 #, python-brace-format
 msgid ""
@@ -537,61 +452,44 @@ msgstr ""
 "**原始碼**\n"
 "採用 MIT 授權開源 — 可從 [GitHub]({url}) 自行架設。"
 
-#. TRANSLATORS: Link button labels on the about card.
 #: ui/status_layout.py:380
 msgid "Status Page"
 msgstr "狀態頁面"
 
-#. TRANSLATORS: Link button label. Financial support for the project, not
-#. customer support.
 #: ui/status_layout.py:384
 msgid "Support"
 msgstr "贊助"
 
-#. TRANSLATORS: Link button label, opens a chat server.
 #: ui/status_layout.py:386
 msgid "Community"
 msgstr "社群"
 
-#. TRANSLATORS: Link button label. Ibby is a person's name and is never
-#. translated.
 #: ui/status_layout.py:389
 msgid "Message Ibby"
 msgstr "聯絡 Ibby"
 
-#. TRANSLATORS: Heading above a list of past outages.
 #: ui/status_layout.py:418
 msgid "Recent incidents"
 msgstr "近期事件"
 
-#. TRANSLATORS: Sits under a truncated list of past incidents.
 #: ui/status_layout.py:428
 #, python-brace-format
 msgid "{count} older not shown here"
 msgid_plural "{count} older not shown here"
 msgstr[0] "另有 {count} 筆較早的紀錄未顯示"
 
-#. TRANSLATORS: A service's state, shown as a single word beside it.
 #: ui/status_layout.py:506
 msgid "Up"
 msgstr "正常"
 
-#. TRANSLATORS: A service's state, one word beside its name. It answered again
-#. and is
-#. being watched before it counts as up.
 #: ui/status_layout.py:514 ui/status_layout.py:624
 msgid "Recovering"
 msgstr "恢復中"
 
-#. TRANSLATORS: A service's state, one word beside its name. Planned work, not
-#. a fault.
 #: ui/status_layout.py:516
 msgid "Maintenance"
 msgstr "維護"
 
-#. TRANSLATORS: A service's state, one word beside its name. Nothing has been
-#. heard about
-#. it either way.
 #: ui/status_layout.py:519
 msgid "Unknown"
 msgstr "未知"
@@ -600,118 +498,84 @@ msgstr "未知"
 msgid "I could not fetch that service right now."
 msgstr "目前無法取得該服務的資訊。"
 
-#. TRANSLATORS: Stands in for a service the status page gave no name for.
 #: ui/status_layout.py:578
 msgid "Unknown service"
 msgstr "未知服務"
 
-#. TRANSLATORS: A labelled row in a service's detail panel. The dot is a
-#. separator.
 #: ui/status_layout.py:590
 #, python-brace-format
 msgid "**State** · {state}"
 msgstr "**狀態** · {state}"
 
-#. TRANSLATORS: A labelled row in a service's detail panel. {status} is a
-#. number
-#. such as 200 or 503.
 #: ui/status_layout.py:598
 #, python-brace-format
 msgid "**HTTP** · {status}"
 msgstr "**HTTP** · {status}"
 
-#. TRANSLATORS: A labelled row. {ms} is a number of milliseconds and the
-#. trailing
-#. ms is the unit.
 #: ui/status_layout.py:604
 #, python-brace-format
 msgid "**Latency** · {ms}ms"
 msgstr "**延遲** · {ms} 毫秒"
 
-#. TRANSLATORS: A labelled row. How long the service has been in its current
-#. state.
 #: ui/status_layout.py:611
 #, python-brace-format
 msgid "**Since** · {when}"
 msgstr "**自** · {when}"
 
-#. TRANSLATORS: A warning under a service that keeps changing between up and
-#. down.
 #: ui/status_layout.py:622
 msgid "⚠️ Flapping between states"
 msgstr "⚠️ 狀態反覆變化"
 
-#. TRANSLATORS: A note under a service having planned work done.
 #: ui/status_layout.py:627
 msgid "🔧 Under maintenance"
 msgstr "🔧 維護中"
 
-#. TRANSLATORS: Buttons choosing how far back a service's history chart
-#. reaches.
 #: ui/status_layout.py:657 ui/status_layout.py:696
 msgid "7 days"
 msgstr "7 天"
 
-#. TRANSLATORS: Button choosing how far back the history chart reaches.
 #: ui/status_layout.py:659 ui/status_layout.py:696
 msgid "30 days"
 msgstr "30 天"
 
-#. TRANSLATORS: Button choosing to show the last few individual checks
-#. instead of a chart.
 #: ui/status_layout.py:663
 msgid "Recent checks"
 msgstr "近期檢查"
 
-#. TRANSLATORS: Caption over a list of a service's most recent checks. The
-#. singular
-#. carries no number.
 #: ui/status_layout.py:685
 #, python-brace-format
 msgid "Last check"
 msgid_plural "Last {n} checks"
 msgstr[0] "最近 {n} 次檢查"
 
-#. TRANSLATORS: One item in a comma-separated caption: "168 periods, no
-#. outages". A
-#. period is one block of the history chart.
 #: ui/status_layout.py:703
 #, python-brace-format
 msgid "{n} period"
 msgid_plural "{n} periods"
 msgstr[0] "{n} 個時段"
 
-#. TRANSLATORS: One item in that caption, counting periods that had an outage.
 #: ui/status_layout.py:709
 #, python-brace-format
 msgid "{n} with an outage"
 msgid_plural "{n} with an outage"
 msgstr[0] "{n} 個時段有故障"
 
-#. TRANSLATORS: One item in a comma-separated caption: "168 periods, no
-#. outages".
 #: ui/status_layout.py:713
 msgid "no outages"
 msgstr "無故障"
 
-#. TRANSLATORS: One item in that caption, counting periods that were degraded
-#. rather than down.
 #: ui/status_layout.py:720
 #, python-brace-format
 msgid "{n} with slow or failed checks"
 msgid_plural "{n} with slow or failed checks"
 msgstr[0] "{n} 個時段檢查緩慢或失敗"
 
-#. TRANSLATORS: One item in a comma-separated caption, meaning the window is
-#. not fully covered.
 #: ui/status_layout.py:727
 msgid "partial history"
 msgstr "歷史紀錄不完整"
 
-#. TRANSLATORS: Caption over the history chart. {span} is a length of time such
-#. as "7
-#. days".
 #: ui/status_layout.py:730
 #, python-brace-format
 msgid "Last {span}"
 msgstr "最近 {span}"
+

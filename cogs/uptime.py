@@ -820,7 +820,8 @@ class UptimeCog(commands.Cog):
             lines.append(
                 f"{self.get_state_emoji(state, healthy)} **[{name}]({url})**: "
                 f"{_state_word(state, _)} ({latency}ms)\n"
-                f"{uptime_bar} {uptime_percent:.1f}% uptime"
+                f"{uptime_bar} "
+                + _("{percent}% uptime").format(percent=f"{uptime_percent:.1f}")
             )
         return lines
 
