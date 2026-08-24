@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiscordUptimeTrackerBot VERSION\n"
 "Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
-"POT-Creation-Date: 2026-08-24 12:57+0100\n"
+"POT-Creation-Date: 2026-08-24 13:02+0100\n"
 "PO-Revision-Date: 2026-08-23 21:46+0100\n"
 "Last-Translator: in-house translation\n"
 "Language: nl\n"
@@ -264,8 +264,8 @@ msgstr "Sommige diensten vragen om aanmelding en hebben een slotje."
 
 #: cogs/uptime.py:827
 #, python-brace-format
-msgid "{percent} uptime"
-msgstr "{percent} uptime"
+msgid "uptime {percent}%"
+msgstr "{percent}% uptime"
 
 #: cogs/uptime.py:1136
 #, python-brace-format
@@ -636,4 +636,7 @@ msgstr "onvolledige geschiedenis"
 #, python-brace-format
 msgid "Last {span}"
 msgstr "Afgelopen {span}"
+
+#~ msgid "{percent} uptime"
+#~ msgstr "{percent} uptime"
 

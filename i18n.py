@@ -7,6 +7,9 @@ locale nobody has translated still renders rather than failing.
 from __future__ import annotations
 
 import gettext
+
+from babel.core import UnknownLocaleError
+from babel.numbers import format_decimal
 from functools import lru_cache
 from pathlib import Path
 
@@ -36,6 +39,24 @@ class Translator:
 
     def ngettext(self, singular: str, plural: str, n: int) -> str:
         return self._t.ngettext(singular, plural, n)
+
+    def decimal(self, value: float, places: int = 1) -> str:
+        """A number in this locale's own notation.
+
+        Half of Europe writes 98,1 where English writes 98.1, and a translated
+        sentence carrying an English decimal point reads as a mistake rather
+        than as a style.
+        """
+
+        if not self.locale:
+            return f"{value:.{places}f}"
+        try:
+            return format_decimal(
+                value, format="#,##0." + "0" * places if places else "#,##0",
+                locale=self.locale.replace("-", "_"),
+            )
+        except (UnknownLocaleError, ValueError):
+            return f"{value:.{places}f}"
 
 
 # Cached for the life of the process. A recompiled catalogue needs a restart to

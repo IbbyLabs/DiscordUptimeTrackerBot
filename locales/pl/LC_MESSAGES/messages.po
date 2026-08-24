@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiscordUptimeTrackerBot 0.8.8\n"
 "Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
-"POT-Creation-Date: 2026-08-24 12:57+0100\n"
+"POT-Creation-Date: 2026-08-24 13:02+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: machine draft, reviewed by a Polish speaker\n"
 "Language: pl\n"
@@ -271,8 +271,8 @@ msgstr "Niektóre usługi wymagają uwierzytelnienia i są oznaczone kłódką."
 
 #: cogs/uptime.py:827
 #, python-brace-format
-msgid "{percent} uptime"
-msgstr "{percent} dostępności"
+msgid "uptime {percent}%"
+msgstr "{percent}% dostępności"
 
 #: cogs/uptime.py:1136
 #, python-brace-format
@@ -652,4 +652,7 @@ msgstr "niepełna historia"
 #, python-brace-format
 msgid "Last {span}"
 msgstr "Ostatnie {span}"
+
+#~ msgid "{percent} uptime"
+#~ msgstr "{percent} dostępności"
 

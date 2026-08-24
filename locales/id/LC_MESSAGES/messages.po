@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: DiscordUptimeTrackerBot 0.8.8\n"
 "Report-Msgid-Bugs-To: ibby@ibbylabs.dev\n"
-"POT-Creation-Date: 2026-08-24 12:57+0100\n"
+"POT-Creation-Date: 2026-08-24 13:02+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: in-house translation\n"
 "Language: id\n"
@@ -264,8 +264,8 @@ msgstr "Sebagian layanan memerlukan autentikasi dan ditandai dengan ikon gembok.
 
 #: cogs/uptime.py:827
 #, python-brace-format
-msgid "{percent} uptime"
-msgstr "{percent} waktu aktif"
+msgid "uptime {percent}%"
+msgstr "{percent}% waktu aktif"
 
 #: cogs/uptime.py:1136
 #, python-brace-format
@@ -636,4 +636,7 @@ msgstr "riwayat tidak lengkap"
 #, python-brace-format
 msgid "Last {span}"
 msgstr "{span} terakhir"
+
+#~ msgid "{percent} uptime"
+#~ msgstr "{percent} waktu aktif"
 
