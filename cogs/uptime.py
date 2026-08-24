@@ -1390,6 +1390,7 @@ class UptimeCog(commands.Cog):
         field=[
             app_commands.Choice(name=_L("Status emoji"), value="status_emoji"),
             app_commands.Choice(name=_L("Status page URL"), value="status_page_url"),
+            app_commands.Choice(name=_L("Language"), value="locale"),
         ]
     )
     @can_manage_guild()
