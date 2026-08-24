@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.2](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.11.1...v0.11.2) (2026-08-24)
+
+
+### Bug Fixes
+
+* **i18n:** keep the percent sign out of a translatable string ([a66b67c](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/a66b67cc603d82cbd9da0a2657afe46416fbeb88))
+
 ## [0.11.1](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.11.0...v0.11.1) (2026-08-24)
 
 
