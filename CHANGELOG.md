@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.11.2...v0.12.0) (2026-08-24)
+
+
+### Features
+
+* **i18n:** let a locale place its own percent sign and decimal mark ([86ae78f](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/86ae78fcfcb386f68c726fb5af7e303aec8f372b))
+
 ## [0.11.2](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.11.1...v0.11.2) (2026-08-24)
 
 
