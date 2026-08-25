@@ -1,4 +1,9 @@
-from incidents import alertable_rows, is_alert_suppressed, is_alertable_transition
+from incidents import (
+    alertable_rows,
+    is_alert_suppressed,
+    is_alertable_transition,
+    visible_service_keys,
+)
 
 
 def test_crossing_into_down_alerts_from_any_answering_state() -> None:
@@ -63,3 +68,27 @@ def test_suppression_matches_on_the_service_id_too() -> None:
 def test_nothing_suppressed_leaves_the_list_alone() -> None:
     rows = [_row("Torbox", "torbox"), _row("Comet", "comet")]
     assert len(alertable_rows(rows)) == 2
+
+
+# A service kept off the status page must be kept out of the channel too. The
+# incidents route carries it either way, so without the filter it is named
+# publicly on every state change.
+def test_a_hidden_service_is_dropped_from_the_alertable_incidents() -> None:
+    rows = [_row("Torbox", "torbox"), _row("Private Thing", "private-thing")]
+    visible = visible_service_keys([{"id": "torbox", "name": "Torbox"}])
+    assert [r["name"] for r in alertable_rows(rows, visible)] == ["Torbox"]
+
+
+def test_visibility_matches_on_the_service_id_when_the_name_differs() -> None:
+    rows = [_row("Torbox Renamed", "torbox")]
+    visible = visible_service_keys([{"id": "torbox", "name": "Something Else"}])
+    assert len(alertable_rows(rows, visible)) == 1
+
+
+def test_no_visible_set_leaves_every_unsuppressed_row() -> None:
+    rows = [_row("Torbox", "torbox"), _row("Private Thing", "private-thing")]
+    assert len(alertable_rows(rows, None)) == 2
+
+
+def test_an_empty_visible_set_drops_everything() -> None:
+    assert alertable_rows([_row("Torbox", "torbox")], set()) == []

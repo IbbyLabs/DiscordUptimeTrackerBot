@@ -182,17 +182,51 @@ def _iso_stamp(value: str) -> str:
     return f"<t:{int(moment.timestamp())}:f>"
 
 
-def alertable_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def visible_service_keys(services: list[dict[str, Any]]) -> set[str]:
+    """Normalised names and ids of the services a reader can see.
+
+    Both forms, because a status source can rename a service without changing
+    its id, or the reverse.
+    """
+
+    keys: set[str] = set()
+    for service in services:
+        name = _alert_filter_name(service.get("name"))
+        service_id = _alert_filter_id(service.get("id"))
+        if name:
+            keys.add(name)
+        if service_id:
+            keys.add(service_id)
+    return keys
+
+
+def _row_visible(row: dict[str, Any], visible: set[str]) -> bool:
+    return (
+        _alert_filter_name(row.get("name")) in visible
+        or _alert_filter_id(row.get("service_id")) in visible
+    )
+
+
+def alertable_rows(
+    rows: list[dict[str, Any]],
+    visible: set[str] | None = None,
+) -> list[dict[str, Any]]:
     """The incidents worth announcing.
 
     A suppressed service still appears in the history panel — it did go down —
     but it does not ring a channel. The noisiest service on the page accounts
     for nine of the last fifty incidents.
+
+    `visible` is the set from `visible_service_keys`. A service hidden from the
+    status page is not announced either: the incidents route carries it whether
+    or not the page shows it, so without this a hidden service is named in the
+    channel every time it changes state. Passing None applies no such filter.
     """
 
     return [
         row for row in rows
         if not is_alert_suppressed({"name": row.get("name"), "id": row.get("service_id")})
+        and (visible is None or _row_visible(row, visible))
     ]
 
 

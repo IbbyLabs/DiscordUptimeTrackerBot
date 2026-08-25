@@ -24,7 +24,7 @@ async def _fresh():
     return db, t.name
 
 
-def _cog(db, rows, recorder):
+def _cog(db, rows, recorder, visible=None):
     cog = UptimeCog.__new__(UptimeCog)
     cast(Any, cog).bot = SimpleNamespace(db=db)
 
@@ -43,9 +43,17 @@ def _cog(db, rows, recorder):
         # service with an open incident is a service the payload shows down.
         return [r for r in rows if r["closed_at"] is None]
 
+    def visible_services(_data):
+        # Same agreement, for the other direction: every service with an
+        # incident is one the page shows, unless a test says otherwise.
+        return visible if visible is not None else [
+            {"id": r.get("service_id", ""), "name": r["name"]} for r in rows
+        ]
+
     cast(Any, cog).fetch_incidents = fetch_incidents
     cast(Any, cog).send_alerts = send_alerts
     cast(Any, cog).active_outages = active_outages
+    cast(Any, cog).visible_services = visible_services
     return cog
 
 
@@ -186,4 +194,25 @@ def test_alerting_asks_the_page_for_everything_not_just_major_outages() -> None:
         finally:
             os.unlink(path)
 
+    asyncio.run(run())
+
+
+# The reported fault: a service kept off the status page still had its name and
+# its downtime posted to a public channel. The incidents route carries it either
+# way, so the alert path has to apply the page's own visibility.
+def test_a_service_hidden_from_the_page_never_reaches_the_channel() -> None:
+    async def run():
+        db, path = await _fresh()
+        try:
+            rec = Recorder()
+            rows = [_row("a", name="Api")]
+            cog = _cog(db, rows, rec, visible=[{"id": "", "name": "Api"}])
+            await cog.process_status_alerts(cast(Any, {}))
+            rec.sent.clear()
+
+            rows.append(_row("b", name="Private"))
+            assert await cog.process_status_alerts(cast(Any, {})) == 0
+            assert rec.sent == []
+        finally:
+            os.unlink(path)
     asyncio.run(run())

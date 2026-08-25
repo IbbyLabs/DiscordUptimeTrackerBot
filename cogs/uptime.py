@@ -23,6 +23,7 @@ from incidents import (
     build_page_incident_messages,
     format_page_incidents,
     plan_page_incident_alerts,
+    visible_service_keys,
 )
 from tracker_db import GUILD_SETTING_FIELDS
 
@@ -839,9 +840,13 @@ class UptimeCog(commands.Cog):
 
         if self.bot.db is None:
             return 0
-        # Alerting sees every incident the page holds. The 30-minute rule is the
-        # history panel's, and applying it here announced outages it then hid.
-        rows = alertable_rows(await self.fetch_incidents(major_only=False))
+        # Alerting sees every incident the page holds for a service the page
+        # shows. The 30-minute rule is the history panel's, and applying it here
+        # announced outages it then hid.
+        rows = alertable_rows(
+            await self.fetch_incidents(major_only=False),
+            visible=visible_service_keys(self.visible_services(data)),
+        )
         if not rows:
             return 0
         announced = await self.bot.db.get_announced_incidents()
