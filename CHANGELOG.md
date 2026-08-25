@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.12.0...v0.12.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **alerts:** keep a service hidden from the status page out of the channel ([73c1bd8](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/73c1bd8bccd0c0387ddc38e2c99cb32fddf82e1e))
+
 ## [0.12.0](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.11.2...v0.12.0) (2026-08-24)
 
 
