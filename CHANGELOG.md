@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.2](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.12.1...v0.12.2) (2026-10-21)
+
+
+### Bug Fixes
+
+* **alerts:** keep the status loop alive and retry undelivered alerts ([be33880](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/commit/be338809fb505404380f1172289acc808281fc11))
+
 ## [0.12.1](https://github.com/IbbyLabs/DiscordUptimeTrackerBot/compare/v0.12.0...v0.12.1) (2026-08-25)
 
 
