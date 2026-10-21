@@ -36,7 +36,7 @@ def _cog(db, rows, recorder, visible=None):
         # The cog builds per guild now, so the stub does what it would.
         built = build_page_incident_messages(plan)
         recorder.sent.extend(built)
-        return len(built)
+        return len(built), set()
 
     def active_outages(_data):
         # The status payload agrees with the incident list in these tests: a

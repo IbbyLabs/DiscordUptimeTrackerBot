@@ -243,9 +243,12 @@ class UptimeCog(commands.Cog):
         data = await self.fetch_status()
         if data:
             self.last_status = data
-            self.bot.add_view(
-                StatusLayout(self, data, **await self.guild_render_settings(None))
-            )
+            try:
+                self.bot.add_view(
+                    StatusLayout(self, data, **await self.guild_render_settings(None))
+                )
+            except Exception:
+                log.exception("Failed to register the status board view at startup")
 
     async def cog_unload(self) -> None:
         self.refresh_status_task.cancel()
@@ -253,7 +256,11 @@ class UptimeCog(commands.Cog):
     @tasks.loop(minutes=10.0)
     async def refresh_status_task(self) -> None:
         await self.bot.wait_until_ready()
-        await self.run_status_cycle()
+        # tasks.Loop stops for good on any exception it does not retry itself.
+        try:
+            await self.run_status_cycle()
+        except Exception:
+            log.exception("Status cycle failed; the next one runs on schedule")
 
     async def run_status_cycle(self) -> tuple[int, int]:
         data = await self.fetch_status()
@@ -870,14 +877,14 @@ class UptimeCog(commands.Cog):
         if not plan["open"] and not plan["close"]:
             return 0
 
-        sent = await self.send_alerts(plan)
+        sent, undelivered = await self.send_alerts(plan)
         await self.bot.db.mark_incidents_announced(
-            [row["id"] for row in plan["open"]],
-            [row["id"] for row in plan["close"]],
+            [] if "open" in undelivered else [row["id"] for row in plan["open"]],
+            [] if "close" in undelivered else [row["id"] for row in plan["close"]],
         )
         return sent
 
-    async def send_alerts(self, plan: dict[str, Any]) -> int:
+    async def send_alerts(self, plan: dict[str, Any]) -> tuple[int, set[str]]:
         """One message per announcement, to every configured alert channel.
 
         Built inside the loop rather than once: each guild reads its own
@@ -885,9 +892,12 @@ class UptimeCog(commands.Cog):
         """
 
         if self.bot.db is None:
-            return 0
+            return 0, set()
         channels = await self.bot.db.list_alert_channels()
         sent = 0
+        # A kind is undelivered when every channel that was reached refused it.
+        attempted: set[str] = set()
+        delivered: set[str] = set()
         for item in channels:
             channel = await self.resolve_tracker_channel(int(item["channel_id"]))
             if channel is None:
@@ -898,14 +908,19 @@ class UptimeCog(commands.Cog):
             translate = translator_for(await self.guild_locale(guild_id))
             for kind, heading, lines in build_page_incident_messages(plan, translate):
                 accent = 0xD90429 if kind == "open" else 0x2A9D8F
+                attempted.add(kind)
                 try:
                     await channel.send(
                         view=PanelLayout(self, heading, lines, accent, live_url=live_url, **settings)
                     )
                     sent += 1
+                    delivered.add(kind)
                 except discord.HTTPException as exc:
                     log.error("Failed to send an alert in %s: %s", item["channel_id"], exc)
-        return sent
+        undelivered = attempted - delivered
+        if undelivered:
+            log.warning("Alerts not delivered to any channel, retrying next cycle: %s", sorted(undelivered))
+        return sent, undelivered
     async def panel_jump_url(self, guild_id: str, panel: str) -> str | None:
         """A link straight to a pinned panel, or None when there is not one."""
 
@@ -1118,7 +1133,15 @@ class UptimeCog(commands.Cog):
                     )
                 updated += 1
             except discord.NotFound:
-                new_message = await channel.send(view=layout)
+                try:
+                    new_message = await channel.send(view=layout)
+                except discord.HTTPException as exc:
+                    log.error(
+                        "Failed to replace a deleted tracker message in channel %s: %s",
+                        channel_id,
+                        exc,
+                    )
+                    continue
                 await self.bot.db.upsert_tracked_message(
                     guild_id,
                     str(channel_id),
